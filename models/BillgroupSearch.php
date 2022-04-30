@@ -27,7 +27,7 @@ class BillgroupSearch extends Billgroup
     public function rules()
     {
         return [
-            [['id', 'name', 'country_id', 'countrynetwork_id', 'sender_id', 'currency', 'payment_terms', 'service', 'cost_rate', 'cld1rate', 'cld2rate', 'cld3rate', 'selfallocation', 'maxperday', 'notes'], 'safe'],
+            [['id', 'name', 'country_id', 'countrynetwork_id', 'sender_id', 'currency_id', 'billcycle_id', 'service', 'cost_rate', 'cld1rate', 'cld2rate', 'cld3rate', 'selfallocation', 'maxperday', 'notes'], 'safe'],
             [['id', 'country_id', 'countrynetwork_id', 'sender_id', 'maxperday',], 'integer'],
         ];
     }
@@ -70,8 +70,8 @@ class BillgroupSearch extends Billgroup
         ]);
 
         $query->andFilterWhere(['like', 'name', $this->name])
-            ->andFilterWhere(['like', 'currency', $this->currency])
-            ->andFilterWhere(['like', 'payment_terms', $this->payment_terms])
+            ->andFilterWhere(['like', 'currency_id', $this->currency_id])
+            ->andFilterWhere(['like', 'billcycle_id', $this->billcycle_id])
             ->andFilterWhere(['like', 'selfallocation', $this->selfallocation])
             ->andFilterWhere(['like', 'maxperday', $this->maxperday])
             ->andFilterWhere(['like', 'notes', $this->notes]);

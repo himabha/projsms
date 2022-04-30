@@ -51,28 +51,32 @@ use yii\helpers\ArrayHelper;
                     </div>
                     <div class="col-sm-6">
                         <div class="form-group bmd-form-group">
-                            <?php echo $form->field($model, 'currency')->dropDownList(['GBP' => 'GBP', 'EUR' => 'EUR', 'USD' => 'USD'], ['prompt' => 'Select Currency']); ?>
+                            <?php echo $form->field($model, 'currency_id')->dropDownList([
+                                '1' => 'GBP', 
+                                '2' => 'EUR', 
+                                '3' => 'USD'
+                                ], ['prompt' => 'Select Currency']); ?>
                             <span class="bmd-help"><?= Html::activeHint($model, 'currency'); ?></span>
                         </div>
                     </div>
                     <div class="col-sm-6">
                         <div class="form-group bmd-form-group">
-                            <?php echo $form->field($model, 'payment_terms')->dropDownList([
-                                '15/15' => '15/15',
-                                '15/30' => '15/30',
-                                '30/30' => '30/30',
-                                '30/35' => '30/35',
-                                '30/45' => '30/45',
-                                '30/50' => '30/50',
-                                '30/55' => '30/55',
-                                '30/60' => '30/60',
-                                '30/65' => '30/65',
-                                '30/70' => '30/70',
-                                '45 Days' => '45 Days',
-                                '90 Days' => '90 Days',
-                                'Daily 1/1' => 'Daily 1/1',
-                                'Weekly 1/1' => 'Weekly 1/1',
-                                'Weekly 7/7' => 'Weekly 7/7'
+                            <?php echo $form->field($model, 'billcycle_id')->dropDownList([
+                                '1' => '15/15',
+                                '2' => '15/30',
+                                '3' => '30/30',
+                                '4' => '30/35',
+                                '5' => '30/45',
+                                '6' => '30/50',
+                                '7' => '30/55',
+                                '8' => '30/60',
+                                '9' => '30/65',
+                                '10' => '30/70',
+                                '11' => '45 Days',
+                                '12' => '90 Days',
+                                '13' => 'Daily 1/1',
+                                '14' => 'Weekly 1/1',
+                                '15' => 'Weekly 7/7'
                             ], ['prompt' => 'Select Terms']); ?>
                             <span class="bmd-help"><?= Html::activeHint($model, 'payment_terms'); ?></span>
                         </div>
