@@ -1,2 +1,6 @@
+<<<<<<< HEAD
 /vendor/*
+=======
+/vendor
+>>>>>>> d326895fe03a56b65c1f27944d88a9aa3a74d24b
 /config/db.php
