@@ -37,7 +37,7 @@ class Supplier extends \yii\db\ActiveRecord
 	 */
 	public static function tableName()
 	{
-		return 'smppclients';
+		return 'smppClients';
 	}
 
 	public function behaviors()

@@ -1465,10 +1465,7 @@ class AdminController extends \yii\web\Controller
     }
 
     /**
-     * @param $id
-     *
-     * @return string|\yii\web\Response
-     * @throws NotFoundHttpException
+     * Function to list all billgroups
      */
 
     public function actionBillgroups()

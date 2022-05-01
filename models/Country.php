@@ -31,7 +31,7 @@ class Country extends \yii\db\ActiveRecord
 	 */
 	public static function tableName()
 	{
-		return 'fscountrycodes';
+		return 'country';
 	}
 
 	public function behaviors()

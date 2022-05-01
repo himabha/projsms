@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\models\BillgroupSearch;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\filters\AccessControl;
@@ -916,5 +917,23 @@ class ResellerController extends \yii\web\Controller
         } else {
             throw new ForbiddenHttpException('cld3rate field should not be empty, Try again.');
         }
+    }
+
+    /**
+     * Function to list all billgroups
+     */
+
+    public function actionBillgroups()
+    {
+        $searchModel = new BillgroupSearch();
+        $dataProvider = $searchModel->search(\Yii::$app->getRequest()->queryParams);
+        $dataProvider->pagination->pageSize = 10;
+
+        \Yii::$app->view->title = \Yii::t('app', 'Billgroups');
+
+        return $this->render('billgroups', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
     }
 }

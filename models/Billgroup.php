@@ -15,8 +15,8 @@ use yii\web\IdentityInterface;
  * @property int|null $country_id
  * @property int|null $countrynetwork_id
  * @property int $sender_id
- * @property string|null $currency 
- * @property string|null $payment_terms
+ * @property string|null $currency_id 
+ * @property string|null $billcycle_id
  * @property int $service
  * @property float $cost_rate
  * @property float $cld1rate
@@ -73,7 +73,7 @@ class Billgroup extends \yii\db\ActiveRecord
 	public function rules()
 	{
 		return [
-			[['id', 'name', 'country_id', 'countrynetwork_id', 'sender_id', 'currency', 'payment_terms', 'service', 'cost_rate', 'cld1rate', 'cld2rate', 'cld3rate', 'selfallocation', 'maxperday', 'notes'], 'safe'],
+			[['id', 'name', 'country_id', 'countrynetwork_id', 'sender_id', 'currency_id', 'billcycle_id', 'service', 'cost_rate', 'cld1rate', 'cld2rate', 'cld3rate', 'selfallocation', 'maxperday', 'notes'], 'safe'],
 			[['name', 'notes', 'maxperday', 'selfallocation'], 'trim'],
 			[['id', 'name'], 'unique'],
 			[['name', 'notes'], 'string'],
