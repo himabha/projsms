@@ -158,7 +158,7 @@ if($action == "create")
                                                                 ?>
                                                     <span class="bmd-help"><?//= Html::activeHint($model, 'start_number'); ?></span> -->
                                                         <!-- <input type="text" name="start_number" class="form-control"> -->
-                                                        <?= $form->field($model, 'start_number')->textInput(); ?>
+                                                        <?= $form->field($model, 'start_number')->textInput(['maxlength' => 20]); ?>
                                                     </div>
                                                 </div>
                                                 <div class="col-sm-6">
@@ -168,7 +168,7 @@ if($action == "create")
                                                                 ?>
                                                     <span class="bmd-help"><?//= Html::activeHint($model, 'number_qty'); ?></span> -->
                                                         <!-- <input type="text" name="number_qty" class="form-control"> -->
-                                                        <?= $form->field($model, 'number_qty')->textInput(['type' => 'number']); ?>
+                                                        <?= $form->field($model, 'number_qty')->textInput(['type' => 'number', 'step' => 1]); ?>
                                                     </div>
                                                 </div>
                                             </div>
