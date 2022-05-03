@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\models\Billgroup;
 use app\models\BillgroupSearch;
 use Yii;
 use yii\data\ActiveDataProvider;
@@ -742,7 +743,25 @@ class ResellerController extends \yii\web\Controller
     */
     public function actionAddCld()
     {
-        $model = new Fsusertb();
+        $searchModel = new FsmastertbSearch();
+        $search = isset($_GET['search']) ? $_GET['search'] : '';
+        $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
+
+        if ($filter == 'all') {
+            $filter = '';
+        }
+        $dataProvider = $searchModel->search(\Yii::$app->getRequest()->queryParams, $search);
+        $dataProvider->pagination->pageSize = $filter;
+        $agents = User::find()->select('id')->where(['reseller_id' => Yii::$app->user->identity->id, 'role' => 2]);
+        $billgroups = Billgroup::find()->asArray()->all();
+
+        return $this->render('add_cld', [
+            'dataProvider' => $dataProvider,
+            'billgroups' => $billgroups,
+            'agents' => $agents
+        ]);
+
+        /* $model = new Fsmastertb();
         $search = isset($_GET['search']) ? $_GET['search'] : '';
         $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
 
@@ -756,7 +775,7 @@ class ResellerController extends \yii\web\Controller
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $mysubusr, $search);
         $dataProvider->pagination->pageSize = $filter;
 
-        return $this->render('add_cld', ['dataProvider' => $dataProvider, 'summary' => $summary]);
+        return $this->render('add_cld', ['dataProvider' => $dataProvider, 'summary' => $summary]); */
     }
 
     /*

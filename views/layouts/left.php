@@ -65,10 +65,16 @@ use yii\helpers\Url;
         <?php
         if (User::isResellerAdmin(Yii::$app->user->identity->id)) {
         ?>
-          <li class="nav-item">
+          <!-- <li class="nav-item">
             <a class="nav-link" href="<?= Url::to(['/reseller-admin/active-calls']); ?>">
               <i class="material-icons">content_paste</i>
               <p>Acitve Calls</p>
+            </a>
+          </li> -->
+          <li class="nav-item">
+            <a class="nav-link" href="<?= Url::to(['/reseller-admin/billgroups']); ?>">
+              <i class="material-icons">content_paste</i>
+              <p>Bill Groups</p>
             </a>
           </li>
           <li class="nav-item">
@@ -126,10 +132,16 @@ use yii\helpers\Url;
             </a>
           </li>
         <?php } elseif (User::isReseller(Yii::$app->user->identity->id)) { ?>
-          <li class="nav-item">
+          <!-- <li class="nav-item">
             <a class="nav-link" href="<?= Url::to(['/reseller/active-calls']); ?>">
               <i class="material-icons">content_paste</i>
               <p>Acitve Calls</p>
+            </a>
+          </li> -->
+          <li class="nav-item">
+            <a class="nav-link" href="<?= Url::to(['/reseller/billgroups']); ?>">
+              <i class="material-icons">content_paste</i>
+              <p>Bill Groups</p>
             </a>
           </li>
           <li class="nav-item">
@@ -187,12 +199,12 @@ use yii\helpers\Url;
             </a>
           </li>
         <?php } elseif (User::isUserAdmin(Yii::$app->user->identity->id)) { ?>
-          <li class="nav-item">
+          <!-- <li class="nav-item">
             <a class="nav-link" href="<?= Url::to(['/admin/active-calls']); ?>">
               <i class="material-icons">content_paste</i>
               <p>Acitve Calls</p>
             </a>
-          </li>
+          </li> -->
           <li class="nav-item">
             <a class="nav-link" href="<?= Url::to(['/admin/billgroups']); ?>">
               <i class="material-icons">content_paste</i>
@@ -338,10 +350,16 @@ use yii\helpers\Url;
             </a>
           </li>
         <?php } else { ?>
-          <li class="nav-item">
+          <!-- <li class="nav-item">
             <a class="nav-link" href="<?= Url::to(['/user/active-calls']); ?>">
               <i class="material-icons">content_paste</i>
               <p>Acitve Calls</p>
+            </a>
+          </li> -->
+          <li class="nav-item">
+            <a class="nav-link" href="<?= Url::to(['/user/billgroups']); ?>">
+              <i class="material-icons">content_paste</i>
+              <p>Bill Groups</p>
             </a>
           </li>
           <li class="nav-item">

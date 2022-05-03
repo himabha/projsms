@@ -18,19 +18,6 @@ $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
 						<h4 class="card-title ">Manage DDI</h4>
 					</div>
 					<div class="card-body">
-						<div class="row summary_outer">
-							<div class="col-sm-4">
-								<label>Stock :</label>
-								<label> <?= $summary['stock'] ?></label>
-							</div>
-							<div class="col-sm-4">
-								<label>Assigned CIDs :</label>
-								<label> <?= $summary['assigned'] ?></label>
-							</div>
-							<div class="col-sm-4">
-
-							</div>
-						</div>
 						<div class="row">
 							<div class="col-sm-12">
 								<div class="row">
@@ -98,7 +85,7 @@ $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
 												'label' => 'Country Name',
 												'attribute' => 'cld2description',
 											],
-											//'cld1rate',
+											'cld1rate',
 											'cld2rate',
 											'cld3rate',
 											// [
