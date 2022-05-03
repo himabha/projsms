@@ -14,7 +14,7 @@ return [
 //    'dsn' => 'mysql:host=localhost;dbname=fsdb',
       'dsn' => 'mysql:host=localhost;dbname=fsdbsms',
       'username' => 'root',
-      'password' => '',
+      'password' => 'P4ssword',
       'charset' => 'utf8',
 
     // Schema cache options (for production environment)
