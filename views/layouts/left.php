@@ -116,13 +116,13 @@ use yii\helpers\Url;
           <li class="nav-item">
             <a class="nav-link" href="<?= Url::to(['/reseller-admin/add-cld']); ?>">
               <i class="material-icons">library_books</i>
-              <p>Manage DDI</p>
+              <p>SMS Numbers</p>
             </a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="<?= Url::to(['/reseller-admin/cdr']); ?>">
               <i class="material-icons">bubble_chart</i>
-              <p>CDR</p>
+              <p>SMS CDR</p>
             </a>
           </li>
           <li class="nav-item">
@@ -183,13 +183,13 @@ use yii\helpers\Url;
           <li class="nav-item">
             <a class="nav-link" href="<?= Url::to(['/reseller/add-cld']); ?>">
               <i class="material-icons">library_books</i>
-              <p>Manage DDI</p>
+              <p>SMS Numbers</p>
             </a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="<?= Url::to(['/reseller/cdr']); ?>">
               <i class="material-icons">bubble_chart</i>
-              <p>CDR</p>
+              <p>SMS CDR</p>
             </a>
           </li>
           <li class="nav-item">
@@ -304,7 +304,7 @@ use yii\helpers\Url;
           <li class="nav-item">
             <a class="nav-link" data-toggle="collapse" href="#manageDDI" aria-expanded="true">
               <i><img style="width:25px" src="<?= \Yii::getAlias('@web/img/yii-logo.svg'); ?>"></i>
-              <p>Manage DDI
+              <p>SMS Numbers
                 <b class="caret"></b>
               </p>
             </a>
@@ -313,7 +313,7 @@ use yii\helpers\Url;
                 <li class="nav-item">
                   <a class="nav-link" href="<?= Url::to(['/admin/add-cld']); ?>">
                     <span class="sidebar-mini"> DS </span>
-                    <span class="sidebar-normal"> Manage DDI </span>
+                    <span class="sidebar-normal">SMS Numbers</span>
                   </a>
                 </li>
                 <li class="nav-item">
@@ -340,7 +340,7 @@ use yii\helpers\Url;
           <li class="nav-item">
             <a class="nav-link" href="<?= Url::to(['/admin/cdr']); ?>">
               <i class="material-icons">bubble_chart</i>
-              <p>CDR</p>
+              <p>SMS CDR</p>
             </a>
           </li>
           <li class="nav-item">
