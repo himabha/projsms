@@ -1601,7 +1601,7 @@ class AdminController extends \yii\web\Controller
                             $model->addError('number_list', 'At least 1 number required');
                         } else {
                             $number_list_arr = explode("\n", $model->number_list);
-                            $numbers = 0;
+                            $numbers = [];
                             foreach($number_list_arr as $v)
                             {
                                 if(!empty($v) && is_numeric($v) && strlen(strval($v)) > 6 && $v > 0)
