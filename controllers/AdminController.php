@@ -1562,6 +1562,8 @@ class AdminController extends \yii\web\Controller
                         } else {
                             if(!is_numeric($model->start_number)) // non numeric
                             {
+                                $model->addError('start_number', 'Not a valid number (positive number only).');
+                            } else {
                                 if($model->start_number < 1) // negative
                                 {
                                     $model->addError('start_number', 'Not a valid number (positive number only).');
@@ -1633,6 +1635,8 @@ class AdminController extends \yii\web\Controller
                         } else {
                             if(!is_numeric($model->single_number)) // non numeric
                             {
+                                $model->addError('single_number', 'Not a valid number (positive number only).');
+                            } else {
                                 if($model->single_number < 1) // negative
                                 {
                                     $model->addError('single_number', 'Not a valid number (positive number only).');
