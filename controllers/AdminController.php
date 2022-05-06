@@ -1529,335 +1529,319 @@ class AdminController extends \yii\web\Controller
      public function actionUploadNumbers()
     {
         \Yii::$app->view->title = \Yii::t('app', 'Upload Numbers');
-
-        //$model = new Numbers([
-        //    'scenario' => Numbers::SCENARIO_CREATE
-        //]);
-
-        //$billgroups = Billgroup::find()->asArray()->all();
-        //$suppliers = Supplier::find()->asArray()->all();
-
-        $model = new Numbers();
-
+        $model = new Numbers(['scenario' => 'create']);
         $post = \Yii::$app->getRequest()->post();
-        //$data = ['Numbers' => []];
-
         $data= [];
-
         if ($post) {    
+            if(!empty($upload_type)) $upload_type = '#range';
             if($model->load($post) && $model->validate())
             {
-                // detect upload type  
-                $upload_type = !empty($_POST['hdn_upload_type']) ? $_POST['hdn_upload_type'] : "#range";
-                switch($upload_type)
-                {
-                    case '#range': 
-                        $model->number_list = "";
-                        $model->single_number = "";
-
-                        $model->start_number = rtrim($model->start_number);
-                        
-                        if(empty($model->start_number)) { // empty
-                            $model->addError('start_number', 'Please enter a number. Min. 7 digits.');
-                        } else {
-                            if(!is_numeric($model->start_number)) // non numeric
-                            {
-                                $model->addError('start_number', 'Not a valid number (positive number only).');
+                //if($model->validate())
+                //{
+                    // detect upload type  
+                    switch($model->upload_type)
+                    {
+                        case '#range': 
+                            $model->number_list = "";
+                            $model->single_number = "";
+    
+                            $model->start_number = rtrim($model->start_number);
+                            
+                            if(empty($model->start_number)) { // empty
+                                $model->addError('start_number', 'Please enter a number. Min. 7 digits.');
                             } else {
-                                if($model->start_number < 1) // negative
+                                if(!is_numeric($model->start_number)) // non numeric
                                 {
                                     $model->addError('start_number', 'Not a valid number (positive number only).');
                                 } else {
-                                    $str = strval($model->start_number); 
-                                    if(strlen($str) < 7) // min 7 digits
+                                    if($model->start_number < 1) // negative
                                     {
-                                        $model->addError('start_number', 'Please enter a number (min. 7 digits).');
+                                        $model->addError('start_number', 'Not a valid number (positive number only).');
+                                    } else {
+                                        $str = strval($model->start_number); 
+                                        if(strlen($str) < 7) // min 7 digits
+                                        {
+                                            $model->addError('start_number', 'Please enter a number (min. 7 digits).');
+                                        }
                                     }
                                 }
                             }
-                        }
-
-                        if(empty($model->number_qty)) { // empty
-                            $model->addError('number_qty', 'Please enter qty (1 - 1000).');
-                        } else {
-                            if($model->number_qty < 1) // negative
-                            {
+    
+                            if(empty($model->number_qty)) { // empty
                                 $model->addError('number_qty', 'Please enter qty (1 - 1000).');
                             } else {
-                                if($model->number_qty > 1000) // max 1000
+                                if($model->number_qty < 1) // negative
                                 {
                                     $model->addError('number_qty', 'Please enter qty (1 - 1000).');
+                                } else {
+                                    if($model->number_qty > 1000) // max 1000
+                                    {
+                                        $model->addError('number_qty', 'Please enter qty (1 - 1000).');
+                                    }
                                 }
                             }
-                        }
-                        break;
-                    case '#manual': 
-                        $model->start_number = "";
-                        $model->number_qty = "";
-                        $model->single_number = "";
-
-                        $model->number_list = rtrim($model->number_list);
-
-                        if(empty($model->number_list))
-                        {
-                            $model->addError('number_list', 'At least 1 number required');
-                        } else {
-                            $number_list_arr = explode("\n", $model->number_list);
-                            $numbers = [];
-                            foreach($number_list_arr as $v)
+                            break;
+                        case '#manual': 
+                            $model->start_number = "";
+                            $model->number_qty = "";
+                            $model->single_number = "";
+    
+                            $model->number_list = rtrim($model->number_list);
+    
+                            if(empty($model->number_list))
                             {
-                                if(!empty($v) && is_numeric($v) && strlen(strval($v)) > 6 && $v > 0)
+                                $model->addError('number_list', 'At least 1 number required');
+                            } else {
+                                $number_list_arr = explode("\n", $model->number_list);
+                                $numbers = [];
+                                foreach($number_list_arr as $v)
                                 {
-                                    $numbers[] = $v;
-                                } 
-                            }
-
-                            if(count($numbers) != count($number_list_arr)){
-                                $model->addError('number_list', 'One or more numbers is not a valid number');
-                            } else {
-                                array_unique($numbers);
+                                    if(!empty($v) && is_numeric($v) && strlen(strval($v)) > 6 && $v > 0)
+                                    {
+                                        $numbers[] = $v;
+                                    } 
+                                }
+    
                                 if(count($numbers) != count($number_list_arr)){
-                                    $model->addError('number_list', 'One or more numbers is duplicate');
+                                    $model->addError('number_list', 'One or more numbers is not a valid number');
+                                } else {
+                                    array_unique($numbers);
+                                    if(count($numbers) != count($number_list_arr)){
+                                        $model->addError('number_list', 'One or more numbers is duplicate');
+                                    }
                                 }
                             }
-                        }
-                        break;
-                    case '#single': 
-                        $model->start_number = "";
-                        $model->number_qty = "";
-                        $model->number_list = ""; 
-
-                        $model->single_number = rtrim($model->single_number);                        
-                        
-                        if(empty($model->single_number))
-                        {
-                            $model->addError('single_number', 'Please enter a number. Min. 7 digits.');
-                        } else {
-                            if(!is_numeric($model->single_number)) // non numeric
+                            break;
+                        case '#single': 
+                            $model->start_number = "";
+                            $model->number_qty = "";
+                            $model->number_list = ""; 
+    
+                            $model->single_number = rtrim($model->single_number);                        
+                            
+                            if(empty($model->single_number))
                             {
-                                $model->addError('single_number', 'Not a valid number (positive number only).');
+                                $model->addError('single_number', 'Please enter a number. Min. 7 digits.');
                             } else {
-                                if($model->single_number < 1) // negative
+                                if(!is_numeric($model->single_number)) // non numeric
                                 {
                                     $model->addError('single_number', 'Not a valid number (positive number only).');
                                 } else {
-                                    $str = strval($model->single_number); 
-                                    if(strlen($str) < 7) // min 7 digits
+                                    if($model->single_number < 1) // negative
                                     {
-                                        $model->addError('single_number', 'Please enter a number (min. 7 digits).');
+                                        $model->addError('single_number', 'Not a valid number (positive number only).');
+                                    } else {
+                                        $str = strval($model->single_number); 
+                                        if(strlen($str) < 7) // min 7 digits
+                                        {
+                                            $model->addError('single_number', 'Please enter a number (min. 7 digits).');
+                                        }
                                     }
                                 }
                             }
-                        }
-                        break;
-                }
-
-                if(empty($model->billgroup_id)) $model->addError('billgroup_id', 'required');
-                if(empty($model->sender_id)) $model->addError('sender_id', 'required');
-                if(empty($model->service_id)) $model->addError('service_id', 'required');
-
-                if(!$model->errors)
-                {
-                    $bg_id = $model->billgroup_id;
-                    $bg = Billgroup::findOne($bg_id);
-                    if(!empty($bg))
+                            break;
+                    }
+                    if(!$model->errors)
                     {
-                        switch($upload_type)
+                        $bg_id = $model->billgroup_id;
+                        $bg = Billgroup::findOne($bg_id);
+                        if(!empty($bg))
                         {
-                            case '#range': 
-                                $range_arr = [];
-                                for ($i = 1; $i <= $model->number_qty; $i++) {
-                                    $range_arr[] = $model->start_number + $i;
-                                }
-
-                                shuffle($range_arr);
-
-                                foreach($range_arr as $v)
-                                {
-                                    $new_number = new Numbers();
-                                    //$new_number->scenario =  Numbers::SCENARIO_CREATE;
-                                    $new_number->status = 1; // default
-                                    $new_number->cld1 = $v;
-                                    $new_number->cld2 = $v;
-                                    $new_number->cost_rate = $bg->cost_rate; 
-                                    $new_number->cld1rate = $bg->cld1rate; // default - leave blank
-                                    $new_number->cld2rate = 0; // default - leave blank, billgroup has this though
-                                    $new_number->cld3rate = 0; // default - leave blank, billgroup has this though
-                                    $new_number->cld1description = ''; // leave blank
-                                    $new_number->cld2description = ''; // leave blank
-                                    $new_number->maxduration = $bg->maxperday; // from billgroup
-                                    $new_number->admin_id = 0; // default
-                                    $new_number->reseller_id = 0; //default
-                                    $new_number->agent_id = 0; //default
-                                    $new_number->billcycle_id = $bg->billcycle_id; 
-                                    $new_number->currency_id = $bg->currency_id; 
-                                    $new_number->billgroup_id = $model->billgroup_id; // $_POST
-                                    $new_number->country_id = $bg->country_id; 
-                                    $new_number->countrynetwork_id = $bg->countrynetwork_id; 
-                                    $new_number->service_id = $model->service_id; // $_POST
-                                    $new_number->sender_id = $model->sender_id; // $_POST
-                                    $new_number->receiver_id = 0; // default - leave blank
-                                    $new_number->allocated_date = null; // default - leave blank
-                                    $data[] = $new_number;
-                                }
-                                break;
-                            case '#manual': 
-                                $number_list_arr = explode("\n", $model->number_list);
-                                foreach($number_list_arr as $v)
-                                {
-                                    $new_number = new Numbers();
-                                    //$new_number->scenario =  Numbers::SCENARIO_CREATE;
-                                    $new_number->status = 1; // default
-                                    $new_number->cld1 = $v;
-                                    $new_number->cld2 = $v;
-                                    $new_number->cost_rate = $bg->cost_rate; 
-                                    $new_number->cld1rate = $bg->cld1rate; // default - leave blank
-                                    $new_number->cld2rate = 0; // default - leave blank, billgroup has this though
-                                    $new_number->cld3rate = 0; // default - leave blank, billgroup has this though
-                                    $new_number->cld1description = ''; // leave blank
-                                    $new_number->cld2description = ''; // leave blank
-                                    $new_number->maxduration = $bg->maxperday; // from billgroup
-                                    $new_number->admin_id = 0; // default
-                                    $new_number->reseller_id = 0; //default
-                                    $new_number->agent_id = 0; //default
-                                    $new_number->billcycle_id = $bg->billcycle_id; 
-                                    $new_number->currency_id = $bg->currency_id; 
-                                    $new_number->billgroup_id = $model->billgroup_id; // $_POST
-                                    $new_number->country_id = $bg->country_id; 
-                                    $new_number->countrynetwork_id = $bg->countrynetwork_id; 
-                                    $new_number->service_id = $model->service_id; // $_POST
-                                    $new_number->sender_id = $model->sender_id; // $_POST
-                                    $new_number->receiver_id = 0; // default - leave blank
-                                    $new_number->allocated_date = null; // default - leave blank
-                                    $data[] = $new_number;
-                                }
-                                break;
-                            case '#single': 
-                                if(!empty($model->single_number))
-                                {
-                                    // status = 1 - default
-                                    // cld1 , cld2 => number , both similar
-                                    // cld1rate fetch from billgroup
-                                    // admin_id, reseller_id, agent_id keep 0
-                                    // maxduration -> maxperday from billgroup
-                                    // cld2rate, cld3rate , cld1description and cld2description , receiver_id, allocated_date -> leave blank
-                                    // sender_id => supplier id from billgroup table
-        
-                                    $new_number = new Numbers();
-                                    //$new_number->scenario =  Numbers::SCENARIO_CREATE;
-                                    $new_number->status = 1; // default
-                                    $new_number->cld1 = $model->single_number;
-                                    $new_number->cld2 = $model->single_number;
-                                    $new_number->cost_rate = $bg->cost_rate; 
-                                    $new_number->cld1rate = $bg->cld1rate; // default - leave blank
-                                    $new_number->cld2rate = 0; // default - leave blank, billgroup has this though
-                                    $new_number->cld3rate = 0; // default - leave blank, billgroup has this though
-                                    $new_number->cld1description = ''; // leave blank
-                                    $new_number->cld2description = ''; // leave blank
-                                    $new_number->maxduration = $bg->maxperday; // from billgroup
-                                    $new_number->admin_id = 0; // default
-                                    $new_number->reseller_id = 0; //default
-                                    $new_number->agent_id = 0; //default
-                                    $new_number->billcycle_id = $bg->billcycle_id; 
-                                    $new_number->currency_id = $bg->currency_id; 
-                                    $new_number->billgroup_id = $model->billgroup_id; // $_POST
-                                    $new_number->country_id = $bg->country_id; 
-                                    $new_number->countrynetwork_id = $bg->countrynetwork_id; 
-                                    $new_number->service_id = $model->service_id; // $_POST
-                                    $new_number->sender_id = $model->sender_id; // $_POST
-                                    $new_number->receiver_id = 0; // default - leave blank
-                                    $new_number->allocated_date = null; // default - leave blank
-                                    $data[] = $new_number;
-                                }
-                                break;
-                        }
-                        if(is_array($data) && count($data) > 0)
-                        {
-                            $all_validated = \yii\base\Model::validateMultiple($data); 
-                            if($all_validated) 
+                            switch($upload_type)
                             {
-                                $rows = [];
-                                foreach($data as $v)
+                                case '#range': 
+                                    $range_arr = [];
+                                    for ($i = 1; $i <= $model->number_qty; $i++) {
+                                        $range_arr[] = $model->start_number + $i;
+                                    }
+    
+                                    shuffle($range_arr);
+    
+                                    foreach($range_arr as $v)
+                                    {
+                                        $new_number = new Numbers();
+                                        //$new_number->scenario =  Numbers::SCENARIO_CREATE;
+                                        $new_number->status = 1; // default
+                                        $new_number->cld1 = $v;
+                                        $new_number->cld2 = $v;
+                                        $new_number->cost_rate = $bg->cost_rate; 
+                                        $new_number->cld1rate = $bg->cld1rate; // default - leave blank
+                                        $new_number->cld2rate = 0; // default - leave blank, billgroup has this though
+                                        $new_number->cld3rate = 0; // default - leave blank, billgroup has this though
+                                        $new_number->cld1description = ''; // leave blank
+                                        $new_number->cld2description = ''; // leave blank
+                                        $new_number->maxduration = $bg->maxperday; // from billgroup
+                                        $new_number->admin_id = 0; // default
+                                        $new_number->reseller_id = 0; //default
+                                        $new_number->agent_id = 0; //default
+                                        $new_number->billcycle_id = $bg->billcycle_id; 
+                                        $new_number->currency_id = $bg->currency_id; 
+                                        $new_number->billgroup_id = $model->billgroup_id; // $_POST
+                                        $new_number->country_id = $bg->country_id; 
+                                        $new_number->countrynetwork_id = $bg->countrynetwork_id; 
+                                        $new_number->service_id = $model->service_id; // $_POST
+                                        $new_number->sender_id = $model->sender_id; // $_POST
+                                        $new_number->receiver_id = 0; // default - leave blank
+                                        $new_number->allocated_date = null; // default - leave blank
+                                        $data[] = $new_number;
+                                    }
+                                    break;
+                                case '#manual': 
+                                    $number_list_arr = explode("\n", $model->number_list);
+                                    foreach($number_list_arr as $v)
+                                    {
+                                        $new_number = new Numbers();
+                                        //$new_number->scenario =  Numbers::SCENARIO_CREATE;
+                                        $new_number->status = 1; // default
+                                        $new_number->cld1 = $v;
+                                        $new_number->cld2 = $v;
+                                        $new_number->cost_rate = $bg->cost_rate; 
+                                        $new_number->cld1rate = $bg->cld1rate; // default - leave blank
+                                        $new_number->cld2rate = 0; // default - leave blank, billgroup has this though
+                                        $new_number->cld3rate = 0; // default - leave blank, billgroup has this though
+                                        $new_number->cld1description = ''; // leave blank
+                                        $new_number->cld2description = ''; // leave blank
+                                        $new_number->maxduration = $bg->maxperday; // from billgroup
+                                        $new_number->admin_id = 0; // default
+                                        $new_number->reseller_id = 0; //default
+                                        $new_number->agent_id = 0; //default
+                                        $new_number->billcycle_id = $bg->billcycle_id; 
+                                        $new_number->currency_id = $bg->currency_id; 
+                                        $new_number->billgroup_id = $model->billgroup_id; // $_POST
+                                        $new_number->country_id = $bg->country_id; 
+                                        $new_number->countrynetwork_id = $bg->countrynetwork_id; 
+                                        $new_number->service_id = $model->service_id; // $_POST
+                                        $new_number->sender_id = $model->sender_id; // $_POST
+                                        $new_number->receiver_id = 0; // default - leave blank
+                                        $new_number->allocated_date = null; // default - leave blank
+                                        $data[] = $new_number;
+                                    }
+                                    break;
+                                case '#single': 
+                                    if(!empty($model->single_number))
+                                    {
+                                        // status = 1 - default
+                                        // cld1 , cld2 => number , both similar
+                                        // cld1rate fetch from billgroup
+                                        // admin_id, reseller_id, agent_id keep 0
+                                        // maxduration -> maxperday from billgroup
+                                        // cld2rate, cld3rate , cld1description and cld2description , receiver_id, allocated_date -> leave blank
+                                        // sender_id => supplier id from billgroup table
+            
+                                        $new_number = new Numbers();
+                                        //$new_number->scenario =  Numbers::SCENARIO_CREATE;
+                                        $new_number->status = 1; // default
+                                        $new_number->cld1 = $model->single_number;
+                                        $new_number->cld2 = $model->single_number;
+                                        $new_number->cost_rate = $bg->cost_rate; 
+                                        $new_number->cld1rate = $bg->cld1rate; // default - leave blank
+                                        $new_number->cld2rate = 0; // default - leave blank, billgroup has this though
+                                        $new_number->cld3rate = 0; // default - leave blank, billgroup has this though
+                                        $new_number->cld1description = ''; // leave blank
+                                        $new_number->cld2description = ''; // leave blank
+                                        $new_number->maxduration = $bg->maxperday; // from billgroup
+                                        $new_number->admin_id = 0; // default
+                                        $new_number->reseller_id = 0; //default
+                                        $new_number->agent_id = 0; //default
+                                        $new_number->billcycle_id = $bg->billcycle_id; 
+                                        $new_number->currency_id = $bg->currency_id; 
+                                        $new_number->billgroup_id = $model->billgroup_id; // $_POST
+                                        $new_number->country_id = $bg->country_id; 
+                                        $new_number->countrynetwork_id = $bg->countrynetwork_id; 
+                                        $new_number->service_id = $model->service_id; // $_POST
+                                        $new_number->sender_id = $model->sender_id; // $_POST
+                                        $new_number->receiver_id = 0; // default - leave blank
+                                        $new_number->allocated_date = null; // default - leave blank
+                                        $data[] = $new_number;
+                                    }
+                                    break;
+                            }
+                            if(is_array($data) && count($data) > 0)
+                            {
+                                $all_validated = \yii\base\Model::validateMultiple($data); 
+                                if($all_validated) 
                                 {
-                                    $rows[] = [
-                                        'status' => $v->status,
-                                        'cld1' => $v->cld1,
-                                        'cld2' => $v->cld2,
-                                        'cost_rate' => $v->cost_rate,
-                                        'cld1rate' => $v->cld1rate,
-                                        'cld2rate' => $v->cld2rate,
-                                        'cld3rate' => $v->cld3rate,
-                                        'cld1description' => $v->cld1description,
-                                        'cld2description' => $v->cld2description,
-                                        'maxduration' => $v->maxduration,
-                                        'admin_id' => $v->admin_id,
-                                        'reseller_id' => $v->reseller_id,
-                                        'agent_id' => $v->agent_id,
-                                        'billcycle_id' => $v->billcycle_id,
-                                        'currency_id' => $v->currency_id,
-                                        'billgroup_id' => $v->billgroup_id,
-                                        'country_id' => $v->country_id,
-                                        'countrynetwork_id' => $v->countrynetwork_id,
-                                        'service_id' => $v->service_id,
-                                        'sender_id' => $v->sender_id,
-                                        'receiver_id' => $v->receiver_id,
-                                        'allocated_date' => $v->allocated_date
-                                   ];
+                                    $rows = [];
+                                    foreach($data as $v)
+                                    {
+                                        $rows[] = [
+                                            'status' => $v->status,
+                                            'cld1' => $v->cld1,
+                                            'cld2' => $v->cld2,
+                                            'cost_rate' => $v->cost_rate,
+                                            'cld1rate' => $v->cld1rate,
+                                            'cld2rate' => $v->cld2rate,
+                                            'cld3rate' => $v->cld3rate,
+                                            'cld1description' => $v->cld1description,
+                                            'cld2description' => $v->cld2description,
+                                            'maxduration' => $v->maxduration,
+                                            'admin_id' => $v->admin_id,
+                                            'reseller_id' => $v->reseller_id,
+                                            'agent_id' => $v->agent_id,
+                                            'billcycle_id' => $v->billcycle_id,
+                                            'currency_id' => $v->currency_id,
+                                            'billgroup_id' => $v->billgroup_id,
+                                            'country_id' => $v->country_id,
+                                            'countrynetwork_id' => $v->countrynetwork_id,
+                                            'service_id' => $v->service_id,
+                                            'sender_id' => $v->sender_id,
+                                            'receiver_id' => $v->receiver_id,
+                                            'allocated_date' => $v->allocated_date
+                                       ];
+                                    }
+                                    $postModel = new Fsmastertb;
+                                    $batch = \Yii::$app->db->createCommand()->batchInsert(Fsmastertb::tableName(), [
+                                        'status',
+                                        'cld1',
+                                        'cld2',
+                                        'cost_rate',
+                                        'cld1rate',
+                                        'cld2rate',
+                                        'cld3rate',
+                                        'cld1description',
+                                        'cld2description',
+                                        'maxduration',
+                                        'admin_id',
+                                        'reseller_id',
+                                        'agent_id',
+                                        'billcycle_id',
+                                        'currency_id',
+                                        'billgroup_id',
+                                        'country_id',
+                                        'countrynetwork_id',
+                                        'service_id',
+                                        'sender_id',
+                                        'receiver_id',
+                                        'allocated_date'
+                                    ], $rows)->execute();
+                                    if($batch)
+                                    {
+                                        \Yii::$app->session->setFlash('success', "Uplaoded");
+                                        return $this->redirect('billgroups');
+                                    } else {
+                                        \Yii::$app->session->setFlash('error', "Upload failed");
+                                    }
                                 }
-                                $postModel = new Fsmastertb;
-                                $batch = \Yii::$app->db->createCommand()->batchInsert(Fsmastertb::tableName(), [
-                                    'status',
-                                    'cld1',
-                                    'cld2',
-                                    'cost_rate',
-                                    'cld1rate',
-                                    'cld2rate',
-                                    'cld3rate',
-                                    'cld1description',
-                                    'cld2description',
-                                    'maxduration',
-                                    'admin_id',
-                                    'reseller_id',
-                                    'agent_id',
-                                    'billcycle_id',
-                                    'currency_id',
-                                    'billgroup_id',
-                                    'country_id',
-                                    'countrynetwork_id',
-                                    'service_id',
-                                    'sender_id',
-                                    'receiver_id',
-                                    'allocated_date'
-                                ], $rows)->execute();
-                                if($batch)
-                                {
-                                    \Yii::$app->session->setFlash('success', "Uplaoded");
-                                    return $this->redirect('billgroups');
-                                } else {
-                                    \Yii::$app->session->setFlash('error', "Upload failed");
-                                }
+                            } else {
+                                \Yii::$app->session->setFlash('error', "At least one number is required");
                             }
                         } else {
-                            \Yii::$app->session->setFlash('error', "At least one number is required");
+                            $model->addError('billgroup_id', 'not a valid billgroup');
                         }
-                    } else {
-                        $model->addError('billgroup_id', 'not a valid billgroup');
+                        
                     }
-                    
-                }
+                //}
             }
         }
-
         $deps = $this->uploadNumbersDeps(isset($post['Numbers']['billgroup_id']) ? intval($post['Numbers']['billgroup_id']) : 0, isset($post['Numbers']['sender_id']) ? intval($post['Numbers']['sender_id']) : 0, isset($post['Numbers']['service_id']) ? intval($post['Numbers']['service_id']) : 0);
         return $this->render('upload-numbers', [
             'action' => 'create',
             'model' => $model,
-            //'billgroups' => $billgroups,
             'billgroups' => $deps['billgroups'],
-            //'suppliers' => $suppliers,
             'suppliers' => $deps['suppliers'],
-            'services' => $deps['services']
-         ]);
+            'services' => $deps['services'],
+            'upload_type' => !empty($model->upload_type) ? $model->upload_type : "#range" 
+        ]);
     }
 
     // dropdownlist values - ajax requests
@@ -1869,10 +1853,11 @@ class AdminController extends \yii\web\Controller
         if(isset($_POST))
         {
             $post = $_POST;
-            $billgroup_id = !empty($post['bg']) ? intval($post['bg']) : 0;
-            $supplier_id = !empty($post['sup']) ? intval($post['sup']) : 0;
-            $service_id = !empty($post['ser']) ? intval($post['ser']) : 0;
-            $deps = $this->uploadNumbersDeps($billgroup_id, $supplier_id, $service_id);
+            $billgroup_id = !empty($post['bg']) ? intval($post['bg']) : "";
+            $supplier_id = !empty($post['sup']) ? intval($post['sup']) : "";
+            $service_id = !empty($post['ser']) ? intval($post['ser']) : "";
+            $initiator = !empty($post['initiator']) ? $post['initiator'] : "";
+            $deps = $this->uploadNumbersDeps($billgroup_id, $supplier_id, $service_id, $initiator);
             if(is_array($deps) && count($deps) > 0)
             {
                 $response = [
@@ -1884,12 +1869,17 @@ class AdminController extends \yii\web\Controller
         return json_encode($response);
     }
     // dropdownlist values
-    protected function uploadNumbersDeps($billgroup_id = null, $supplier_id = null , $service_id = null)
+    protected function uploadNumbersDeps($billgroup_id = null, $supplier_id = null , $service_id = null, $initiator = null)
     {
         $response = [
             'billgroups' => [],
             'suppliers' => [],
-            'services' => []
+            'services' => [],
+            'defaults' => [
+                'bill' => $billgroup_id,
+                'sup' => $supplier_id,
+                'ser' => $service_id 
+            ]
         ];
         if(empty($billgroup_id) && empty($supplier_id) && empty($service_id))
         {
@@ -1923,6 +1913,14 @@ class AdminController extends \yii\web\Controller
 
                 $res = $bgs_bill->all();
                 $response['billgroups'] = \yii\helpers\ArrayHelper::map($res, 'id', 'name');
+                if($initiator == 'numbers-billgroup_id')
+                {
+                    if(is_array($res) && count($res) == 1)
+                    {
+                        $response['defaults']['sup'] = $res[0]['sender_id'];
+                        $response['defaults']['ser'] = $res[0]['service'];
+                    }
+                }                
                 $sup_ids = \yii\helpers\ArrayHelper::getColumn($res, 'sender_id');
                 $ser_ids = \yii\helpers\ArrayHelper::getColumn($res, 'service');
 
@@ -1936,7 +1934,6 @@ class AdminController extends \yii\web\Controller
                     $suppliers = Supplier::find()->asArray()->all();
                     $response['suppliers'] = \yii\helpers\ArrayHelper::map($suppliers, 'id', 'name');
                 }
-
 
                 if(is_array($ser_ids) && count($ser_ids) > 0)
                 {

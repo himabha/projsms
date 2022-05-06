@@ -31,6 +31,7 @@ class Numbers extends Fsmastertb
     public $number_qty;
     public $number_list;
     public $single_number;
+    public $upload_type;
     
     /**
      * @return array
@@ -39,13 +40,15 @@ class Numbers extends Fsmastertb
     {
         return [
             [['fsmid', 'smpp_username', 'status', 'smpp_gateway', 'inboundip', 'cld1', 'cld2', 'outboundip', 'cost_rate', 'cld1rate', 'cld2rate', 'cld3rate', 'cld1description', 'cld2description', 'maxduration', 'admin_id', 'reseller_id', 'agent_id', 'PaymentTerms', 'currency', 'billgroup_id', 'country_id', 'countrynetwork_id', 'service_id', 'sender_id', 'receiver_id'], 'safe'],
-            [['fsmid', 'admin_id', 'reseller_id', 'agent_id', 'billgroup_id', 'country_id', 'countrynetwork_id', 'service_id', 'sender_id', 'receiver_id'], 'integer'],
+            //[['fsmid', 'admin_id', 'reseller_id', 'agent_id', 'billgroup_id', 'country_id', 'countrynetwork_id', 'service_id', 'sender_id', 'receiver_id'], 'integer'],
+            [['fsmid', 'admin_id', 'reseller_id', 'agent_id', 'country_id', 'countrynetwork_id', 'receiver_id'], 'integer'],
         
-            [['start_number', 'number_list', 'single_number'], 'safe'],
-            ['number_qty', 'integer'],
+            [['start_number', 'number_list', 'single_number', 'upload_type'], 'safe', 'on' => self::SCENARIO_CREATE],
+            ['number_qty', 'integer', 'message' => 'required', 'on' => self::SCENARIO_CREATE],
 
-            
-
+            [['billgroup_id', 'sender_id', 'service_id'], 'required', 'message' => 'required',  'on' => self::SCENARIO_CREATE],
+            [['billgroup_id', 'sender_id', 'service_id'], 'required', 'message' => 'required',  'on' => self::SCENARIO_CREATE],
+            [['billgroup_id', 'sender_id', 'service_id'], 'integer', 'message' => 'required',  'on' => self::SCENARIO_CREATE],
 
         ];
     }
