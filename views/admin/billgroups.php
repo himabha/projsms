@@ -55,12 +55,36 @@ use yii\widgets\Pjax;
                                 'filterModel' => $searchModel,
                                 'columns' => [
                                     'id',
-                                    'country_id',
-                                    'countrynetwork_id',
-                                    'sender_id',
-                                    'currency_id',
-                                    'billcycle_id',
-                                    'service',
+                                    [
+                                        'attribute' => 'country_id',
+                                        'value' => function($model){
+                                            return $model->country->Country;
+                                        }
+                                    ],
+                                    [
+                                        'attribute' => 'countrynetwork_id',
+                                        'value' => function($model){
+                                            return $model->country->Country_Network;
+                                        }
+                                    ],
+                                    [
+                                        'attribute' => 'currency_id',
+                                        'value' => function($model){
+                                            return $model->currency->currency;
+                                        }
+                                    ],
+                                    [
+                                        'attribute' => 'billcycle_id',
+                                        'value' => function($model){
+                                            return $model->billcycle->billcycle;
+                                        }
+                                    ],
+                                    [
+                                        'attribute' => 'service',
+                                        'value' => function($model){
+                                            return isset(\Yii::$app->params['services'][$model->service]) ? \Yii::$app->params['services'][$model->service] : '';
+                                        }
+                                    ],
                                     /* 'cost_rate',
                                     'cld1rate',
                                     'cld2rate',

@@ -755,8 +755,43 @@ class ResellerAdminController extends \yii\web\Controller
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $mysubusr, $search);
         $dataProvider->pagination->pageSize = $filter;
 
-        return $this->render('add_cld', ['dataProvider' => $dataProvider, 'summary' => $summary]);
+        return $this->render('add_cld', [
+            'dataProvider' => $dataProvider, 
+            'searchModel' => $searchModel,
+            'summary' => $summary,
+            'billgroups' => $this->getBillgroupItems(),
+            'resellers' => $this->getResellerItems()
+        ]);
     }
+
+    protected function getBillgroupItems()
+    {
+        $items = ['' => "Select Bill Group"];
+        $res = \app\models\Billgroup::find()->all();
+        if(is_array($res) && count($res) > 0)
+        {
+            foreach($res as $v)
+            {
+                $items[$v->id] = $v->name;
+            }
+        }
+        return $items;
+    }
+
+    protected function getResellerItems()
+    {
+        $items = ["" => "Select Reseller", 0 => "Un-allocated"];
+        $res = User::find()->where(['role' => 3, 'reseller_id' => \Yii::$app->user->id])->all();
+        if(is_array($res) && count($res) > 0)
+        {
+            foreach($res as $v)
+            {
+                $items[$v->id] = $v->username;
+            }
+        }
+        return $items;
+    }
+
 
     /*
     * Asign a cld to user

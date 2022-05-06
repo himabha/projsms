@@ -5,8 +5,8 @@ return [
     'senderEmail' => 'noreply@example.com',
     'senderName' => 'Example.com mailer',
     'services' => [
-        1 => 'Termiante',
-        2 => 'Route'         
+        0 => 'Terminate',
+        1 => 'Route'         
     ]
 ];
 

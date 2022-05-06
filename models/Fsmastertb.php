@@ -119,5 +119,16 @@ class Fsmastertb extends \yii\db\ActiveRecord
         }
     }
 
+    public function getBillgroup()
+    {
+        return $this->hasOne(Billgroup::className(),['id' => 'billgroup_id']);
+    }
+
+    public function getSupplier()
+    {
+        return $this->hasOne(Supplier::className(),['id' => 'sender_id']);
+    }
+
+
 
 }

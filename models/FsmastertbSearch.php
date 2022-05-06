@@ -17,11 +17,36 @@ class FsmastertbSearch extends Fsmastertb
      */
     public function rules()
     {
-        return [
+        $return = [
             [['fsmid'], 'integer'],
             [['inboundip', 'cld1', 'cld2', 'outboundip', 'cld1description', 'cld2description'], 'safe'],
-            [['cld1rate', 'cld2rate'], 'number'],
+            [['cld1rate', 'cld2rate', 'cld3rate', 'billgroup_id'], 'number']
         ];
+
+
+        switch(\Yii::$app->user->identity->role)
+        {
+            case 1: // admin
+                $return[] = [['admin_id', 'sender_id', 'service_id'], 'number'];
+                break;
+            case 2: // agent
+
+                break;
+            case 3: // reseller
+                $return[] = [['agent_id'], 'number'];
+                break;
+            case 4: // reseller admin
+                $return[] = [['reseller_id'], 'number'];
+                break;
+        }
+
+        return $return;
+
+        // return [
+        //     [['fsmid'], 'integer'],
+        //     [['inboundip', 'cld1', 'cld2', 'outboundip', 'cld1description', 'cld2description'], 'safe'],
+        //     [['cld1rate', 'cld2rate', 'billgroup_id', 'sender_id','admin_id', 'service_id'], 'number'],
+        // ];
     }
 
     /**
@@ -45,12 +70,11 @@ class FsmastertbSearch extends Fsmastertb
         $query = Fsmastertb::find();
         if(!$isAdmin)
         {
-          if(Yii::$app->user->identity->role == 4){
-              $query->joinWith(['resellers']);
-          }
-          else{
-            $query->joinWith(['users']);
-          }
+            if(Yii::$app->user->identity->role == 4){
+                //$query->joinWith(['resellers']);
+            } else {
+                $query->joinWith(['users']);
+            }
         }
         $this->load($params);
 
@@ -82,25 +106,62 @@ class FsmastertbSearch extends Fsmastertb
         }
 
         if(!$isAdmin){
-            if(empty($search)){
-                //$query->where(['closing_date' => NULL]);
+            if(\Yii::$app->user->identity->role == 3) // reseller 
+            {
+                if(empty($search))
+                {
+                    $query->andFilterWhere([
+                        'cld2rate' => $this->cld2rate,
+                        'cld3rate' => $this->cld3rate,
+                        'billgroup_id' => $this->billgroup_id,
+                        'agent_id' => $this->agent_id
+                    ]);
+                    $query->andFilterWhere(['like', 'cld1', $this->cld1])
+                    ->andFilterWhere(['like', 'cld2description', $this->cld2description])
+                    ;
+                }
+            } else if(\Yii::$app->user->identity->role == 4) { // reseller admin
+                if(empty($search)){
+                    $query->andFilterWhere([
+                        'cld1rate' => $this->cld1rate,
+                        'cld2rate' => $this->cld2rate,
+                        'billgroup_id' => $this->billgroup_id,
+                        'reseller_id' => $this->reseller_id
+                    ]);
+                    $query->andFilterWhere(['like', 'cld1', $this->cld1])
+                    ->andFilterWhere(['like', 'cld2description', $this->cld2description])
+                    ;
+                }
             }
-            else{
-                //$query->andWhere(['closing_date' => NULL]);
+        } else { // admin
+            if(empty($search)){
+                $query->andFilterWhere([
+                    'cld1rate' => $this->cld1rate,
+                    'cld2rate' => $this->cld2rate,
+                    'billgroup_id' => $this->billgroup_id,
+                    'sender_id' => $this->sender_id,
+                    'admin_id' => $this->admin_id,
+                    'service_id' => $this->service_id
+                ]);
+
+                $query->andFilterWhere(['like', 'cld1', $this->cld1])
+                ->andFilterWhere(['like', 'cld2description', $this->cld2description])
+                ;
             }
         }
 
         if(!$isAdmin){
-          if(Yii::$app->user->identity->role == 4){
-              $query->andFilterWhere(['in', 'fsmastertb.admin_id', Yii::$app->user->identity->id]);
-          }
-          else{
-            $query->andFilterWhere(['in', 'fsmastertb.reseller_id', Yii::$app->user->identity->id]);
-          }
+            if(Yii::$app->user->identity->role == 4){
+                $query->andFilterWhere(['in', 'fsmastertb.admin_id', Yii::$app->user->identity->id]);
+            } else {
+                $query->andFilterWhere(['in', 'fsmastertb.reseller_id', Yii::$app->user->identity->id]);
+            }
         }
+
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
         ]);
+
         return $dataProvider;
     }
 }

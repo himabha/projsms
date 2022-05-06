@@ -244,7 +244,71 @@ class AdminController extends \yii\web\Controller
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $mysubusr, $search, true);
         $dataProvider->pagination->pageSize = $filter;
 
-        return $this->render('add_cld', ['dataProvider' => $dataProvider, 'summary' => $summary, 'search' => $search, 'filter' => $filter]);
+        return $this->render('add_cld', [
+            'dataProvider' => $dataProvider, 
+            'searchModel' => $searchModel,
+            'summary' => $summary, 
+            'search' => $search, 
+            'filter' => $filter,
+            'billgroups' => $this->getBillgroupItems(),
+            'suppliers' => $this->getSupplierItems(),
+            'clients' => $this->getResellerAdminItems(),
+            'services' => $this->getServicesItems()
+
+        ]);
+    }
+
+    protected function getBillgroupItems()
+    {
+        $items = ['' => "Select Bill Group"];
+        $res = Billgroup::find()->all();
+        if(is_array($res) && count($res) > 0)
+        {
+            foreach($res as $v)
+            {
+                $items[$v->id] = $v->name;
+            }
+        }
+        return $items;
+    }
+    protected function getSupplierItems()
+    {
+        $items = ["" => "Select Supplier"];
+        $res = Supplier::find()->all();
+        if(is_array($res) && count($res) > 0)
+        {
+            foreach($res as $v)
+            {
+                $items[$v->id] = $v->name;
+            }
+        }
+        return $items;
+    }
+    protected function getResellerAdminItems()
+    {
+        $items = ["" => "Select Client", 0 => "Un-allocated"];
+        $res = User::find()->where(['role' => 4])->all();
+        if(is_array($res) && count($res) > 0)
+        {
+            foreach($res as $v)
+            {
+                $items[$v->id] = $v->username;
+            }
+        }
+        return $items;
+    }
+    protected function getServicesItems()
+    {
+        $items = ["" => "Select Service"];
+        $res = \Yii::$app->params['services'];
+        if(is_array($res) && count($res) > 0)
+        {
+            foreach($res as $k=>$v)
+            {
+                $items[$k] = $v;
+            }
+        }
+        return $items;
     }
 
     /*
@@ -1470,6 +1534,8 @@ class AdminController extends \yii\web\Controller
 
     public function actionBillgroups()
     {
+        //$model = new BillingGroup();
+
         $searchModel = new BillgroupSearch();
         $dataProvider = $searchModel->search(\Yii::$app->getRequest()->queryParams);
         $dataProvider->pagination->pageSize = 10;
@@ -1647,7 +1713,7 @@ class AdminController extends \yii\web\Controller
                         $bg = Billgroup::findOne($bg_id);
                         if(!empty($bg))
                         {
-                            switch($upload_type)
+                            switch($model->upload_type)
                             {
                                 case '#range': 
                                     $range_arr = [];
