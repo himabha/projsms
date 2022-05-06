@@ -1545,8 +1545,75 @@ class AdminController extends \yii\web\Controller
         return $this->render('billgroups', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'countries' => $this->getCountryItems(),
+            'country_networks' => $this->getCountryNetworkItems(),
+            'currencies' => $this->getCurrencyItems(),
+            'billcycles' => $this->getBillcycleItems(),
+            'services' => $this->getServicesItems()
         ]);
     }
+
+    protected function getCountryItems()
+    {
+        $items = ['' => "Select Country"];
+        $res = Country::find()->all();
+        if(is_array($res) && count($res) > 0)
+        {
+            foreach($res as $v)
+            {
+                $items[$v->ID] = $v->Country;
+            }
+        }
+        return $items;
+    }
+
+    protected function getCountryNetworkItems()
+    {
+        $items = ['' => "Select Country Network"];
+        $res = Country::find()->all();
+        if(is_array($res) && count($res) > 0)
+        {
+            foreach($res as $v)
+            {
+                $items[$v->ID] = $v->Country_Network;
+            }
+        }
+        return $items;
+    }
+
+    protected function getCurrencyItems()
+    {
+        $items = ['' => "Select Currency"];
+        $res = \app\models\Currency::find()->all();
+        if(is_array($res) && count($res) > 0)
+        {
+            foreach($res as $v)
+            {
+                $items[$v->id] = $v->currency;
+            }
+        }
+        return $items;
+    }
+
+
+    protected function getBillcycleItems()
+    {
+        $items = ['' => "Select Billcycle"];
+        $res = \app\models\Billcycle::find()->all();
+        if(is_array($res) && count($res) > 0)
+        {
+            foreach($res as $v)
+            {
+                $items[$v->ID] = $v->billcycle;
+            }
+        }
+        return $items;
+    }
+
+
+
+
+
 
     /**
      * @param $id

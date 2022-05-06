@@ -57,30 +57,35 @@ use yii\widgets\Pjax;
                                     'id',
                                     [
                                         'attribute' => 'country_id',
+                                        'filter' => $countries,
                                         'value' => function($model){
                                             return $model->country->Country;
                                         }
                                     ],
                                     [
                                         'attribute' => 'countrynetwork_id',
+                                        'filter' => $country_networks,
                                         'value' => function($model){
                                             return $model->country->Country_Network;
                                         }
                                     ],
                                     [
                                         'attribute' => 'currency_id',
+                                        'filter' => $currencies,
                                         'value' => function($model){
                                             return $model->currency->currency;
                                         }
                                     ],
                                     [
                                         'attribute' => 'billcycle_id',
+                                        'filter' => $billcycles,
                                         'value' => function($model){
                                             return $model->billcycle->billcycle;
                                         }
                                     ],
                                     [
                                         'attribute' => 'service',
+                                        'filter' => $services,
                                         'value' => function($model){
                                             return isset(\Yii::$app->params['services'][$model->service]) ? \Yii::$app->params['services'][$model->service] : '';
                                         }

@@ -67,11 +67,16 @@ class BillgroupSearch extends Billgroup
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
+            'currency_id' => $this->currency_id,
+            'billcycle_id' => $this->billcycle_id,
+            'country_id' => $this->country_id,
+            'countrynetwork_id' => $this->countrynetwork_id,
+            'service' => $this->service,
         ]);
 
         $query->andFilterWhere(['like', 'name', $this->name])
-            ->andFilterWhere(['like', 'currency_id', $this->currency_id])
-            ->andFilterWhere(['like', 'billcycle_id', $this->billcycle_id])
+            //->andFilterWhere(['like', 'currency_id', $this->currency_id])
+            //->andFilterWhere(['like', 'billcycle_id', $this->billcycle_id])
             ->andFilterWhere(['like', 'selfallocation', $this->selfallocation])
             ->andFilterWhere(['like', 'maxperday', $this->maxperday])
             ->andFilterWhere(['like', 'notes', $this->notes]);
