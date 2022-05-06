@@ -66,57 +66,33 @@ use yii\helpers\Url;
         if (User::isResellerAdmin(Yii::$app->user->identity->id)) {
         ?>
           <li class="nav-item">
-            <a class="nav-link" href="<?= Url::to(['/reseller-admin/active-calls']); ?>">
+            <a class="nav-link" href="<?= Url::to(['/reseller-admin/billgroups']); ?>">
               <i class="material-icons">content_paste</i>
-              <p>Acitve Calls</p>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" data-toggle="collapse" href="#reports" aria-expanded="true">
-              <i><img style="width:25px" src="<?= \Yii::getAlias('@web/img/yii-logo.svg'); ?>"></i>
-              <p>Reports
-                <b class="caret"></b>
-              </p>
-            </a>
-            <div class="collapse show" id="reports">
-              <ul class="nav">
-                <li class="nav-item">
-                  <a class="nav-link" href="<?= Url::to(['/reseller-admin/date-report']); ?>">
-                    <span class="sidebar-mini"> DS </span>
-                    <span class="sidebar-normal"> Datewise Summary </span>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="<?= Url::to(['/reseller-admin/fs-call-report']); ?>">
-                    <span class="sidebar-mini"> RD </span>
-                    <span class="sidebar-normal"> Resellerwise Detailed </span>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="<?= Url::to(['/reseller-admin/reseller-summary']); ?>">
-                    <span class="sidebar-mini"> RS </span>
-                    <span class="sidebar-normal"> Resellerwise Summary </span>
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="<?= Url::to(['/reseller-admin/list-reseller']); ?>">
-              <i class="material-icons">content_paste</i>
-              <p>Resellers</p>
+              <p>Bill Groups</p>
             </a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="<?= Url::to(['/reseller-admin/add-cld']); ?>">
               <i class="material-icons">library_books</i>
-              <p>Manage DDI</p>
+              <p>SMS Numbers</p>
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="<?= Url::to(['/reseller-admin/cdr']); ?>">
-              <i class="material-icons">bubble_chart</i>
-              <p>CDR</p>
+            <a class="nav-link" href="<?= Url::to(['/']); ?>">
+              <i class="material-icons">library_books</i>
+              <p>SMS TDR</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="<?= Url::to(['/reseller-admin/fs-call-report']); ?>">
+              <i class="material-icons">library_books</i>
+              <p>Reports</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="<?= Url::to(['/reseller-admin/list-reseller']); ?>">
+              <i class="material-icons">content_paste</i>
+              <p>Resellers</p>
             </a>
           </li>
           <li class="nav-item">
@@ -127,57 +103,33 @@ use yii\helpers\Url;
           </li>
         <?php } elseif (User::isReseller(Yii::$app->user->identity->id)) { ?>
           <li class="nav-item">
-            <a class="nav-link" href="<?= Url::to(['/reseller/active-calls']); ?>">
+            <a class="nav-link" href="<?= Url::to(['/reseller/billgroups']); ?>">
               <i class="material-icons">content_paste</i>
-              <p>Acitve Calls</p>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" data-toggle="collapse" href="#reports" aria-expanded="true">
-              <i><img style="width:25px" src="<?= \Yii::getAlias('@web/img/yii-logo.svg'); ?>"></i>
-              <p>Reports
-                <b class="caret"></b>
-              </p>
-            </a>
-            <div class="collapse show" id="reports">
-              <ul class="nav">
-                <li class="nav-item">
-                  <a class="nav-link" href="<?= Url::to(['/reseller/date-report']); ?>">
-                    <span class="sidebar-mini"> DS </span>
-                    <span class="sidebar-normal"> Datewise Summary </span>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="<?= Url::to(['/reseller/fs-call-report']); ?>">
-                    <span class="sidebar-mini"> AD </span>
-                    <span class="sidebar-normal"> Agentwise Detailed </span>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="<?= Url::to(['/reseller/agent-summary']); ?>">
-                    <span class="sidebar-mini"> AS </span>
-                    <span class="sidebar-normal"> Agentwise Summary </span>
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="<?= Url::to(['/reseller/list-user']); ?>">
-              <i class="material-icons">content_paste</i>
-              <p>Agents</p>
+              <p>Bill Groups</p>
             </a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="<?= Url::to(['/reseller/add-cld']); ?>">
               <i class="material-icons">library_books</i>
-              <p>Manage DDI</p>
+              <p>SMS Numbers</p>
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="<?= Url::to(['/reseller/cdr']); ?>">
-              <i class="material-icons">bubble_chart</i>
-              <p>CDR</p>
+            <a class="nav-link" href="<?= Url::to(['/']); ?>">
+              <i class="material-icons">library_books</i>
+              <p>SMS TDR</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="<?= Url::to(['/reseller/fs-call-report']); ?>">
+              <i class="material-icons">library_books</i>
+              <p>Reports</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="<?= Url::to(['/reseller/list-reseller']); ?>">
+              <i class="material-icons">content_paste</i>
+              <p>Resellers</p>
             </a>
           </li>
           <li class="nav-item">
@@ -188,59 +140,29 @@ use yii\helpers\Url;
           </li>
         <?php } elseif (User::isUserAdmin(Yii::$app->user->identity->id)) { ?>
           <li class="nav-item">
-            <a class="nav-link" href="<?= Url::to(['/admin/active-calls']); ?>">
-              <i class="material-icons">content_paste</i>
-              <p>Acitve Calls</p>
+            <a class="nav-link" href="<?= Url::to(['/reseller/add-cld']); ?>">
+              <i class="material-icons">library_books</i>
+              <p>SMS Numbers</p>
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="<?= Url::to(['/admin/billgroups']); ?>">
-              <i class="material-icons">content_paste</i>
-              <p>Bill Groups</p>
+            <a class="nav-link" href="<?= Url::to(['/']); ?>">
+              <i class="material-icons">library_books</i>
+              <p>SMS TDR</p>
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" data-toggle="collapse" href="#reports" aria-expanded="true">
-              <i><img style="width:25px" src="<?= \Yii::getAlias('@web/img/yii-logo.svg'); ?>"></i>
-              <p>Reports
-                <b class="caret"></b>
-              </p>
+            <a class="nav-link" href="<?= Url::to(['/reseller/fs-call-report']); ?>">
+              <i class="material-icons">library_books</i>
+              <p>Reports</p>
             </a>
-            <div class="collapse show" id="reports">
-              <ul class="nav">
-                <li class="nav-item">
-                  <a class="nav-link" href="<?= Url::to(['/admin/date-report']); ?>">
-                    <span class="sidebar-mini"> DR </span>
-                    <span class="sidebar-normal"> Datewise Report </span>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="<?= Url::to(['/admin/fs-call-report']); ?>">
-                    <span class="sidebar-mini"> SR </span>
-                    <span class="sidebar-normal"> Summary Report </span>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="<?= Url::to(['/admin/agent-summary']); ?>">
-                    <span class="sidebar-mini"> AR </span>
-                    <span class="sidebar-normal"> Agentwise Report </span>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="<?= Url::to(['/admin/reseller-summary']); ?>">
-                    <span class="sidebar-mini"> RR </span>
-                    <span class="sidebar-normal"> Resellerwise Report </span>
-                  </a>
-                </li>
-              </ul>
-            </div>
           </li>
-          <li class="nav-item">
+          <!-- <li class="nav-item">
             <a class="nav-link" href="<?= Url::to(['/admin/upload']); ?>">
               <i class="material-icons">content_paste</i>
               <p>Import</p>
             </a>
-          </li>
+          </li> -->
           <li class="nav-item">
             <a class="nav-link" data-toggle="collapse" href="#reseller" aria-expanded="true">
               <i><img style="width:25px" src="<?= \Yii::getAlias('@web/img/yii-logo.svg'); ?>"></i>
@@ -289,10 +211,10 @@ use yii\helpers\Url;
               </ul>
             </div>
           </li>
-          <li class="nav-item">
+          <!-- <li class="nav-item">
             <a class="nav-link" data-toggle="collapse" href="#manageDDI" aria-expanded="true">
               <i><img style="width:25px" src="<?= \Yii::getAlias('@web/img/yii-logo.svg'); ?>"></i>
-              <p>Manage DDI
+              <p>SMS Numbers
                 <b class="caret"></b>
               </p>
             </a>
@@ -301,7 +223,7 @@ use yii\helpers\Url;
                 <li class="nav-item">
                   <a class="nav-link" href="<?= Url::to(['/admin/add-cld']); ?>">
                     <span class="sidebar-mini"> DS </span>
-                    <span class="sidebar-normal"> Manage DDI </span>
+                    <span class="sidebar-normal">SMS Numbers</span>
                   </a>
                 </li>
                 <li class="nav-item">
@@ -324,13 +246,7 @@ use yii\helpers\Url;
                 </li>
               </ul>
             </div>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="<?= Url::to(['/admin/cdr']); ?>">
-              <i class="material-icons">bubble_chart</i>
-              <p>CDR</p>
-            </a>
-          </li>
+          </li> -->
           <li class="nav-item">
             <a class="nav-link" href="<?= Url::to(['/admin/fs-test']); ?>">
               <i class="material-icons">location_ons</i>
@@ -338,10 +254,16 @@ use yii\helpers\Url;
             </a>
           </li>
         <?php } else { ?>
-          <li class="nav-item">
+          <!-- <li class="nav-item">
             <a class="nav-link" href="<?= Url::to(['/user/active-calls']); ?>">
               <i class="material-icons">content_paste</i>
               <p>Acitve Calls</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="<?= Url::to(['/user/billgroups']); ?>">
+              <i class="material-icons">content_paste</i>
+              <p>Bill Groups</p>
             </a>
           </li>
           <li class="nav-item">
@@ -385,6 +307,36 @@ use yii\helpers\Url;
                 </li>
               </ul>
             </div>
+          </li>-->
+          <li class="nav-item">
+            <a class="nav-link" href="<?= Url::to(['/user/billgroups']); ?>">
+              <i class="material-icons">content_paste</i>
+              <p>Bill Groups</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="<?= Url::to(['/user/add-cld']); ?>">
+              <i class="material-icons">library_books</i>
+              <p>SMS Numbers</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="<?= Url::to(['/']); ?>">
+              <i class="material-icons">library_books</i>
+              <p>SMS TDR</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="<?= Url::to(['/user/fs-call-report']); ?>">
+              <i class="material-icons">library_books</i>
+              <p>Reports</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="<?= Url::to(['/user/fs-test']); ?>">
+              <i class="material-icons">location_ons</i>
+              <p>Test Numbers</p>
+            </a>
           </li>
         <?php } ?>
         <li class="nav-item">

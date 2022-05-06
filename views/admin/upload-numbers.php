@@ -80,7 +80,7 @@ if($action == "create")
                 <h4 class="card-title">
                     <?= \Yii::t('app', 'Upload Numbers') ?>
                     <div class="pull-right">
-                        <?= Html::a(Html::tag('b', 'keyboard_arrow_left', ['class' => 'material-icons']), ['bill-groups'], [
+                        <?= Html::a(Html::tag('b', 'keyboard_arrow_left', ['class' => 'material-icons']), ['billgroups'], [
                             'class' => 'btn btn-xs btn-success btn-round btn-fab',
                             'rel' => "tooltip",
                             'data' => [

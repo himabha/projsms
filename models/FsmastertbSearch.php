@@ -40,10 +40,11 @@ class FsmastertbSearch extends Fsmastertb
      *
      * @return ActiveDataProvider
      */
-    public function search($params, $users, $search=null, $isAdmin = false)
+    //public function search($params, $users, $search=null, $isAdmin = false)
+    public function search($params, $search=null, $isAdmin = false)
     {
         $query = Fsmastertb::find();
-        if(!$isAdmin)
+        /* if(!$isAdmin)
         {
           if(Yii::$app->user->identity->role == 4){
               $query->joinWith(['resellers']);
@@ -51,10 +52,10 @@ class FsmastertbSearch extends Fsmastertb
           else{
             $query->joinWith(['users']);
           }
-        }
+        }*/
         $this->load($params);
 
-        if (!$this->validate()) {
+        /*if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
             // $query->where('0=1');
             return $dataProvider;
@@ -66,6 +67,7 @@ class FsmastertbSearch extends Fsmastertb
         //     'cld1rate' => $search,
         //     'cld2rate' => $search,
         // ]);
+        */
 
         if(!empty($search)){
             $query->andFilterWhere(['like', 'fsmastertb.cld1', $search]);
@@ -80,7 +82,7 @@ class FsmastertbSearch extends Fsmastertb
             //->orFilterWhere(['like', 'cld1description', $search])
             ->orFilterWhere(['like', 'cld2description', $search]);
         }
-
+        /*
         if(!$isAdmin){
             if(empty($search)){
                 //$query->where(['closing_date' => NULL]);
@@ -88,7 +90,7 @@ class FsmastertbSearch extends Fsmastertb
             else{
                 //$query->andWhere(['closing_date' => NULL]);
             }
-        }
+        }*/
 
         if(!$isAdmin){
           if(Yii::$app->user->identity->role == 4){

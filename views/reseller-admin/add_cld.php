@@ -19,19 +19,6 @@ $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
 						<!-- <p class="card-category"> Here is a subtitle for this table</p> -->
 					</div>
 					<div class="card-body">
-						<div class="row summary_outer">
-							<div class="col-sm-4">
-								<label>Stock :</label>
-								<label> <?= $summary['stock'] ?></label>
-							</div>
-							<div class="col-sm-4">
-								<label>Assigned CIDs :</label>
-								<label> <?= $summary['assigned'] ?></label>
-							</div>
-							<div class="col-sm-4">
-
-							</div>
-						</div>
 						<div class="row">
 							<div class="col-sm-12">
 								<div class="row">
@@ -104,31 +91,43 @@ $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
 											// ],
 											[
 												'class' => 'yii\grid\ActionColumn',
-												'template' => ' {update-cld}', //{show-number-routes} ,  {delete-cld}
+												'template' => ' {update-cld}, {show-number-routes} ,  {delete-cld}',
 												'buttons' => [
 													'show-number-routes' => function ($url, $model, $key) {
-														return Html::a('<span class="glyphicon glyphicon-eye-open"></span>', $url, [
-															'class' => 'btn btn-info btn-xs',
-															'data-toggle' => 'tooltip',
-															'title' => 'Show list of all resellers who hold this number',
-														]);
+														return Html::a(
+															'<i class="fa fa-eye"></i>',
+															$url,
+															[
+																'data-original-title' => 'Show list of all resellers who hold this number',
+																'data-placement' => 'top',
+																'style' => 'margin-right: 10px'
+															]
+														);
 													},
 													'update-cld' => function ($url, $model, $key) {
-														return Html::a('<span class="glyphicon glyphicon-pencil"></span>', $url, [
-															'class' => 'btn btn-success btn-xs',
-															'data-toggle' => 'tooltip',
-															'title' => 'Edit'
-														]);
+														return Html::a(
+															'<i class="fa fa-edit"></i>',
+															$url,
+															[
+																'data-original-title' => 'Edit this number',
+																'data-placement' => 'top',
+																'style' => 'margin-right: 10px'
+															]
+														);
 													},
 													'delete-cld' => function ($url, $model, $key) {
-														return Html::a('<span class="glyphicon glyphicon-trash"></span>', $url, [
-															'class' => 'btn btn-danger btn-xs',
-															'data-pjax' => "0",
-															'data-method' => 'post',
-															'data-confirm' => 'Are you sure you want to delete CLD1?',
-															'data-toggle' => 'tooltip',
-															'title' => 'Delete'
-														]);
+														return Html::a(
+															'<i class="fa fa-trash-o"></i>',
+															$url,
+															[
+																'data-original-title' => 'Delete this number?',
+																'data-placement' => 'top',
+																'data-pjax' => '0',
+																'data-confirm' => 'Are you sure you want to delete this item?',
+																'data-method' => 'post',
+																'style' => 'margin-right: 10px'
+															]
+														);
 													}
 												],
 											]

@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\models\BillgroupSearch;
 use Yii;
 use app\models\User;
 use app\models\Fsusertb;
@@ -476,5 +477,23 @@ class UserController extends Controller
         $country = Fscallreport::find()->groupBy(['Country'])->all();
 
         return $this->render('country_wise_summary', ['dataProvider' => $dataProvider, 'date_range' => $date_range, 'country' => $country, 'country_id' => $country_id]);
+    }
+
+    /**
+     * Function to list all billgroups
+     */
+
+    public function actionBillgroups()
+    {
+        $searchModel = new BillgroupSearch();
+        $dataProvider = $searchModel->search(\Yii::$app->getRequest()->queryParams);
+        $dataProvider->pagination->pageSize = 10;
+
+        \Yii::$app->view->title = \Yii::t('app', 'Billgroups');
+
+        return $this->render('billgroups', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
     }
 }

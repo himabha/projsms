@@ -15,7 +15,7 @@ use yii\helpers\ArrayHelper;
                 <h4 class="card-title">
                     <?= $model->isNewRecord ? \Yii::t('app', 'Create Billgroup') : \Yii::t('app', 'Update Billgroup') ?>
                     <div class="pull-right">
-                        <?= Html::a(Html::tag('b', 'keyboard_arrow_left', ['class' => 'material-icons']), ['bill-groups'], [
+                        <?= Html::a(Html::tag('b', 'keyboard_arrow_left', ['class' => 'material-icons']), ['billgroups'], [
                             'class' => 'btn btn-xs btn-success btn-round btn-fab',
                             'rel' => "tooltip",
                             'data' => [
