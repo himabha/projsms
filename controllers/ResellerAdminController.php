@@ -2,8 +2,6 @@
 
 namespace app\controllers;
 
-use app\models\Billgroup;
-use app\models\BillgroupSearch;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\filters\AccessControl;
@@ -743,26 +741,7 @@ class ResellerAdminController extends \yii\web\Controller
     */
     public function actionAddCld()
     {
-
-        $searchModel = new FsmastertbSearch();
-        $search = isset($_GET['search']) ? $_GET['search'] : '';
-        $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
-
-        if ($filter == 'all') {
-            $filter = '';
-        }
-        $dataProvider = $searchModel->search(\Yii::$app->getRequest()->queryParams, $search);
-        $dataProvider->pagination->pageSize = $filter;
-        $resellers = User::find()->select('id')->where(['reseller_id' => Yii::$app->user->identity->id, 'role' => 3]);
-        $billgroups = Billgroup::find()->asArray()->all();
-
-        return $this->render('add_cld', [
-            'dataProvider' => $dataProvider,
-            'billgroups' => $billgroups,
-            'resellers' => $resellers
-        ]);
-
-        /* $model = new Fsmastertb();
+        $model = new Fsusertb();
         $search = isset($_GET['search']) ? $_GET['search'] : '';
         $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
 
@@ -776,8 +755,43 @@ class ResellerAdminController extends \yii\web\Controller
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $mysubusr, $search);
         $dataProvider->pagination->pageSize = $filter;
 
-        return $this->render('add_cld', ['dataProvider' => $dataProvider, 'summary' => $summary]); */
+        return $this->render('add_cld', [
+            'dataProvider' => $dataProvider, 
+            'searchModel' => $searchModel,
+            'summary' => $summary,
+            'billgroups' => $this->getBillgroupItems(),
+            'resellers' => $this->getResellerItems()
+        ]);
     }
+
+    protected function getBillgroupItems()
+    {
+        $items = ['' => "Select Bill Group"];
+        $res = \app\models\Billgroup::find()->all();
+        if(is_array($res) && count($res) > 0)
+        {
+            foreach($res as $v)
+            {
+                $items[$v->id] = $v->name;
+            }
+        }
+        return $items;
+    }
+
+    protected function getResellerItems()
+    {
+        $items = ["" => "Select Reseller", 0 => "Un-allocated"];
+        $res = User::find()->where(['role' => 3, 'reseller_id' => \Yii::$app->user->id])->all();
+        if(is_array($res) && count($res) > 0)
+        {
+            foreach($res as $v)
+            {
+                $items[$v->id] = $v->username;
+            }
+        }
+        return $items;
+    }
+
 
     /*
     * Asign a cld to user
@@ -931,23 +945,5 @@ class ResellerAdminController extends \yii\web\Controller
         } else {
             throw new ForbiddenHttpException('cld2rate field should not be empty, Try again.');
         }
-    }
-
-    /**
-     * Function to list all billgroups
-     */
-
-    public function actionBillgroups()
-    {
-        $searchModel = new BillgroupSearch();
-        $dataProvider = $searchModel->search(\Yii::$app->getRequest()->queryParams);
-        $dataProvider->pagination->pageSize = 10;
-
-        \Yii::$app->view->title = \Yii::t('app', 'Billgroups');
-
-        return $this->render('billgroups', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-        ]);
     }
 }

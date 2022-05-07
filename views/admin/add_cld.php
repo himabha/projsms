@@ -10,58 +10,60 @@ $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
 ?>
 
 <div class="content">
-	<div class="container-fluid">
-		<div class="row">
-			<div class="col-md-12">
-				<div class="card">
-					<div class="card-header card-header-primary">
-						<h4 class="card-title ">Add CLD</h4>
-					</div>
-					<div class="card-body">
-						<div class="row summary_outer">
-							<div class="col-sm-4">
-								<label>Stock :</label>
-								<label> <?= $summary['stock'] ?></label>
-							</div>
-							<div class="col-sm-4">
-								<label>Assigned CIDs :</label>
-								<label> <?= $summary['assigned'] ?></label>
-							</div>
-							<div class="col-sm-4">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header card-header-primary">
+                        <h4 class="card-title ">Add CLD</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row summary_outer">
+                            <div class="col-sm-4">
+                                <label>Stock :</label>
+                                <label> <?= $summary['stock'] ?></label>
+                            </div>
+                            <div class="col-sm-4">
+                                <label>Assigned CIDs :</label>
+                                <label> <?= $summary['assigned'] ?></label>
+                            </div>
+                            <div class="col-sm-4">
 
-							</div>
-						</div>
-						<div class="row">
-							<div class="col-md-3 col-xs-6">
-								<?= Html::a('Assign DDI to Reseller Admin', ['assign-cld-reseller-admin'], ['class' => 'btn btn-success pull-left']) ?>
-							</div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-xs-6">
+                                <?= Html::a('Assign DDI to Reseller Admin', ['assign-cld-reseller-admin'], ['class' => 'btn btn-success pull-left']) ?>
+                            </div>
 
-							<div class="col-sm-2 col-xs-6">
-								<?= Html::a('Assign DDI to Reseller', ['assign-cld-reseller'], ['class' => 'btn btn-success pull-left']) ?>
-							</div>
-							<div class="col-sm-2 col-xs-6">
-								<?= Html::a('Assign DDI to Agent', ['assign-cld'], ['class' => 'btn btn-success pull-left']) ?>
-							</div>
-							<div class="col-sm-2 col-xs-6">
-								<button type="button" class="btn btn-danger" id="edit_selected_number" onclick="javascript:void(0);">Edit Selected Numbers</button>
-							</div>
+                            <div class="col-sm-2 col-xs-6">
+                                <?= Html::a('Assign DDI to Reseller', ['assign-cld-reseller'], ['class' => 'btn btn-success pull-left']) ?>
+                            </div>
+                            <div class="col-sm-2 col-xs-6">
+                                <?= Html::a('Assign DDI to Agent', ['assign-cld'], ['class' => 'btn btn-success pull-left']) ?>
+                            </div>
+                            <div class="col-sm-2 col-xs-6">
+                                <button type="button" class="btn btn-danger" id="edit_selected_number"
+                                    onclick="javascript:void(0);">Edit Selected Numbers</button>
+                            </div>
 
-							<div class="col-md-3 col-sm-2 col-xs-6">
-								<?php
+                            <div class="col-md-3 col-sm-2 col-xs-6">
+                                <?php
 								$form = ActiveForm::begin(['id' => 'searchForm', 'method' => 'get']);
 								?>
-								<div class="pull_right-medium">
-									<?= Html::textInput('search', $search, ['id' => 'search_box', 'class' => 'search_box', 'placeholder' => 'Search....']); ?>
-									<?= Html::dropdownlist('filter', $filter, ['20' => '20', '50' => '50', '100' => '100', '1000' => '1000'], ['id' => 'filter_box', 'class' => 'filter_box']); ?>
-								</div>
-								<?php ActiveForm::end(); ?>
-							</div>
-						</div>
-						<div class="row">
-							<div class="table-responsive">
-								<?= GridView::widget([
+                                <div class="pull_right-medium">
+                                    <?= Html::textInput('search', $search, ['id' => 'search_box', 'class' => 'search_box', 'placeholder' => 'Search....']); ?>
+                                    <?= Html::dropdownlist('filter', $filter, ['20' => '20', '50' => '50', '100' => '100', '1000' => '1000'], ['id' => 'filter_box', 'class' => 'filter_box']); ?>
+                                </div>
+                                <?php ActiveForm::end(); ?>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="table-responsive">
+                                <?= GridView::widget([
 									'id' => 'manage_num_grid',
 									'dataProvider' => $dataProvider,
+									'filterModel' => $searchModel,
 									'tableOptions' => [
 										'id' => 'list_cld_tbl',
 										'class' => 'table'
@@ -77,6 +79,54 @@ $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
 											'class' => 'yii\grid\CheckboxColumn',
 											'checkboxOptions' => function ($model, $key, $index, $column) {
 												return ['value' => $model->fsmid];
+											}
+										],
+										[
+											'label' => 'Bill Group',
+											'attribute' => 'billgroup_id',
+											'filter' => $billgroups,
+											'value' => function ($model) {
+												if ($model->billgroup_id !== 0) {
+													return $model->billgroup->name;
+												} else {
+													return '';
+												}
+											}
+										],
+										[
+											'label' => 'Suppliers',
+											'attribute' => 'sender_id',
+											'filter' => $suppliers,
+											'value' => function ($model) {
+												if ($model->sender_id !== 0) {
+													return $model->supplier->name;
+												} else {
+													return '';
+												}
+											}
+										],
+										[
+											'label' => 'Clients',
+											'filter' => $clients,
+											'attribute' => 'admin_id',
+											'value' => function ($model) {
+												if ($model->admin_id !== 0) {
+													return $model->resellerAdmin->username;
+												} else {
+													return '';
+												}
+											}
+										],
+										[
+											'label' => 'Services',
+											'attribute' => 'service_id',
+											'filter' => $services,
+											'value' => function ($model) {
+												if ($model->service_id !== "") {
+													return isset(\Yii::$app->params['services'][$model->service_id]) ? \Yii::$app->params['services'][$model->service_id] : '';
+												} else {
+													return '';
+												}
 											}
 										],
 										'cld1',
@@ -97,17 +147,6 @@ $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
 											'value' => function ($model) {
 												if ($model->agent_id !== 0) {
 													return $model->users->username;
-												} else {
-													return '';
-												}
-											}
-										],
-										[
-											'label' => 'Reseller Admin Name',
-											'attribute' => 'admin_id',
-											'value' => function ($model) {
-												if ($model->admin_id !== 0) {
-													return $model->resellerAdmin->username;
 												} else {
 													return '';
 												}
@@ -159,80 +198,80 @@ $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
 
 									],
 								]); ?>
-							</div>
-							<?php
+                            </div>
+                            <?php
 							$form = ActiveForm::begin(['id' => 'exportForm', 'method' => 'get', 'action' => ['export-ddi']]);
 							?>
-							<?= Html::hiddenInput('search', $search, ['id' => 'search']); ?>
-							<?= Html::hiddenInput('filter', $filter, ['id' => 'filter']); ?>
+                            <?= Html::hiddenInput('search', $search, ['id' => 'search']); ?>
+                            <?= Html::hiddenInput('filter', $filter, ['id' => 'filter']); ?>
 
-							<?= Html::submitButton('Export to Excel', ['class' => 'btn btn-success exprt_btn']) ?>
-							<?php ActiveForm::end(); ?>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+                            <?= Html::submitButton('Export to Excel', ['class' => 'btn btn-success exprt_btn']) ?>
+                            <?php ActiveForm::end(); ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 <div id="manage_confirm" class="modal fade" role="dialog">
-	<div class="modal-dialog">
+    <div class="modal-dialog">
 
-		<!-- Modal content-->
-		<div class="modal-content">
-			<div class="modal-header">
-				<h4 class="float-right m-0">Update CLD2 Rate</h4>
-				<button type="button" class="close" data-dismiss="modal">&times;</button>
-			</div>
-			<div class="modal-body">
-				<div id="detach_message"></div>
-				<?php
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="float-right m-0">Update CLD2 Rate</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="detach_message"></div>
+                <?php
 				$form = ActiveForm::begin(['id' => 'detachForm', 'method' => 'post', 'action' => ['admin/edit-number']]);
 				?>
-				<!-- <?= Html::hiddenInput('btn_id', '', ['id' => 'btn_id']); ?> -->
-				<?= Html::label('CLD1 Rate', 'cld1Rate'); ?>
-				<?= Html::textInput('cld1Rate', '', ['class' => "form-control"]); ?>
-				<br />
-				<?= Html::label('CLD2 Rate', 'cld2Rate'); ?>
-				<?= Html::textInput('cld2Rate', '', ['class' => "form-control"]); ?>
-				<?= Html::hiddenInput('btn_number', '', ['id' => 'btn_number']); ?>
-				<div class="media form-group">
-					<button type="submit" class="btn btn-primary">Yes</button>
-					<button type="button" class="btn btn-default" data-dismiss="modal">No</button>
+                <!-- <?= Html::hiddenInput('btn_id', '', ['id' => 'btn_id']); ?> -->
+                <?= Html::label('CLD1 Rate', 'cld1Rate'); ?>
+                <?= Html::textInput('cld1Rate', '', ['class' => "form-control"]); ?>
+                <br />
+                <?= Html::label('CLD2 Rate', 'cld2Rate'); ?>
+                <?= Html::textInput('cld2Rate', '', ['class' => "form-control"]); ?>
+                <?= Html::hiddenInput('btn_number', '', ['id' => 'btn_number']); ?>
+                <div class="media form-group">
+                    <button type="submit" class="btn btn-primary">Yes</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
 
-					<?php ActiveForm::end(); ?>
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-				</div>
-			</div>
+                    <?php ActiveForm::end(); ?>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
 
-		</div>
-	</div>
+        </div>
+    </div>
 </div>
 <script type="text/javascript">
-	$("#search_box").keyup(function() {
-		if ($(this).val().length > 3) {
-			$('#searchForm').submit();
-		}
-	});
-	$(document).on('change', '#filter_box', function() {
-		$('#searchForm').submit();
-	});
-	$("#edit_selected_number").on("click", function() {
-		var numbers = $('#manage_num_grid').yiiGridView('getSelectedRows');
-		if (numbers.length > 0) {
-			var strvalue = "";
-			$('input[name="selection[]"]:checked').each(function() {
-				if (strvalue != "")
-					strvalue = strvalue + "," + this.value;
-				else
-					strvalue = this.value;
-			});
-			$('#btn_number').val(strvalue);
-			$('#manage_confirm').modal('show');
-		} else {
-			alert("Please select atleast one number");
-		}
-	});
+$("#search_box").keyup(function() {
+    if ($(this).val().length > 3) {
+        $('#searchForm').submit();
+    }
+});
+$(document).on('change', '#filter_box', function() {
+    $('#searchForm').submit();
+});
+$("#edit_selected_number").on("click", function() {
+    var numbers = $('#manage_num_grid').yiiGridView('getSelectedRows');
+    if (numbers.length > 0) {
+        var strvalue = "";
+        $('input[name="selection[]"]:checked').each(function() {
+            if (strvalue != "")
+                strvalue = strvalue + "," + this.value;
+            else
+                strvalue = this.value;
+        });
+        $('#btn_number').val(strvalue);
+        $('#manage_confirm').modal('show');
+    } else {
+        alert("Please select atleast one number");
+    }
+});
 </script>

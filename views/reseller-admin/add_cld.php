@@ -47,6 +47,7 @@ $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
 									<?= GridView::widget([
 										'id' => 'manage_num_grid',
 										'dataProvider' => $dataProvider,
+										'filterModel' => $searchModel,
 										'tableOptions' => [
 											'id' => 'list_cld_tbl',
 											'class' => 'table'
@@ -65,17 +66,31 @@ $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
 												}
 											],
 											//'inboundip',
-											'cld1',
 											[
-												'label' => 'Reseller Name',
-												'attribute' => 'agent_id',
+												'label' => 'Bill Group',
+												'attribute' => 'billgroup_id',
+												'filter' => $billgroups,
 												'value' => function ($model) {
-													if ($model->reseller_id) {
+													if ($model->billgroup_id !== 0) {
+														return $model->billgroup->name;
+													} else {
+														return '';
+													}
+												}
+											],
+											[
+												'label' => 'Reseller',
+												'filter' => $resellers,
+												'attribute' => 'reseller_id',
+												'value' => function ($model) {
+													if ($model->reseller_id != 0) {
 														return $model->resellers->username;
 													}
 													return null;
 												}
 											],
+											'cld1',
+
 											//'cld2',
 											//'outboundip',
 											//'cld1description',

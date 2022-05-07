@@ -18,7 +18,7 @@ use yii\web\IdentityInterface;
  * @property string|null $Start_date 
  * @property string|null $End_date
  */
-class Country extends \yii\db\ActiveRecord
+class Billcycle extends \yii\db\ActiveRecord
 {
 	/**
 	 * Constants
@@ -31,7 +31,7 @@ class Country extends \yii\db\ActiveRecord
 	 */
 	public static function tableName()
 	{
-		return 'country';
+		return 'billcycle';
 	}
 
 	public function behaviors()
@@ -46,8 +46,8 @@ class Country extends \yii\db\ActiveRecord
 	public function rules()
 	{
 		return [
-			[['ID'], 'integer'],
-			[['Country', 'Country_Network'], 'safe'],
+			[['ID', 'trade_period', 'pay_period'], 'integer'],
+			[['billcycle'], 'safe'],
 		];
 	}
 

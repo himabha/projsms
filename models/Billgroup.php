@@ -90,8 +90,13 @@ class Billgroup extends \yii\db\ActiveRecord
 	public function attributeLabels()
 	{
 		return [
+			'id' => 'ID',
 			'name' => 'Bill Group Name (required)',
-			'country_id' => 'Country ID',
+			'country_id' => 'Country',
+			'countrynetwork_id' => 'Country Network',
+			'sender_id' => 'Supplier',
+			'currency_id' => 'Currency',
+			'billcycle_id' => 'Billcycle',
 			'selfallocation' => 'Max daily self allocate value (0 to disable)',
 			'maxperday' => 'Max per day value (0 for no limit)'
 		];
@@ -140,4 +145,25 @@ class Billgroup extends \yii\db\ActiveRecord
 	{
 		return $this->id;
 	}
+
+    public function getCountry()
+    {
+        return $this->hasOne(Country::className(),['ID' => 'country_id']);
+    }
+
+    public function getSupplier()
+    {
+        return $this->hasOne(Supplier::className(),['id' => 'sender_id']);
+    }
+
+    public function getCurrency()
+    {
+        return $this->hasOne(Currency::className(),['id' => 'currency_id']);
+    }
+
+    public function getBillcycle()
+    {
+        return $this->hasOne(Billcycle::className(),['ID' => 'billcycle_id']);
+    }
+
 }
