@@ -70,6 +70,7 @@ $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
 												'label' => 'Bill Group',
 												'attribute' => 'billgroup_id',
 												'filter' => $billgroups,
+<<<<<<< HEAD
 												'value' => function ($model) {
 													if ($model->billgroup_id !== 0) {
 														return $model->billgroup->name;
@@ -83,6 +84,21 @@ $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
 												'filter' => $resellers,
 												'attribute' => 'reseller_id',
 												'value' => function ($model) {
+=======
+												'value' => function ($model) {
+													if ($model->billgroup_id !== 0) {
+														return $model->billgroup->name;
+													} else {
+														return '';
+													}
+												}
+											],
+											[
+												'label' => 'Reseller',
+												'filter' => $resellers,
+												'attribute' => 'reseller_id',
+												'value' => function ($model) {
+>>>>>>> b11fdfca1b4483cff1f35fae97541874f5cc4133
 													if ($model->reseller_id != 0) {
 														return $model->resellers->username;
 													}
