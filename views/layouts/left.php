@@ -140,7 +140,13 @@ use yii\helpers\Url;
           </li>
         <?php } elseif (User::isUserAdmin(Yii::$app->user->identity->id)) { ?>
           <li class="nav-item">
-            <a class="nav-link" href="<?= Url::to(['/reseller/add-cld']); ?>">
+            <a class="nav-link" href="<?= Url::to(['/admin/billgroups']); ?>">
+              <i class="material-icons">content_paste</i>
+              <p>Billgroups</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="<?= Url::to(['/admin/add-cld']); ?>">
               <i class="material-icons">library_books</i>
               <p>SMS Numbers</p>
             </a>
@@ -152,7 +158,7 @@ use yii\helpers\Url;
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="<?= Url::to(['/reseller/fs-call-report']); ?>">
+            <a class="nav-link" href="<?= Url::to(['/admin/fs-call-report']); ?>">
               <i class="material-icons">library_books</i>
               <p>Reports</p>
             </a>
