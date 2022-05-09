@@ -253,7 +253,7 @@ class AdminController extends \yii\web\Controller
             'billgroups' => $this->getBillgroupItems(),
             'suppliers' => $this->getSupplierItems(),
             'clients' => $this->getResellerAdminItems(),
-            'services' => $this->getServicesItems()
+            'services' => $this->getServicesItems(),
 
         ]);
     }

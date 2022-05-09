@@ -3,6 +3,11 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+$this->registerCss('
+    .custom_select{
+        border:none;
+    }
+');
 
 $totalCount = $dataProvider->getTotalCount();
 ?>
@@ -32,7 +37,6 @@ $totalCount = $dataProvider->getTotalCount();
                                 'options'          => ['class' => 'table-responsive grid-view'],
                                 'dataProvider' => $dataProvider,
                                 'filterModel' => $searchModel,
-                                'filterPosition' => 'header',
                                 'showFooter' => true,
                                 'columns' => [
                                     //'id',
@@ -40,7 +44,7 @@ $totalCount = $dataProvider->getTotalCount();
                                     [
                                         'attribute' => 'country_id',
                                         'filter' => $countries,
-                                        'filterInputOptions' => ['prompt' => 'Select Country'],
+                                        'filterInputOptions' => ['prompt' => 'Select Country', 'class' => 'custom_select'],
                                         'value' => function($model){
                                             return $model->country->Country;
                                         }
@@ -48,7 +52,7 @@ $totalCount = $dataProvider->getTotalCount();
                                     [
                                         'attribute' => 'countrynetwork_id',
                                         'filter' => $country_networks,
-                                        'filterInputOptions' => ['prompt' => 'Select Country Network'],
+                                        'filterInputOptions' => ['prompt' => 'Select Country Network', 'class' => 'custom_select'],
                                         'value' => function($model){
                                             return $model->country->Country_Network;
                                         }
@@ -56,7 +60,7 @@ $totalCount = $dataProvider->getTotalCount();
                                     [
                                         'attribute' => 'sender_id',
                                         'filter' => $suppliers,
-                                        'filterInputOptions' => ['prompt' => 'Select Supplier'],
+                                        'filterInputOptions' => ['prompt' => 'Select Supplier', 'class' => 'custom_select'],
                                         'value' => function($model){
                                             return isset($model->supplier) ? $model->supplier->name : null;
                                         }
@@ -64,7 +68,7 @@ $totalCount = $dataProvider->getTotalCount();
                                     [
                                         'attribute' => 'currency_id',
                                         'filter' => $currencies,
-                                        'filterInputOptions' => ['prompt' => 'Select Currency'],
+                                        'filterInputOptions' => ['prompt' => 'Select Currency', 'class' => 'custom_select'],
                                         'value' => function($model){
                                             return $model->currency->currency;
                                         }
@@ -72,7 +76,7 @@ $totalCount = $dataProvider->getTotalCount();
                                     [
                                         'attribute' => 'billcycle_id',
                                         'filter' => $billcycles,
-                                        'filterInputOptions' => ['prompt' => 'Select Bill Cycle'],
+                                        'filterInputOptions' => ['prompt' => 'Select Bill Cycle', 'class' => 'custom_select'],
                                         'value' => function($model){
                                             return $model->billcycle->billcycle;
                                         }
@@ -80,7 +84,7 @@ $totalCount = $dataProvider->getTotalCount();
                                     [
                                         'attribute' => 'service',
                                         'filter' => $services,
-                                        'filterInputOptions' => ['prompt' => 'Select Service'],
+                                        'filterInputOptions' => ['prompt' => 'Select Service', 'class' => 'custom_select'],
                                         'footer' => 'Total records: ' . $totalCount,
                                         'footerOptions' => ['style' => ['font-size' => 'larger', 'font-weight' => 'bold']],
                                         'value' => function($model){

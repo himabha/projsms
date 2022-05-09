@@ -4,6 +4,11 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 $totalCount = $dataProvider->getTotalCount();
+$this->registerCss('
+    .custom_select{
+        border:none;
+    }
+');
 ?>
 <div class="content">
     <div class="container-fluid">
@@ -43,7 +48,7 @@ $totalCount = $dataProvider->getTotalCount();
                             ]); ?>
                             <?= GridView::widget([
                                 'id' => 'users',
-                                'filterPosition' => 'header',
+                                //'filterPosition' => 'header',
                                 'showFooter' => true,
                                 'tableOptions' => [
                                     'class' => 'table table-striped table-no-bordered table-hover',
@@ -56,7 +61,10 @@ $totalCount = $dataProvider->getTotalCount();
                                     [
                                         'attribute' => 'country_id',
                                         'filter' => $countries,
-                                        'filterInputOptions' => ['prompt' => 'Select Country'],
+                                        'filterInputOptions' => [
+                                            'prompt' => 'Select Country',
+                                            'class' => 'custom_select'
+                                        ],
                                         'value' => function($model){
                                             return $model->country->Country;
                                         }
@@ -64,7 +72,10 @@ $totalCount = $dataProvider->getTotalCount();
                                     [
                                         'attribute' => 'countrynetwork_id',
                                         'filter' => $country_networks,
-                                        'filterInputOptions' => ['prompt' => 'Select Country Network'],
+                                        'filterInputOptions' => [
+                                            'prompt' => 'Select Country Network',
+                                            'class' => 'custom_select'
+                                        ],
                                         'value' => function($model){
                                             return $model->country->Country_Network;
                                         }
@@ -72,6 +83,10 @@ $totalCount = $dataProvider->getTotalCount();
                                     [
                                         'attribute' => 'currency_id',
                                         'filter' => $currencies,
+                                        'filterInputOptions' => [
+                                            'prompt' => 'Select Currency', 
+                                            'class' => 'custom_select'
+                                        ],
                                         'value' => function($model){
                                             return $model->currency->currency;
                                         }
@@ -79,6 +94,10 @@ $totalCount = $dataProvider->getTotalCount();
                                     [
                                         'attribute' => 'billcycle_id',
                                         'filter' => $billcycles,
+                                        'filterInputOptions' => [
+                                            'prompt' => 'Select Bill Cycle', 
+                                            'class' => 'custom_select'
+                                        ],
                                         'value' => function($model){
                                             return $model->billcycle->billcycle;
                                         }
@@ -86,7 +105,10 @@ $totalCount = $dataProvider->getTotalCount();
                                     [
                                         'attribute' => 'service',
                                         'filter' => $services,
-                                        'filterInputOptions' => ['prompt' => 'Select Service'],
+                                        'filterInputOptions' => [
+                                            'prompt' => 'Select Service',
+                                            'class' => 'custom_select'
+                                        ],
                                         'value' => function($model){
                                             return isset(\Yii::$app->params['services'][$model->service]) ? \Yii::$app->params['services'][$model->service] : '';
                                         }

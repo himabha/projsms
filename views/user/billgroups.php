@@ -3,6 +3,12 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+$this->registerCss('
+    .custom_select{
+        border:none;
+    }
+');
+
 ?>
 <div class="content">
     <div class="container-fluid">
@@ -24,7 +30,6 @@ use yii\widgets\Pjax;
                             ]); ?>
                             <?= GridView::widget([
                                 'id' => 'users',
-                                'filterPosition' => 'header',
                                 'showFooter' => true,
                                 'tableOptions' => [
                                     'class' => 'table table-striped table-no-bordered table-hover',
@@ -38,7 +43,7 @@ use yii\widgets\Pjax;
                                     [
                                         'attribute' => 'country_id',
                                         'filter' => $countries,
-                                        'filterInputOptions' => ['prompt' => 'Select Country'],
+                                        'filterInputOptions' => ['prompt' => 'Select Country', 'class' => 'custom_select'],
                                         'value' => function($model){
                                             return $model->country->Country;
                                         }
@@ -46,7 +51,7 @@ use yii\widgets\Pjax;
                                     [
                                         'attribute' => 'countrynetwork_id',
                                         'filter' => $country_networks,
-                                        'filterInputOptions' => ['prompt' => 'Select Country Network'],
+                                        'filterInputOptions' => ['prompt' => 'Select Country Network', 'class' => 'custom_select'],
                                         'value' => function($model){
                                             return $model->country->Country_Network;
                                         }
@@ -54,7 +59,7 @@ use yii\widgets\Pjax;
                                     [
                                         'attribute' => 'sender_id',
                                         'filter' => $suppliers,
-                                        'filterInputOptions' => ['prompt' => 'Select Supplier'],
+                                        'filterInputOptions' => ['prompt' => 'Select Supplier', 'class' => 'custom_select'],
                                         'value' => function($model){
                                             return $model->supplier->name;
                                         }
@@ -62,7 +67,7 @@ use yii\widgets\Pjax;
                                     [
                                         'attribute' => 'currency_id',
                                         'filter' => $currencies,
-                                        'filterInputOptions' => ['prompt' => 'Currency'],
+                                        'filterInputOptions' => ['prompt' => 'Currency', 'class' => 'custom_select'],
                                         'value' => function($model){
                                             return $model->currency->currency;
                                         }
@@ -70,7 +75,7 @@ use yii\widgets\Pjax;
                                     [
                                         'attribute' => 'billcycle_id',
                                         'filter' => $billcycles,
-                                        'filterInputOptions' => ['prompt' => 'Select Bill Cycle'],
+                                        'filterInputOptions' => ['prompt' => 'Select Bill Cycle', 'class' => 'custom_select'],
                                         'value' => function($model){
                                             return $model->billcycle->billcycle;
                                         }
@@ -78,7 +83,7 @@ use yii\widgets\Pjax;
                                     [
                                         'attribute' => 'service',
                                         'filter' => $services,
-                                        'filterInputOptions' => ['prompt' => 'Select Service'],
+                                        'filterInputOptions' => ['prompt' => 'Select Service', 'class' => 'custom_select'],
                                         'value' => function($model){
                                             return isset(\Yii::$app->params['services'][$model->service]) ? \Yii::$app->params['services'][$model->service] : '';
                                         }

@@ -18,9 +18,36 @@ $this->registerCss('
 	.has-error.help-block, .help-block-error{
 		color:red!important;
 	}
+	.custom_select{
+		border:none;
+		margin-right:2em;
+	}
+	ul.gv_top{
+		list-style-type:none;
+		padding-left:0;
+	}
+	ul.gv_top li{
+		display:inline-block;
+	}
 ');
 $this->registerJs('
 	$(document).ready(function(){
+		$("#billgroup_id_search").attr("type", "hidden");
+		$("#dd_billgroup_id").change(function(){
+			$("#billgroup_id_search").val(jQuery(this).val()).trigger("change");
+		});
+		$("#sender_id_search").attr("type", "hidden");
+		$("#dd_sender_id").change(function(){
+			$("#sender_id_search").val(jQuery(this).val()).trigger("change");
+		});
+		$("#admin_id_search").attr("type", "hidden");
+		$("#dd_admin_id").change(function(){
+			$("#admin_id_search").val(jQuery(this).val()).trigger("change");
+		});
+		$("#service_id_search").attr("type", "hidden");
+		$("#dd_service_id").change(function(){
+			$("#service_id_search").val(jQuery(this).val()).trigger("change");
+		});
 		$("#search_box").keyup(function() {
 			if ($(this).val().length > 3) {
 				$("#searchForm").submit();
@@ -72,38 +99,43 @@ $this->registerJs('
 
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="col-md-3 col-xs-6">
-                                <?= Html::a('Assign DDI to Reseller Admin', ['assign-cld-reseller-admin'], ['class' => 'btn btn-success pull-left']) ?>
-                            </div>
-
-                            <div class="col-sm-2 col-xs-6">
-                                <?= Html::a('Assign DDI to Reseller', ['assign-cld-reseller'], ['class' => 'btn btn-success pull-left']) ?>
-                            </div>
-                            <div class="col-sm-2 col-xs-6">
-                                <?= Html::a('Assign DDI to Agent', ['assign-cld'], ['class' => 'btn btn-success pull-left']) ?>
-                            </div>
-                            <div class="col-sm-2 col-xs-6">
-                                <button type="button" class="btn btn-danger" id="edit_selected_number"
-                                    onclick="javascript:void(0);">Edit Selected Numbers</button>
-                            </div>
-
-                            <div class="col-md-3 col-sm-2 col-xs-6">
-							    <?php 
-								$form = ActiveForm::begin(['id' => 'searchForm', 'method' => 'get']);
-								?>
-                                <div class="pull_right-medium">
+                        <div>
+                            <ul class="gv_top">
+                                <li>
+                                    <?= Html::a('Assign DDI to Reseller Admin', ['assign-cld-reseller-admin'], ['class' => 'btn btn-success pull-left']) ?>
+                                </li>
+                                <li>
+                                    <?= Html::a('Assign DDI to Reseller', ['assign-cld-reseller'], ['class' => 'btn btn-success pull-left']) ?>
+                                </li>
+                                <li>
+                                    <?= Html::a('Assign DDI to Agent', ['assign-cld'], ['class' => 'btn btn-success pull-left']) ?>
+                                </li>
+                                <li>
+                                    <button type="button" class="btn btn-danger pull-left" id="edit_selected_number"
+                                        onclick="javascript:void(0);">Edit Selected Numbers</button>
+                                </li>
+                                <li>
+                                    <?php $form = ActiveForm::begin(['id' => 'searchForm', 'method' => 'get']); ?>
+                                    <div class="pull_right-medium">
                                     <?= Html::textInput('search', $search, ['id' => 'search_box', 'class' => 'search_box', 'placeholder' => 'Search....']); ?>
                                     <?= Html::dropdownlist('filter', $filter, ['10' => '10', '20' => '20', '50' => '50', '100' => '100', '1000' => '1000'], ['id' => 'filter_box', 'class' => 'filter_box']); ?>
-                                </div>
-                                <?php ActiveForm::end(); ?>
+                                    </div>
+                                    <?php ActiveForm::end(); ?>
+                                </li>
+                            </ul>
+                        </div>
+                        <div id="dropdown_top" style="margin-bottom:2em;">
+                            <div class="form-group">
+                                <?= Html::dropdownList('dd_billgroup_id',  isset($_GET['FsmastertbSearch']['billgroup_id']) ?  $_GET['FsmastertbSearch']['billgroup_id'] : ""  , $billgroups, ['id' => 'dd_billgroup_id', 'class' => 'custom_select', 'prompt' => 'Select Bill Group', 'role' => 'button']); ?>
+                                <?= Html::dropdownlist('dd_sender_id',  isset($_GET['FsmastertbSearch']['sender_id']) ?  $_GET['FsmastertbSearch']['sender_id'] : ""  , $suppliers, ['id' => 'dd_sender_id', 'class' => 'custom_select', 'prompt' => 'Select Supplier']); ?>
+                                <?= Html::dropdownlist('dd_admin_id',  isset($_GET['FsmastertbSearch']['admin_id']) ?  $_GET['FsmastertbSearch']['admin_id'] : ""  , $clients, ['id' => 'dd_admin_id', 'class' => 'custom_select', 'prompt' => 'Select Client']); ?>
+                                <?= Html::dropdownlist('dd_service_id',  isset($_GET['FsmastertbSearch']['service_id']) ?  $_GET['FsmastertbSearch']['service_id'] : ""  , $services, ['id' => 'dd_service_id', 'class' => 'custom_select', 'prompt' => 'Select Service']); ?>
                             </div>
                         </div>
-                        <div class="row">
+                        <div>
                             <div class="table-responsive">
                                 <?= GridView::widget([
 									'id' => 'manage_num_grid',
-									'filterPosition' => 'header',
 									'dataProvider' => $dataProvider,
 									'filterModel' => $searchModel,
 									'showFooter' => true,
@@ -121,8 +153,10 @@ $this->registerJs('
 										[
 											'label' => 'Bill Group',
 											'attribute' => 'billgroup_id',
-											'filter' => $billgroups,
-											'filterInputOptions' => ['prompt' => 'Select Bill Group'],
+											//'filter' => $billgroups,
+											'filterInputOptions' => [
+												'id' => 'billgroup_id_search'
+											],
 											'value' => function ($model) {
 												return isset($model->billgroup) ? $model->billgroup->name : null;
 											}
@@ -130,16 +164,20 @@ $this->registerJs('
 										[
 											'label' => 'Suppliers',
 											'attribute' => 'sender_id',
-											'filter' => $suppliers,
-											'filterInputOptions' => ['prompt' => 'Select Supplier'],
+											//'filter' => $suppliers,
+											'filterInputOptions' => [
+												'id' => 'sender_id_search'
+											],
 											'value' => function ($model) {
 												return isset($model->supplier) ? $model->supplier->name : null;	
 											}
 										],
 										[
 											'label' => 'Clients',
-											'filter' => $clients,
-											'filterInputOptions' => ['prompt' => 'Select Client'],
+											//'filter' => $clients,
+											'filterInputOptions' => [
+												'id' => 'admin_id_search'
+											],
 											'attribute' => 'admin_id',
 											'value' => function ($model) {
 												return $model->resellerAdmin ? $model->resellerAdmin->username : null;
@@ -148,8 +186,10 @@ $this->registerJs('
 										[
 											'label' => 'Services',
 											'attribute' => 'service_id',
-											'filter' => $services,
-											'filterInputOptions' => ['prompt' => 'Select Service'],
+											//'filter' => $services,
+											'filterInputOptions' => [
+												'id' => 'service_id_search'
+											],
 											'value' => function ($model) {
 												return isset(\Yii::$app->params['services'][$model->service_id]) ? \Yii::$app->params['services'][$model->service_id] : null;											
 											}
@@ -157,9 +197,9 @@ $this->registerJs('
 										[
 											'label' => 'Caller Number',
 											'attribute' => 'cld1',
-											'filterInputOptions' => [
-												'placeholder' => 'Search Caller Number',
-											]
+											//'filterInputOptions' => [
+											//	'placeholder' => 'Search Caller Number',
+											//]
 										],
 										[
 											'label' => 'Reseller Name',
@@ -186,25 +226,22 @@ $this->registerJs('
 										[
 											'label' => 'Country Name',
 											'attribute' => 'cld2description',
-											'filterInputOptions' => [
-												'placeholder' => 'Search Country Name',
-											]
 										],
 										[
 											'label' => 'Cld1 Rate',
 											'attribute' => 'cld1rate',
-											'filterInputOptions' => [
-												'placeholder' => 'Search Cld1 Rate',
-											]
+											//'filterInputOptions' => [
+											//	'placeholder' => 'Search Cld1 Rate',
+											//]
 										],
 										[
 											'label' => 'Cld2 Rate',
 											'attribute' => 'cld2rate',
 											'footer' => 'Total records: ' . $totalCount,
 											'footerOptions' => ['style' => ['font-size' => 'larger', 'font-weight' => 'bold']],
-											'filterInputOptions' => [
-												'placeholder' => 'Search Cld2 Rate',
-											]
+											//'filterInputOptions' => [
+											//	'placeholder' => 'Search Cld2 Rate',
+											//]
 										],
 										[
 											'class' => 'yii\grid\ActionColumn',
@@ -240,12 +277,9 @@ $this->registerJs('
 									],
 								]); ?>
                             </div>
-                            <?php
-							$form = ActiveForm::begin(['id' => 'exportForm', 'method' => 'get', 'action' => ['export-ddi']]);
-							?>
+                            <?php $form = ActiveForm::begin(['id' => 'exportForm', 'method' => 'get', 'action' => ['export-ddi']]); ?>
                             <?= Html::hiddenInput('search', $search, ['id' => 'search']); ?>
                             <?= Html::hiddenInput('filter', $filter, ['id' => 'filter']); ?>
-
                             <?= Html::submitButton('Export to Excel', ['class' => 'btn btn-success exprt_btn']) ?>
                             <?php ActiveForm::end(); ?>
                         </div>
@@ -257,7 +291,6 @@ $this->registerJs('
 </div>
 <div id="manage_confirm" class="modal fade" role="dialog">
     <div class="modal-dialog">
-
         <!-- Modal content-->
         <div class="modal-content">
             <div class="modal-header">
