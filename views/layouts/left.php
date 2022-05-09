@@ -72,7 +72,7 @@ use yii\helpers\Url;
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="<?= Url::to(['/reseller-admin/add-cld']); ?>">
+            <a class="nav-link" href="<?= Url::to(['/reseller-admin/sms-numbers']); ?>">
               <i class="material-icons">library_books</i>
               <p>SMS Numbers</p>
             </a>
@@ -109,7 +109,7 @@ use yii\helpers\Url;
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="<?= Url::to(['/reseller/add-cld']); ?>">
+            <a class="nav-link" href="<?= Url::to(['/reseller/sms-numbers']); ?>">
               <i class="material-icons">library_books</i>
               <p>SMS Numbers</p>
             </a>
@@ -146,7 +146,7 @@ use yii\helpers\Url;
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="<?= Url::to(['/admin/add-cld']); ?>">
+            <a class="nav-link" href="<?= Url::to(['/admin/sms-numbers']); ?>">
               <i class="material-icons">library_books</i>
               <p>SMS Numbers</p>
             </a>
@@ -227,7 +227,7 @@ use yii\helpers\Url;
             <div class="collapse show" id="manageDDI">
               <ul class="nav">
                 <li class="nav-item">
-                  <a class="nav-link" href="<?= Url::to(['/admin/add-cld']); ?>">
+                  <a class="nav-link" href="<?= Url::to(['/admin/sms-numbers']); ?>">
                     <span class="sidebar-mini"> DS </span>
                     <span class="sidebar-normal">SMS Numbers</span>
                   </a>
@@ -321,7 +321,7 @@ use yii\helpers\Url;
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="<?= Url::to(['/user/add-cld']); ?>">
+            <a class="nav-link" href="<?= Url::to(['/user/sms-numbers']); ?>">
               <i class="material-icons">library_books</i>
               <p>SMS Numbers</p>
             </a>

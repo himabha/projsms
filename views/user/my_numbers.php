@@ -15,6 +15,7 @@ $this->registerCss('
 	.pagination li{
 		margin-right:1em;
 	}
+
 	.custom_select{
 		border:none;
 		margin-right:2em;
@@ -26,16 +27,14 @@ $this->registerCss('
 	ul.gv_top li{
 		display:inline-block;
 	}
+
 ');
 $this->registerJs('
 	$(document).ready(function(){
+
 		$("#billgroup_id_search").attr("type", "hidden");
 		$("#dd_billgroup_id").change(function(){
 			$("#billgroup_id_search").val(jQuery(this).val()).trigger("change");
-		});
-		$("#agent_id_search").attr("type", "hidden");
-		$("#dd_agent_id").change(function(){
-			$("#agent_id_search").val(jQuery(this).val()).trigger("change");
 		});
 
 		$("#search_box").keyup(function() {
@@ -73,43 +72,40 @@ $this->registerJs('
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header card-header-primary">
-                        <h4 class="card-title ">Manage DDI</h4>
+                        <h4 class="card-title ">SMS Numbers</h4>
                     </div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-sm-12">
-                                <div>
-                                    <ul class="gv_top">
-                                        <li>
-                                            <?= Html::a('Assign DDI to Agent', ['assign-cld'], ['class' => 'btn btn-success pull-left']) ?>
-                                        </li>
+                                <div class="row">
+                                    <div class="col-sm-3 col-xs-6">
+                                        <?= Html::a('Assign DDI to Agent', ['assign-cld'], ['class' => 'btn btn-success pull-left']) ?>
+                                    </div>
 
-                                        <li>
-                                            <?= Html::a('Detach DDI to Agent', ['show-assigned'], ['class' => 'btn btn-success pull-left']) ?>
-                                        </li>
+                                    <div class="col-sm-3 col-xs-6">
+                                        <?= Html::a('Detach DDI to Agent', ['show-assigned'], ['class' => 'btn btn-success pull-left']) ?>
+                                    </div>
 
-                                        <li>
-                                            <button type="button" class="btn btn-danger pull-left" id="edit_selected_number"
-                                                onclick="javascript:void(0);">Edit Selected Numbers</button>
-                                        </li>
+                                    <div class="col-sm-3 col-xs-6">
+                                        <button type="button" class="btn btn-danger" id="edit_selected_number"
+                                            onclick="javascript:void(0);">Edit Selected Numbers</button>
+                                    </div>
 
-                                        <li>
-                                            <?php
+                                    <div class="col-sm-3 col-xs-12">
+                                        <?php
 										$form = ActiveForm::begin(['id' => 'searchForm', 'method' => 'get']);
 										?>
-                                            <div class="pull_right-medium">
-                                                <?= Html::textInput('search', $search, ['id' => 'search_box', 'class' => 'search_box', 'placeholder' => 'Search....']); ?>
-                                                <?= Html::dropdownlist('filter', $filter, ['10' => '10', '20' => '20', '50' => '50', '100' => '100', '1000' => '1000'], ['id' => 'filter_box', 'class' => 'filter_box']); ?>
-                                            </div>
+                                        <div class="pull_right-medium">
+                                            <?= Html::textInput('search', $search, ['id' => 'search_box', 'class' => 'search_box', 'placeholder' => 'Search....']); ?>
+                                            <?= Html::dropdownlist('filter', $filter, ['10' => '10', '20' => '20', '50' => '50', '100' => '100', '1000' => '1000'], ['id' => 'filter_box', 'class' => 'filter_box']); ?>
+                                        </div>
 
-                                            <?php ActiveForm::end(); ?>
-                                        </li>
-                                    </ul>
+                                        <?php ActiveForm::end(); ?>
+                                    </div>
                                 </div>
                                 <div id="dropdown_top" style="margin-bottom:2em; margin-top:2em;">
                                     <div class="form-group">
                                         <?= Html::dropdownList('dd_billgroup_id',  isset($_GET['FsmastertbSearch']['billgroup_id']) ?  $_GET['FsmastertbSearch']['billgroup_id'] : ""  , $billgroups, ['id' => 'dd_billgroup_id', 'class' => 'custom_select', 'prompt' => 'Select Bill Group', 'role' => 'button']); ?>
-                                        <?= Html::dropdownlist('dd_agent_id',  isset($_GET['FsmastertbSearch']['agent_id']) ?  $_GET['FsmastertbSearch']['agent_id'] : ""  , $agents, ['id' => 'dd_agent_id', 'class' => 'custom_select', 'prompt' => 'Select Agent']); ?>
                                     </div>
                                 </div>
 
@@ -134,25 +130,15 @@ $this->registerJs('
 												'label' => 'Bill Group',
 												'attribute' => 'billgroup_id',
 												//'filter' => $billgroups,
-												'filterInputOptions' => ['id' => 'billgroup_id_search'],
+												'filterInputOptions' => [
+													'id' => 'billgroup_id_search'
+												],
 												'value' => function ($model) {
 													if ($model->billgroup_id !== 0) {
 														return $model->billgroup->name;
 													} else {
 														return '';
 													}
-												}
-											],
-											[
-												'label' => 'Agent Name',
-												//'filter' => $agents,
-												'filterInputOptions' => ['id' => 'agent_id_search'],												
-												'attribute' => 'agent_id',
-												'value' => function ($model) {
-													if ($model->agent_id !== 0) {
-														return $model->users->username;
-													}
-													return null;
 												}
 											],
 											[

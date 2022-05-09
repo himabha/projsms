@@ -121,7 +121,7 @@ class FsmastertbSearch extends Fsmastertb
                     ;
                 }
             }
-            if(\Yii::$app->user->identity->role == 3) // reseller 
+            else if(\Yii::$app->user->identity->role == 3) // reseller 
             {
                 if(empty($search))
                 {

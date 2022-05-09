@@ -742,7 +742,7 @@ class ResellerAdminController extends \yii\web\Controller
     /*
     * Add cld to users
     */
-    public function actionAddCld()
+    public function actionSmsNumbers()
     {
         $model = new Fsusertb();
         $search = isset($_GET['search']) ? $_GET['search'] : '';
@@ -758,7 +758,7 @@ class ResellerAdminController extends \yii\web\Controller
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $mysubusr, $search);
         $dataProvider->pagination->pageSize = $filter;
 
-        return $this->render('add_cld', [
+        return $this->render('sms_numbers', [
             'dataProvider' => $dataProvider, 
             'searchModel' => $searchModel,
             'summary' => $summary,

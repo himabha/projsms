@@ -596,7 +596,7 @@ class UserController extends Controller
     /*
     * Add cld to users
     */
-    public function actionAddCld()
+    public function actionSmsNumbers()
     {
         $model = new Fsusertb();
         $search = isset($_GET['search']) ? $_GET['search'] : '';
@@ -612,7 +612,7 @@ class UserController extends Controller
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $mysubusr, $search);
         $dataProvider->pagination->pageSize = $filter;
 
-        return $this->render('my_number', [
+        return $this->render('my_numbers', [
             'dataProvider' => $dataProvider, 
             'searchModel' => $searchModel,
             'summary' => $summary,
