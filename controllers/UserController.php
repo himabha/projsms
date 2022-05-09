@@ -20,6 +20,12 @@ use app\models\Fsmycdr;
 use app\models\Fscallreport;
 use app\models\Brandname;
 
+use app\models\Billgroup;
+use app\models\Country;
+use app\models\Numbers;
+use app\models\Supplier;
+
+
 class UserController extends Controller
 {
     /**
@@ -494,6 +500,98 @@ class UserController extends Controller
         return $this->render('billgroups', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'countries' => $this->getCountryItems(),
+            'country_networks' => $this->getCountryNetworkItems(),
+            'currencies' => $this->getCurrencyItems(),
+            'billcycles' => $this->getBillcycleItems(),
+            'suppliers' => $this->getSupplierItems(),
+            'services' => $this->getServicesItems()
         ]);
     }
+
+    protected function getCountryItems()
+    {
+        $items = [];
+        //$items = ['' => "Select Country"];
+        $res = Country::find()->all();
+        if(is_array($res) && count($res) > 0)
+        {
+            foreach($res as $v)
+            {
+                $items[$v->ID] = $v->Country;
+            }
+        }
+        return $items;
+    }
+
+    protected function getCountryNetworkItems()
+    {
+        $items = [];
+        $res = Country::find()->all();
+        if(is_array($res) && count($res) > 0)
+        {
+            foreach($res as $v)
+            {
+                $items[$v->ID] = $v->Country_Network;
+            }
+        }
+        return $items;
+    }
+
+    protected function getCurrencyItems()
+    {
+        $items = [];
+        $res = \app\models\Currency::find()->all();
+        if(is_array($res) && count($res) > 0)
+        {
+            foreach($res as $v)
+            {
+                $items[$v->id] = $v->currency;
+            }
+        }
+        return $items;
+    }
+    protected function getBillcycleItems()
+    {
+        $items = [];
+        $res = \app\models\Billcycle::find()->all();
+        if(is_array($res) && count($res) > 0)
+        {
+            foreach($res as $v)
+            {
+                $items[$v->ID] = $v->billcycle;
+            }
+        }
+        return $items;
+    }
+
+    protected function getServicesItems()
+    {
+        $items = [];
+        $res = \Yii::$app->params['services'];
+        if(is_array($res) && count($res) > 0)
+        {
+            foreach($res as $k=>$v)
+            {
+                $items[$k] = $v;
+            }
+        }
+        return $items;
+    }
+    protected function getSupplierItems()
+    {
+        $items = [];
+        $res = Supplier::find()->all();
+        if(is_array($res) && count($res) > 0)
+        {
+            foreach($res as $v)
+            {
+                $items[$v->id] = $v->name;
+            }
+        }
+        return $items;
+    }
+
+
+
 }

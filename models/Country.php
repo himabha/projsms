@@ -47,7 +47,8 @@ class Country extends \yii\db\ActiveRecord
 	{
 		return [
 			[['ID'], 'integer'],
-			[['Country', 'Country_Network'], 'safe'],
+			[['Country', 'Country_Network'], 'string', 'max' => 100],
+			[['SERVICE'], 'string', 'max' => 10],
 		];
 	}
 
@@ -56,6 +57,11 @@ class Country extends \yii\db\ActiveRecord
 	 */
 	public function attributeLabels()
 	{
+		return [
+			'Country' => 'Country',
+			'Country)Network' => 'Country NEtwork',
+			'SERVICE' => 'service'
+		];
 	}
 
 	public function attributeHints()

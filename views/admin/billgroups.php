@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+$totalCount = $dataProvider->getTotalCount();
 ?>
 <div class="content">
     <div class="container-fluid">
@@ -42,22 +43,20 @@ use yii\widgets\Pjax;
                             ]); ?>
                             <?= GridView::widget([
                                 'id' => 'users',
+                                'filterPosition' => 'header',
+                                'showFooter' => true,
                                 'tableOptions' => [
                                     'class' => 'table table-striped table-no-bordered table-hover',
-                                ],
-                                'pager' => [
-                                    'firstPageLabel' => 'First',
-                                    'lastPageLabel' => 'Last',
-                                    'maxButtonCount' => '2',
                                 ],
                                 'options'          => ['class' => 'table-responsive grid-view'],
                                 'dataProvider' => $dataProvider,
                                 'filterModel' => $searchModel,
                                 'columns' => [
-                                    'id',
+                                    //'id',
                                     [
                                         'attribute' => 'country_id',
                                         'filter' => $countries,
+                                        'filterInputOptions' => ['prompt' => 'Select Country'],
                                         'value' => function($model){
                                             return $model->country->Country;
                                         }
@@ -65,6 +64,7 @@ use yii\widgets\Pjax;
                                     [
                                         'attribute' => 'countrynetwork_id',
                                         'filter' => $country_networks,
+                                        'filterInputOptions' => ['prompt' => 'Select Country Network'],
                                         'value' => function($model){
                                             return $model->country->Country_Network;
                                         }
@@ -86,19 +86,16 @@ use yii\widgets\Pjax;
                                     [
                                         'attribute' => 'service',
                                         'filter' => $services,
+                                        'filterInputOptions' => ['prompt' => 'Select Service'],
                                         'value' => function($model){
                                             return isset(\Yii::$app->params['services'][$model->service]) ? \Yii::$app->params['services'][$model->service] : '';
                                         }
                                     ],
-                                    /* 'cost_rate',
-                                    'cld1rate',
-                                    'cld2rate',
-                                    'cld3rate',
-                                    'selfallocation',
-                                    'maxperday', */
                                     [
                                         'header' => \Yii::t('app', 'Actions'),
                                         'class' => '\yii\grid\ActionColumn',
+                                        'footer' => 'Total records: ' . $totalCount,
+                                        'footerOptions' => ['style' => ['font-size' => 'larger', 'font-weight' => 'bold']],
                                         'contentOptions' => [
                                             'class' => 'table-actions'
                                         ],

@@ -27,8 +27,8 @@ class BillgroupSearch extends Billgroup
     public function rules()
     {
         return [
-            [['id', 'name', 'country_id', 'countrynetwork_id', 'sender_id', 'currency_id', 'billcycle_id', 'service', 'cost_rate', 'cld1rate', 'cld2rate', 'cld3rate', 'selfallocation', 'maxperday', 'notes'], 'safe'],
-            [['id', 'country_id', 'countrynetwork_id', 'sender_id', 'maxperday',], 'integer'],
+            [['id', 'name', 'service', 'cost_rate', 'cld1rate', 'cld2rate', 'cld3rate', 'selfallocation', 'maxperday', 'notes'], 'safe'],
+            [['id', 'country_id', 'countrynetwork_id', 'sender_id', 'maxperday', 'currency_id', 'billcycle_id'], 'integer'],
         ];
     }
 
@@ -71,6 +71,7 @@ class BillgroupSearch extends Billgroup
             'billcycle_id' => $this->billcycle_id,
             'country_id' => $this->country_id,
             'countrynetwork_id' => $this->countrynetwork_id,
+            'sender_id' => $this->sender_id,
             'service' => $this->service,
         ]);
 

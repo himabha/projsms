@@ -7,6 +7,44 @@ use yii\widgets\ActiveForm;
 
 $search = isset($_GET['search']) ? $_GET['search'] : '';
 $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
+$totalCount = $dataProvider->getTotalCount();
+$this->registerCss('
+	.pagination {
+		margin-left: 1em;
+	}
+	.pagination li{
+		margin-right:1em;
+	}
+');
+$this->registerJs('
+	$(document).ready(function(){
+		$("#search_box").keyup(function() {
+			if ($(this).val().length > 3) {
+				$("#searchForm").submit();
+			}
+		});
+		$(document).on("change", "#filter_box", function() {
+			$("#searchForm").submit();
+			$("input[name=\'per-page\']").val($(this).val());
+		});
+		$("#edit_selected_number").on("click", function() {
+			var numbers = $("#manage_num_grid").yiiGridView("getSelectedRows");
+			if (numbers.length > 0) {
+				var strvalue = "";
+				$("input[name=\'selection[]\']:checked").each(function() {
+					if (strvalue != "")
+						strvalue = strvalue + "," + this.value;
+					else
+						strvalue = this.value;
+				});
+				$("#btn_number").val(strvalue);
+				$("#manage_confirm").modal("show");
+			} else {
+				alert("Please select at least one number");
+			}
+		});
+	});
+');
 ?>
 
 <div class="content">
@@ -48,12 +86,12 @@ $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
                             </div>
 
                             <div class="col-md-3 col-sm-2 col-xs-6">
-                                <?php
+							    <?php 
 								$form = ActiveForm::begin(['id' => 'searchForm', 'method' => 'get']);
 								?>
                                 <div class="pull_right-medium">
                                     <?= Html::textInput('search', $search, ['id' => 'search_box', 'class' => 'search_box', 'placeholder' => 'Search....']); ?>
-                                    <?= Html::dropdownlist('filter', $filter, ['20' => '20', '50' => '50', '100' => '100', '1000' => '1000'], ['id' => 'filter_box', 'class' => 'filter_box']); ?>
+                                    <?= Html::dropdownlist('filter', $filter, ['10' => '10', '20' => '20', '50' => '50', '100' => '100', '1000' => '1000'], ['id' => 'filter_box', 'class' => 'filter_box']); ?>
                                 </div>
                                 <?php ActiveForm::end(); ?>
                             </div>
@@ -62,17 +100,13 @@ $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
                             <div class="table-responsive">
                                 <?= GridView::widget([
 									'id' => 'manage_num_grid',
+									'filterPosition' => 'header',
 									'dataProvider' => $dataProvider,
 									'filterModel' => $searchModel,
+									'showFooter' => true,
 									'tableOptions' => [
 										'id' => 'list_cld_tbl',
 										'class' => 'table'
-									],
-									'summary' => '',
-									'pager' => [
-										'firstPageLabel' => 'First',
-										'lastPageLabel' => 'Last',
-										'maxButtonCount' => '2',
 									],
 									'columns' => [
 										[
@@ -85,51 +119,45 @@ $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
 											'label' => 'Bill Group',
 											'attribute' => 'billgroup_id',
 											'filter' => $billgroups,
+											'filterInputOptions' => ['prompt' => 'Select Bill Group'],
 											'value' => function ($model) {
-												if ($model->billgroup_id !== 0) {
-													return $model->billgroup->name;
-												} else {
-													return '';
-												}
+												return isset($model->billgroup) ? $model->billgroup->name : null;
 											}
 										],
 										[
 											'label' => 'Suppliers',
 											'attribute' => 'sender_id',
 											'filter' => $suppliers,
+											'filterInputOptions' => ['prompt' => 'Select Supplier'],
 											'value' => function ($model) {
-												if ($model->sender_id !== 0) {
-													return $model->supplier->name;
-												} else {
-													return '';
-												}
+												return isset($model->supplier) ? $model->supplier->name : null;	
 											}
 										],
 										[
 											'label' => 'Clients',
 											'filter' => $clients,
+											'filterInputOptions' => ['prompt' => 'Select Client'],
 											'attribute' => 'admin_id',
 											'value' => function ($model) {
-												if ($model->admin_id !== 0) {
-													return $model->resellerAdmin->username;
-												} else {
-													return '';
-												}
+												return $model->resellerAdmin ? $model->resellerAdmin->username : null;
 											}
 										],
 										[
 											'label' => 'Services',
 											'attribute' => 'service_id',
 											'filter' => $services,
+											'filterInputOptions' => ['prompt' => 'Select Service'],
 											'value' => function ($model) {
-												if ($model->service_id !== "") {
-													return isset(\Yii::$app->params['services'][$model->service_id]) ? \Yii::$app->params['services'][$model->service_id] : '';
-												} else {
-													return '';
-												}
+												return isset(\Yii::$app->params['services'][$model->service_id]) ? \Yii::$app->params['services'][$model->service_id] : null;											
 											}
 										],
-										'cld1',
+										[
+											'label' => 'Caller Number',
+											'attribute' => 'cld1',
+											'filterInputOptions' => [
+												'placeholder' => 'Search Caller Number',
+											]
+										],
 										[
 											'label' => 'Reseller Name',
 											'attribute' => 'reseller_id',
@@ -152,19 +180,29 @@ $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
 												}
 											}
 										],
-										//'cld2',
-										//'outboundip',
-										//'cld1description',
 										[
 											'label' => 'Country Name',
 											'attribute' => 'cld2description',
+											'filterInputOptions' => [
+												'placeholder' => 'Search Country Name',
+											]
 										],
-										'cld1rate',
-										'cld2rate',
-										// [
-										// 	'header' => '<a href="Javascript::void(0);">User</a>',
-										// 	'value' => 'cld.user.username'
-										// ],
+										[
+											'label' => 'Cld1 Rate',
+											'attribute' => 'cld1rate',
+											'filterInputOptions' => [
+												'placeholder' => 'Search Cld1 Rate',
+											]
+										],
+										[
+											'label' => 'Cld2 Rate',
+											'attribute' => 'cld2rate',
+											'footer' => 'Total records: ' . $totalCount,
+											'footerOptions' => ['style' => ['font-size' => 'larger', 'font-weight' => 'bold']],
+											'filterInputOptions' => [
+												'placeholder' => 'Search Cld2 Rate',
+											]
+										],
 										[
 											'class' => 'yii\grid\ActionColumn',
 											'template' => '{update-cld}', // {show-number-routes} {delete-cld}',
@@ -249,29 +287,3 @@ $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
         </div>
     </div>
 </div>
-<script type="text/javascript">
-$("#search_box").keyup(function() {
-    if ($(this).val().length > 3) {
-        $('#searchForm').submit();
-    }
-});
-$(document).on('change', '#filter_box', function() {
-    $('#searchForm').submit();
-});
-$("#edit_selected_number").on("click", function() {
-    var numbers = $('#manage_num_grid').yiiGridView('getSelectedRows');
-    if (numbers.length > 0) {
-        var strvalue = "";
-        $('input[name="selection[]"]:checked').each(function() {
-            if (strvalue != "")
-                strvalue = strvalue + "," + this.value;
-            else
-                strvalue = this.value;
-        });
-        $('#btn_number').val(strvalue);
-        $('#manage_confirm').modal('show');
-    } else {
-        alert("Please select atleast one number");
-    }
-});
-</script>

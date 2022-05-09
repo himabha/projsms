@@ -766,7 +766,7 @@ class ResellerAdminController extends \yii\web\Controller
 
     protected function getBillgroupItems()
     {
-        $items = ['' => "Select Bill Group"];
+        $items = [];
         $res = \app\models\Billgroup::find()->all();
         if(is_array($res) && count($res) > 0)
         {
@@ -780,7 +780,7 @@ class ResellerAdminController extends \yii\web\Controller
 
     protected function getResellerItems()
     {
-        $items = ["" => "Select Reseller", 0 => "Un-allocated"];
+        $items = [0 => "Un-allocated"];
         $res = User::find()->where(['role' => 3, 'reseller_id' => \Yii::$app->user->id])->all();
         if(is_array($res) && count($res) > 0)
         {

@@ -159,7 +159,7 @@ class FsmastertbSearch extends Fsmastertb
         }
 
         $dataProvider = new ActiveDataProvider([
-            'query' => $query,
+            'query' => $query
         ]);
 
         return $dataProvider;

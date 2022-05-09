@@ -27,6 +27,12 @@ use yii\db\Query;
 use app\models\Fscallreport;
 use app\models\Brandname;
 
+use app\models\Country;
+use app\models\Supplier;
+use app\models\Currency;
+
+
+
 class ResellerController extends \yii\web\Controller
 {
     public function behaviors()
@@ -762,12 +768,13 @@ class ResellerController extends \yii\web\Controller
             'summary' => $summary,
             'billgroups' => $this->getBillgroupItems(),
             'agents' => $this->getAgentItems(),
+            'services' => $this->getServicesItems()
         ]);
     }
 
     protected function getBillgroupItems()
     {
-        $items = ['' => "Select Bill Group"];
+        $items = [];
         $res = \app\models\Billgroup::find()->all();
         if(is_array($res) && count($res) > 0)
         {
@@ -780,7 +787,7 @@ class ResellerController extends \yii\web\Controller
     }
     protected function getAgentItems()
     {
-        $items = ["" => "Select Agent", 0 => "Un-allocated"];
+        $items = [0 => "Un-allocated"];
         $res = User::find()->where(['role' => 2, 'reseller_id' => \Yii::$app->user->id])->all();
         if(is_array($res) && count($res) > 0)
         {
@@ -791,6 +798,20 @@ class ResellerController extends \yii\web\Controller
         }
         return $items;
     }
+    protected function getServicesItems()
+    {
+        $items = [];
+        $res = \Yii::$app->params['services'];
+        if(is_array($res) && count($res) > 0)
+        {
+            foreach($res as $k=>$v)
+            {
+                $items[$k] = $v;
+            }
+        }
+        return $items;
+    }
+
 
     /*
     * Asign a cld to user
@@ -967,6 +988,85 @@ class ResellerController extends \yii\web\Controller
         return $this->render('billgroups', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'countries' => $this->getCountryItems(),
+            'country_networks' => $this->getCountryNetworkItems(),
+            'currencies' => $this->getCurrencyItems(),
+            'billcycles' => $this->getBillcycleItems(),
+            'services' => $this->getServicesItems(),
+            'suppliers' => $this->getSupplierItems(),
         ]);
     }
+
+    protected function getCountryItems()
+    {
+        $items = [];
+        $res = Country::find()->all();
+        if(is_array($res) && count($res) > 0)
+        {
+            foreach($res as $v)
+            {
+                $items[$v->ID] = $v->Country;
+            }
+        }
+        return $items;
+    }
+
+    protected function getCountryNetworkItems()
+    {
+        $items = [];
+        $res = Country::find()->all();
+        if(is_array($res) && count($res) > 0)
+        {
+            foreach($res as $v)
+            {
+                $items[$v->ID] = $v->Country_Network;
+            }
+        }
+        return $items;
+    }
+
+    protected function getCurrencyItems()
+    {
+        $items = [];
+        $res = \app\models\Currency::find()->all();
+        if(is_array($res) && count($res) > 0)
+        {
+            foreach($res as $v)
+            {
+                $items[$v->id] = $v->currency;
+            }
+        }
+        return $items;
+    }
+    protected function getBillcycleItems()
+    {
+        $items = [];
+        $res = \app\models\Billcycle::find()->all();
+        if(is_array($res) && count($res) > 0)
+        {
+            foreach($res as $v)
+            {
+                $items[$v->ID] = $v->billcycle;
+            }
+        }
+        return $items;
+    }
+
+    protected function getSupplierItems()
+    {
+        $items = [];
+        $res = Supplier::find()->all();
+        if(is_array($res) && count($res) > 0)
+        {
+            foreach($res as $v)
+            {
+                $items[$v->id] = $v->name;
+            }
+        }
+        return $items;
+    }
+
+
+
+
 }

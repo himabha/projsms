@@ -7,6 +7,44 @@ use yii\widgets\ActiveForm;
 
 $search = isset($_GET['search']) ? $_GET['search'] : '';
 $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
+$totalCount = $dataProvider->getTotalCount();
+$this->registerCss('
+	.pagination {
+		margin-left: 1em;
+	}
+	.pagination li{
+		margin-right:1em;
+	}
+');
+$this->registerJs('
+	$(document).ready(function(){
+		$("#search_box").keyup(function() {
+			if ($(this).val().length > 3) {
+				$("#searchForm").submit();
+			}
+		});
+		$(document).on("change", "#filter_box", function() {
+			$("#searchForm").submit();
+			$("input[name=\'per-page\']").val($(this).val());
+		});
+		$("#edit_selected_number").on("click", function() {
+			var numbers = $("#manage_num_grid").yiiGridView("getSelectedRows");
+			if (numbers.length > 0) {
+				var strvalue = "";
+				$("input[name=\'selection[]\']:checked").each(function() {
+					if (strvalue != "")
+						strvalue = strvalue + "," + this.value;
+					else
+						strvalue = this.value;
+				});
+				$("#btn_number").val(strvalue);
+				$("#manage_confirm").modal("show");
+			} else {
+				alert("Please select at least one number");
+			}
+		});
+	});
+');
 ?>
 
 <div class="content">
@@ -37,7 +75,7 @@ $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
 										?>
 										<div class="pull_right-medium">
 											<?= Html::textInput('search', $search, ['id' => 'search_box', 'class' => 'search_box', 'placeholder' => 'Search....']); ?>
-											<?= Html::dropdownlist('filter', $filter, ['20' => '20', '50' => '50', '100' => '100', '1000' => '1000'], ['id' => 'filter_box', 'class' => 'filter_box']); ?>
+											<?= Html::dropdownlist('filter', $filter, ['10' => '10', '20' => '20', '50' => '50', '100' => '100', '1000' => '1000'], ['id' => 'filter_box', 'class' => 'filter_box']); ?>
 										</div>
 
 										<?php ActiveForm::end(); ?>
@@ -48,15 +86,11 @@ $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
 										'id' => 'manage_num_grid',
 										'dataProvider' => $dataProvider,
 										'filterModel' => $searchModel,
+										'filterPosition' => 'header',
+										'showFooter' => true,
 										'tableOptions' => [
 											'id' => 'list_cld_tbl',
 											'class' => 'table'
-										],
-										'summary' => '',
-										'pager' => [
-											'firstPageLabel' => 'First',
-											'lastPageLabel' => 'Last',
-											'maxButtonCount' => '2',
 										],
 										'columns' => [
 											[
@@ -65,13 +99,11 @@ $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
 													return ['value' => $model->fsmid];
 												}
 											],
-											//'inboundip',
 											[
 												'label' => 'Bill Group',
 												'attribute' => 'billgroup_id',
 												'filter' => $billgroups,
-<<<<<<< HEAD
-												'value' => function ($model) {
+												'filterInputOptions' => ['prompt' => 'Select Bill Group'],												'value' => function ($model) {
 													if ($model->billgroup_id !== 0) {
 														return $model->billgroup->name;
 													} else {
@@ -82,45 +114,45 @@ $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
 											[
 												'label' => 'Reseller',
 												'filter' => $resellers,
-												'attribute' => 'reseller_id',
+												'filterInputOptions' => ['prompt' => 'Select Reseller'],												'attribute' => 'reseller_id',
 												'value' => function ($model) {
-=======
-												'value' => function ($model) {
-													if ($model->billgroup_id !== 0) {
-														return $model->billgroup->name;
-													} else {
-														return '';
-													}
-												}
-											],
-											[
-												'label' => 'Reseller',
-												'filter' => $resellers,
-												'attribute' => 'reseller_id',
-												'value' => function ($model) {
->>>>>>> b11fdfca1b4483cff1f35fae97541874f5cc4133
 													if ($model->reseller_id != 0) {
 														return $model->resellers->username;
 													}
 													return null;
 												}
 											],
-											'cld1',
-
-											//'cld2',
-											//'outboundip',
-											//'cld1description',
+											[
+												'label' => 'Caller Number',
+												'attribute' => 'cld1',
+												'filterInputOptions' => [
+													'placeholder' => 'Search Caller Number',
+												]
+											],
 											[
 												'label' => 'Country Name',
 												'attribute' => 'cld2description',
+												'filterInputOptions' => [
+													'placeholder' => 'Search Country Name',
+												]
 											],
-											'cld1rate',
-											'cld2rate',
-											// [
-											// 	'header' => '<a href="Javascript::void(0);">User</a>',
-											// 	'value' => 'cld.user.username'
-											// ],
 											[
+												'label' => 'Cld1 Rate',
+												'attribute' => 'cld1rate',
+												'filterInputOptions' => [
+													'placeholder' => 'Search Cld1 Rate',
+												]
+											],
+											[
+												'label' => 'Cld2 Rate',
+												'attribute' => 'cld2rate',
+												'footer' => 'Total records: ' . $totalCount,
+												'footerOptions' => ['style' => ['font-size' => 'larger', 'font-weight' => 'bold']],
+												'filterInputOptions' => [
+													'placeholder' => 'Search Cld2 Rate',
+												]
+											],
+												[
 												'class' => 'yii\grid\ActionColumn',
 												'template' => ' {update-cld}, {show-number-routes} ,  {delete-cld}',
 												'buttons' => [
@@ -205,31 +237,3 @@ $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
 		</div>
 	</div>
 </div>
-<script type="text/javascript">
-	$("#search_box").keyup(function() {
-		if ($(this).val().length > 3) {
-			$('#searchForm').submit();
-		}
-	});
-	$(document).on('change', '#filter_box', function() {
-		$('#searchForm').submit();
-	});
-	$("#edit_selected_number").on("click", function() {
-		alert("ffd");
-		var numbers = $('#manage_num_grid').yiiGridView('getSelectedRows');
-		console.log(numbers);
-		if (numbers.length > 0) {
-			var strvalue = "";
-			$('input[name="selection[]"]:checked').each(function() {
-				if (strvalue != "")
-					strvalue = strvalue + "," + this.value;
-				else
-					strvalue = this.value;
-			});
-			$('#btn_number').val(strvalue);
-			$('#manage_confirm').modal('show');
-		} else {
-			alert("Please select atleast one number");
-		}
-	});
-</script>

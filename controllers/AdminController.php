@@ -242,7 +242,7 @@ class AdminController extends \yii\web\Controller
 
         $summary = $model->getSummary($mysubusr, true);
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $mysubusr, $search, true);
-        $dataProvider->pagination->pageSize = $filter;
+        $dataProvider->setPagination(['pageSize' => $filter]); 
 
         return $this->render('add_cld', [
             'dataProvider' => $dataProvider, 
@@ -260,7 +260,7 @@ class AdminController extends \yii\web\Controller
 
     protected function getBillgroupItems()
     {
-        $items = ['' => "Select Bill Group"];
+        $items = [];
         $res = Billgroup::find()->all();
         if(is_array($res) && count($res) > 0)
         {
@@ -273,7 +273,7 @@ class AdminController extends \yii\web\Controller
     }
     protected function getSupplierItems()
     {
-        $items = ["" => "Select Supplier"];
+        $items = [];
         $res = Supplier::find()->all();
         if(is_array($res) && count($res) > 0)
         {
@@ -286,7 +286,7 @@ class AdminController extends \yii\web\Controller
     }
     protected function getResellerAdminItems()
     {
-        $items = ["" => "Select Client", 0 => "Un-allocated"];
+        $items = [0 => "Un-allocated"];
         $res = User::find()->where(['role' => 4])->all();
         if(is_array($res) && count($res) > 0)
         {
@@ -299,7 +299,7 @@ class AdminController extends \yii\web\Controller
     }
     protected function getServicesItems()
     {
-        $items = ["" => "Select Service"];
+        $items = [];
         $res = \Yii::$app->params['services'];
         if(is_array($res) && count($res) > 0)
         {
@@ -1555,7 +1555,8 @@ class AdminController extends \yii\web\Controller
 
     protected function getCountryItems()
     {
-        $items = ['' => "Select Country"];
+        $items = [];
+        //$items = ['' => "Select Country"];
         $res = Country::find()->all();
         if(is_array($res) && count($res) > 0)
         {
@@ -1569,7 +1570,7 @@ class AdminController extends \yii\web\Controller
 
     protected function getCountryNetworkItems()
     {
-        $items = ['' => "Select Country Network"];
+        $items = [];
         $res = Country::find()->all();
         if(is_array($res) && count($res) > 0)
         {
@@ -1583,7 +1584,7 @@ class AdminController extends \yii\web\Controller
 
     protected function getCurrencyItems()
     {
-        $items = ['' => "Select Currency"];
+        $items = [];
         $res = \app\models\Currency::find()->all();
         if(is_array($res) && count($res) > 0)
         {
@@ -1594,11 +1595,9 @@ class AdminController extends \yii\web\Controller
         }
         return $items;
     }
-
-
     protected function getBillcycleItems()
     {
-        $items = ['' => "Select Billcycle"];
+        $items = [];
         $res = \app\models\Billcycle::find()->all();
         if(is_array($res) && count($res) > 0)
         {

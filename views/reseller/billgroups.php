@@ -3,6 +3,8 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
+$totalCount = $dataProvider->getTotalCount();
 ?>
 <div class="content">
     <div class="container-fluid">
@@ -27,23 +29,67 @@ use yii\widgets\Pjax;
                                 'tableOptions' => [
                                     'class' => 'table table-striped table-no-bordered table-hover',
                                 ],
-                                'pager' => [
-                                    'firstPageLabel' => 'First',
-                                    'lastPageLabel' => 'Last',
-                                    'maxButtonCount' => '2',
-                                ],
                                 'options'          => ['class' => 'table-responsive grid-view'],
                                 'dataProvider' => $dataProvider,
                                 'filterModel' => $searchModel,
+                                'filterPosition' => 'header',
+                                'showFooter' => true,
                                 'columns' => [
-                                    'id',
+                                    //'id',
                                     'name',
-                                    'country_id',
-                                    'countrynetwork_id',
-                                    'sender_id',
-                                    'currency_id',
-                                    'billcycle_id',
-                                    'service',
+                                    [
+                                        'attribute' => 'country_id',
+                                        'filter' => $countries,
+                                        'filterInputOptions' => ['prompt' => 'Select Country'],
+                                        'value' => function($model){
+                                            return $model->country->Country;
+                                        }
+                                    ],
+                                    [
+                                        'attribute' => 'countrynetwork_id',
+                                        'filter' => $country_networks,
+                                        'filterInputOptions' => ['prompt' => 'Select Country Network'],
+                                        'value' => function($model){
+                                            return $model->country->Country_Network;
+                                        }
+                                    ],
+                                    [
+                                        'attribute' => 'sender_id',
+                                        'filter' => $suppliers,
+                                        'filterInputOptions' => ['prompt' => 'Select Supplier'],
+                                        'value' => function($model){
+                                            return isset($model->supplier) ? $model->supplier->name : null;
+                                        }
+                                    ],
+                                    [
+                                        'attribute' => 'currency_id',
+                                        'filter' => $currencies,
+                                        'filterInputOptions' => ['prompt' => 'Select Currency'],
+                                        'value' => function($model){
+                                            return $model->currency->currency;
+                                        }
+                                    ],
+                                    [
+                                        'attribute' => 'billcycle_id',
+                                        'filter' => $billcycles,
+                                        'filterInputOptions' => ['prompt' => 'Select Bill Cycle'],
+                                        'value' => function($model){
+                                            return $model->billcycle->billcycle;
+                                        }
+                                    ],
+                                    [
+                                        'attribute' => 'service',
+                                        'filter' => $services,
+                                        'filterInputOptions' => ['prompt' => 'Select Service'],
+                                        'footer' => 'Total records: ' . $totalCount,
+                                        'footerOptions' => ['style' => ['font-size' => 'larger', 'font-weight' => 'bold']],
+                                        'value' => function($model){
+                                            return isset(\Yii::$app->params['services'][$model->service]) ? \Yii::$app->params['services'][$model->service] : '';
+                                        }
+                                    ],
+
+
+
                                 ],
                             ]); ?>
                             <?php Pjax::end(); ?>
