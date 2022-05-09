@@ -19757,4 +19757,8 @@ Copyright (c) 2015 Daniel Eden
   }
 }
 
+.has-error.help-block, .help-block , .help-block-error{
+  color:red!important;
+}
+
 /*# sourceMappingURL=dashboard-free.css.map */

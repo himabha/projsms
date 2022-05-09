@@ -15,6 +15,9 @@ $this->registerCss('
 	.pagination li{
 		margin-right:1em;
 	}
+	.has-error.help-block, .help-block-error{
+		color:red!important;
+	}
 ');
 $this->registerJs('
 	$(document).ready(function(){
