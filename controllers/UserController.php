@@ -22,6 +22,7 @@ use app\models\Brandname;
 
 use app\models\Billgroup;
 use app\models\Country;
+use app\models\FsmastertbSearch;
 use app\models\Numbers;
 use app\models\Supplier;
 
@@ -592,6 +593,45 @@ class UserController extends Controller
         return $items;
     }
 
+    /*
+    * Add cld to users
+    */
+    public function actionAddCld()
+    {
+        $model = new Fsusertb();
+        $search = isset($_GET['search']) ? $_GET['search'] : '';
+        $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
 
+        if ($filter == 'all') {
+            $filter = '';
+        }
+
+        $searchModel = new FsmastertbSearch();
+        $mysubusr = User::find()->select('id')->where(['agent_id' => Yii::$app->user->identity->id, 'role' => 2]);
+        $summary = $model->getSummary($mysubusr, false, false, true);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $mysubusr, $search);
+        $dataProvider->pagination->pageSize = $filter;
+
+        return $this->render('my_number', [
+            'dataProvider' => $dataProvider, 
+            'searchModel' => $searchModel,
+            'summary' => $summary,
+            'billgroups' => $this->getBillgroupItems(),
+        ]);
+    }
+
+    protected function getBillgroupItems()
+    {
+        $items = [];
+        $res = \app\models\Billgroup::find()->all();
+        if(is_array($res) && count($res) > 0)
+        {
+            foreach($res as $v)
+            {
+                $items[$v->id] = $v->name;
+            }
+        }
+        return $items;
+    }
 
 }

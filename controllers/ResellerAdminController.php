@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\models\BillgroupSearch;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\filters\AccessControl;
@@ -26,7 +27,9 @@ use yii\helpers\ArrayHelper;
 use yii\db\Query;
 use app\models\Fscallreport;
 use app\models\Brandname;
+use app\models\Country;
 use app\models\FsaccessSearch;
+use app\models\Supplier;
 
 class ResellerAdminController extends \yii\web\Controller
 {
@@ -945,5 +948,113 @@ class ResellerAdminController extends \yii\web\Controller
         } else {
             throw new ForbiddenHttpException('cld2rate field should not be empty, Try again.');
         }
+    }
+
+    /**
+     * Function to list all billgroups
+     */
+
+    public function actionBillgroups()
+    {
+        $searchModel = new BillgroupSearch();
+        $dataProvider = $searchModel->search(\Yii::$app->getRequest()->queryParams);
+        $dataProvider->pagination->pageSize = 10;
+
+        \Yii::$app->view->title = \Yii::t('app', 'Billgroups');
+
+        return $this->render('billgroups', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'countries' => $this->getCountryItems(),
+            'country_networks' => $this->getCountryNetworkItems(),
+            'currencies' => $this->getCurrencyItems(),
+            'billcycles' => $this->getBillcycleItems(),
+            'services' => $this->getServicesItems(),
+            'suppliers' => $this->getSupplierItems(),
+        ]);
+    }
+
+    protected function getCountryItems()
+    {
+        $items = [];
+        //$items = ['' => "Select Country"];
+        $res = Country::find()->all();
+        if(is_array($res) && count($res) > 0)
+        {
+            foreach($res as $v)
+            {
+                $items[$v->ID] = $v->Country;
+            }
+        }
+        return $items;
+    }
+
+    protected function getCountryNetworkItems()
+    {
+        $items = [];
+        $res = Country::find()->all();
+        if(is_array($res) && count($res) > 0)
+        {
+            foreach($res as $v)
+            {
+                $items[$v->ID] = $v->Country_Network;
+            }
+        }
+        return $items;
+    }
+
+    protected function getCurrencyItems()
+    {
+        $items = [];
+        $res = \app\models\Currency::find()->all();
+        if(is_array($res) && count($res) > 0)
+        {
+            foreach($res as $v)
+            {
+                $items[$v->id] = $v->currency;
+            }
+        }
+        return $items;
+    }
+    protected function getBillcycleItems()
+    {
+        $items = [];
+        $res = \app\models\Billcycle::find()->all();
+        if(is_array($res) && count($res) > 0)
+        {
+            foreach($res as $v)
+            {
+                $items[$v->ID] = $v->billcycle;
+            }
+        }
+        return $items;
+    }
+
+    protected function getSupplierItems()
+    {
+        $items = [];
+        $res = Supplier::find()->all();
+        if(is_array($res) && count($res) > 0)
+        {
+            foreach($res as $v)
+            {
+                $items[$v->id] = $v->name;
+            }
+        }
+        return $items;
+    }
+
+    protected function getServicesItems()
+    {
+        $items = [];
+        $res = \Yii::$app->params['services'];
+        if(is_array($res) && count($res) > 0)
+        {
+            foreach($res as $k=>$v)
+            {
+                $items[$k] = $v;
+            }
+        }
+        return $items;
     }
 }

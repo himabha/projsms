@@ -106,6 +106,21 @@ class FsmastertbSearch extends Fsmastertb
         }
 
         if(!$isAdmin){
+            if(\Yii::$app->user->identity->role == 2) // user 
+            {
+                if(empty($search))
+                {
+                    $query->andFilterWhere([
+                        'cld2rate' => $this->cld2rate,
+                        'cld3rate' => $this->cld3rate,
+                        'billgroup_id' => $this->billgroup_id,
+                        'agent_id' => \Yii::$app->user->identity->id
+                    ]);
+                    $query->andFilterWhere(['like', 'cld1', $this->cld1])
+                    ->andFilterWhere(['like', 'cld2description', $this->cld2description])
+                    ;
+                }
+            }
             if(\Yii::$app->user->identity->role == 3) // reseller 
             {
                 if(empty($search))
