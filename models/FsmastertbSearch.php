@@ -30,7 +30,6 @@ class FsmastertbSearch extends Fsmastertb
                 $return[] = [['admin_id', 'sender_id', 'service_id'], 'number'];
                 break;
             case 2: // agent
-
                 break;
             case 3: // reseller
                 $return[] = [['agent_id'], 'number'];
@@ -114,7 +113,7 @@ class FsmastertbSearch extends Fsmastertb
                         'cld2rate' => $this->cld2rate,
                         'cld3rate' => $this->cld3rate,
                         'billgroup_id' => $this->billgroup_id,
-                        'agent_id' => \Yii::$app->user->identity->id
+                        //'agent_id' => \Yii::$app->user->identity->id
                     ]);
                     $query->andFilterWhere(['like', 'cld1', $this->cld1])
                     ->andFilterWhere(['like', 'cld2description', $this->cld2description])
@@ -168,6 +167,8 @@ class FsmastertbSearch extends Fsmastertb
         if(!$isAdmin){
             if(Yii::$app->user->identity->role == 4){
                 $query->andFilterWhere(['in', 'fsmastertb.admin_id', Yii::$app->user->identity->id]);
+            } else if(Yii::$app->user->identity->role == 2) {
+                $query->andFilterWhere(['in', 'fsmastertb.agent_id', Yii::$app->user->identity->id]);
             } else {
                 $query->andFilterWhere(['in', 'fsmastertb.reseller_id', Yii::$app->user->identity->id]);
             }

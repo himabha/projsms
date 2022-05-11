@@ -19,6 +19,18 @@ $this->registerCss('
 		border:none;
 		margin-right:2em;
 	}
+	input.custom_search{
+		margin-bottom:6px;
+		line-height:2.5em;
+		padding-left:0.5em;
+		padding-right:0.5em;
+	}
+	select.custom_filter{
+		margin-bottom:6px;
+		line-height:2.8em;
+		padding-left:0.5em;
+		padding-right:0.5em;
+	}
 	ul.gv_top{
 		list-style-type:none;
 		padding-left:0;
@@ -26,14 +38,16 @@ $this->registerCss('
 	ul.gv_top li{
 		display:inline-block;
 	}
-');
+	#dropdown_top ul.gv_top select{
+		margin-bottom:0.5em;
+	}');
 $this->registerJs('
 	$(document).ready(function(){
-		$("#billgroup_id_search").attr("type", "hidden");
+		//$("#billgroup_id_search").attr("type", "hidden");
 		$("#dd_billgroup_id").change(function(){
 			$("#billgroup_id_search").val(jQuery(this).val()).trigger("change");
 		});
-		$("#reseller_id_search").attr("type", "hidden");
+		//$("#reseller_id_search").attr("type", "hidden");
 		$("#dd_reseller_id").change(function(){
 			$("#reseller_id_search").val(jQuery(this).val()).trigger("change");
 		});
@@ -42,6 +56,9 @@ $this->registerJs('
 			if ($(this).val().length > 3) {
 				$("#searchForm").submit();
 			}
+		});
+		$("#search_box").focusout(function() {
+			if($(this).val() == "") $("#searchForm").submit();
 		});
 		$(document).on("change", "#filter_box", function() {
 			$("#searchForm").submit();
@@ -79,34 +96,38 @@ $this->registerJs('
                     <div class="card-body">
                         <div class="row">
                             <div class="col-sm-12">
-                                <div class="row">
-                                    <div class="col-sm-3 col-xs-6">
-                                        <?= Html::a('Assign DDI to Reseller', ['assign-cld'], ['class' => 'btn btn-success pull-left']) ?>
-                                    </div>
-                                    <div class="col-sm-3 col-xs-6">
-                                        <?= Html::a('Detach DDI to Reseller', ['show-assigned'], ['class' => 'btn btn-success pull-left']) ?>
-                                    </div>
-                                    <div class="col-sm-3 col-xs-6">
-                                        <button type="button" class="btn btn-danger" id="edit_selected_number"
-                                            onclick="javascript:void(0);">Edit Selected Numbers</button>
-                                    </div>
-                                    <div class="col-sm-3 col-xs-12">
-                                        <?php
-										$form = ActiveForm::begin(['id' => 'searchForm', 'method' => 'get']);
-										?>
-                                        <div class="pull_right-medium">
-                                            <?= Html::textInput('search', $search, ['id' => 'search_box', 'class' => 'search_box', 'placeholder' => 'Search....']); ?>
-                                            <?= Html::dropdownlist('filter', $filter, ['10' => '10', '20' => '20', '50' => '50', '100' => '100', '1000' => '1000'], ['id' => 'filter_box', 'class' => 'filter_box']); ?>
-                                        </div>
-
-                                        <?php ActiveForm::end(); ?>
-                                    </div>
+                                <div>
+                                    <?php $form = ActiveForm::begin(['id' => 'searchForm', 'method' => 'get']); ?>
+                                    <ul class="gv_top">
+                                        <li>
+                                            <?= Html::a('Assign DDI to Reseller', ['assign-cld'], ['class' => 'btn btn-success pull-left']) ?>
+                                        </li>
+                                        <li>
+                                            <?= Html::a('Detach DDI to Reseller', ['show-assigned'], ['class' => 'btn btn-success pull-left']) ?>
+                                        </li>
+                                        <li>
+                                            <button type="button" class="btn btn-danger pull-left"
+                                                id="edit_selected_number" onclick="javascript:void(0);">Edit Selected
+                                                Numbers</button>
+                                        </li>
+                                        <li>
+                                            <?= Html::textInput('search', $search, ['id' => 'search_box', 'class' => 'search_box custom_search pull-left', 'placeholder' => 'Search....']); ?>
+                                        </li>
+                                        <li>
+                                            <?= Html::dropdownlist('filter', $filter, ['10' => '10', '20' => '20', '50' => '50', '100' => '100', '1000' => '1000'], ['id' => 'filter_box', 'class' => 'filter_box custom_filter pull-left']); ?>
+                                        </li>
+                                    </ul>
+                                    <?php ActiveForm::end(); ?>
                                 </div>
-                                <div id="dropdown_top" style="margin-bottom:2em; margin-top:2em;">
-                                    <div class="form-group">
-                                        <?= Html::dropdownList('dd_billgroup_id',  isset($_GET['FsmastertbSearch']['billgroup_id']) ?  $_GET['FsmastertbSearch']['billgroup_id'] : ""  , $billgroups, ['id' => 'dd_billgroup_id', 'class' => 'custom_select', 'prompt' => 'Select Bill Group', 'role' => 'button']); ?>
-                                        <?= Html::dropdownlist('dd_reseller_id',  isset($_GET['FsmastertbSearch']['reseller_id']) ?  $_GET['FsmastertbSearch']['reseller_id'] : ""  , $resellers, ['id' => 'dd_reseller_id', 'class' => 'custom_select', 'prompt' => 'Select Reseller']); ?>
-                                    </div>
+                                <div id="dropdown_top">
+                                    <ul class="gv_top">
+                                        <li>
+                                            <?= Html::dropdownList('dd_billgroup_id',  isset($_GET['FsmastertbSearch']['billgroup_id']) ?  $_GET['FsmastertbSearch']['billgroup_id'] : ""  , $billgroups, ['id' => 'dd_billgroup_id', 'class' => 'btn-dark btn-sm', 'prompt' => 'Select Bill Group', 'role' => 'button']); ?>
+                                        </li>
+                                        <li>
+                                            <?= Html::dropdownlist('dd_reseller_id',  isset($_GET['FsmastertbSearch']['reseller_id']) ?  $_GET['FsmastertbSearch']['reseller_id'] : ""  , $resellers, ['id' => 'dd_reseller_id', 'class' => 'btn-dark btn-sm', 'prompt' => 'Select Reseller']); ?>
+                                        </li>
+                                    </ul>
                                 </div>
                                 <div class="table-responsive">
                                     <?= GridView::widget([
@@ -128,30 +149,27 @@ $this->registerJs('
 											[
 												'label' => 'Bill Group',
 												'attribute' => 'billgroup_id',
-												//'filter' => $billgroups,
+												'filter' => $billgroups,
 												'filterInputOptions' => [
-													'id' => 'billgroup_id_search'
+													'id' => 'billgroup_id_search',
+													'prompt' => 'Select Bill Group',
+													'class' => 'custom_select'
 												],												
 												'value' => function ($model) {
-													if ($model->billgroup_id !== 0) {
-														return $model->billgroup->name;
-													} else {
-														return '';
-													}
+													return isset($model->billgroup) ? $model->billgroup->name : null;
 												}
 											],
 											[
 												'label' => 'Reseller',
 												'attribute' => 'reseller_id',
-												//'filter' => $resellers,
+												'filter' => $resellers,
 												'filterInputOptions' => [
-													'id' => 'reseller_id_search'
+													'id' => 'reseller_id_search',
+													'prompt' => 'Select Reseller',
+													'class' => 'custom_select'
 												],												
 												'value' => function ($model) {
-													if ($model->reseller_id != 0) {
-														return $model->resellers->username;
-													}
-													return null;
+													return isset($model->resellers) ? $model->resellers->username : null;
 												}
 											],
 											[
@@ -169,11 +187,11 @@ $this->registerJs('
 											[
 												'label' => 'Cld2 Rate',
 												'attribute' => 'cld2rate',
-												'footer' => 'Total records: ' . $totalCount,
-												'footerOptions' => ['style' => ['font-size' => 'larger', 'font-weight' => 'bold']],
 											],
 												[
 												'class' => 'yii\grid\ActionColumn',
+												'footer' => 'Total records: ' . $totalCount,
+												'footerOptions' => ['style' => ['font-size' => 'larger', 'font-weight' => 'bold', 'min-width' => '10em']],
 												'template' => ' {update-cld}, {show-number-routes} ,  {delete-cld}',
 												'buttons' => [
 													'show-number-routes' => function ($url, $model, $key) {

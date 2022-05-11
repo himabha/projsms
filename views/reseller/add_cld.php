@@ -19,6 +19,18 @@ $this->registerCss('
 		border:none;
 		margin-right:2em;
 	}
+	input.custom_search{
+		margin-bottom:6px;
+		line-height:2.5em;
+		padding-left:0.5em;
+		padding-right:0.5em;
+	}
+	select.custom_filter{
+		margin-bottom:6px;
+		line-height:2.8em;
+		padding-left:0.5em;
+		padding-right:0.5em;
+	}
 	ul.gv_top{
 		list-style-type:none;
 		padding-left:0;
@@ -26,14 +38,17 @@ $this->registerCss('
 	ul.gv_top li{
 		display:inline-block;
 	}
+	#dropdown_top ul.gv_top select{
+		margin-bottom:0.5em;
+	}
 ');
 $this->registerJs('
 	$(document).ready(function(){
-		$("#billgroup_id_search").attr("type", "hidden");
+		//$("#billgroup_id_search").attr("type", "hidden");
 		$("#dd_billgroup_id").change(function(){
 			$("#billgroup_id_search").val(jQuery(this).val()).trigger("change");
 		});
-		$("#agent_id_search").attr("type", "hidden");
+		//$("#agent_id_search").attr("type", "hidden");
 		$("#dd_agent_id").change(function(){
 			$("#agent_id_search").val(jQuery(this).val()).trigger("change");
 		});
@@ -42,6 +57,9 @@ $this->registerJs('
 			if ($(this).val().length > 3) {
 				$("#searchForm").submit();
 			}
+		});
+		$("#search_box").focusout(function() {
+			if($(this).val() == "") $("#searchForm").submit();
 		});
 		$(document).on("change", "#filter_box", function() {
 			$("#searchForm").submit();
@@ -79,6 +97,7 @@ $this->registerJs('
                         <div class="row">
                             <div class="col-sm-12">
                                 <div>
+                                    <?php $form = ActiveForm::begin(['id' => 'searchForm', 'method' => 'get']); ?>
                                     <ul class="gv_top">
                                         <li>
                                             <?= Html::a('Assign DDI to Agent', ['assign-cld'], ['class' => 'btn btn-success pull-left']) ?>
@@ -89,30 +108,29 @@ $this->registerJs('
                                         </li>
 
                                         <li>
-                                            <button type="button" class="btn btn-danger pull-left" id="edit_selected_number"
-                                                onclick="javascript:void(0);">Edit Selected Numbers</button>
+                                            <button type="button" class="btn btn-danger pull-left"
+                                                id="edit_selected_number" onclick="javascript:void(0);">Edit Selected
+                                                Numbers</button>
                                         </li>
-
                                         <li>
-                                            <?php
-										$form = ActiveForm::begin(['id' => 'searchForm', 'method' => 'get']);
-										?>
-                                            <div class="pull_right-medium">
-                                                <?= Html::textInput('search', $search, ['id' => 'search_box', 'class' => 'search_box', 'placeholder' => 'Search....']); ?>
-                                                <?= Html::dropdownlist('filter', $filter, ['10' => '10', '20' => '20', '50' => '50', '100' => '100', '1000' => '1000'], ['id' => 'filter_box', 'class' => 'filter_box']); ?>
-                                            </div>
-
-                                            <?php ActiveForm::end(); ?>
+                                            <?= Html::textInput('search', $search, ['id' => 'search_box', 'class' => 'search_box custom_search pull-left', 'placeholder' => 'Search....']); ?>
+                                        </li>
+                                        <li>
+                                            <?= Html::dropdownlist('filter', $filter, ['10' => '10', '20' => '20', '50' => '50', '100' => '100', '1000' => '1000'], ['id' => 'filter_box', 'class' => 'filter_box custom_filter pull-left']); ?>
+                                        </li>
+                                    </ul>
+                                    <?php ActiveForm::end(); ?>
+                                </div>
+                                <div id="dropdown_top">
+                                    <ul class="gv_top">
+                                        <li>
+                                            <?= Html::dropdownList('dd_billgroup_id',  isset($_GET['FsmastertbSearch']['billgroup_id']) ?  $_GET['FsmastertbSearch']['billgroup_id'] : ""  , $billgroups, ['id' => 'dd_billgroup_id', 'class' => 'btn-dark btn-sm', 'prompt' => 'Select Bill Group', 'role' => 'button']); ?>
+                                        </li>
+                                        <li>
+                                            <?= Html::dropdownlist('dd_agent_id',  isset($_GET['FsmastertbSearch']['agent_id']) ?  $_GET['FsmastertbSearch']['agent_id'] : ""  , $agents, ['id' => 'dd_agent_id', 'class' => 'btn-dark btn-sm', 'prompt' => 'Select Agent']); ?>
                                         </li>
                                     </ul>
                                 </div>
-                                <div id="dropdown_top" style="margin-bottom:2em; margin-top:2em;">
-                                    <div class="form-group">
-                                        <?= Html::dropdownList('dd_billgroup_id',  isset($_GET['FsmastertbSearch']['billgroup_id']) ?  $_GET['FsmastertbSearch']['billgroup_id'] : ""  , $billgroups, ['id' => 'dd_billgroup_id', 'class' => 'custom_select', 'prompt' => 'Select Bill Group', 'role' => 'button']); ?>
-                                        <?= Html::dropdownlist('dd_agent_id',  isset($_GET['FsmastertbSearch']['agent_id']) ?  $_GET['FsmastertbSearch']['agent_id'] : ""  , $agents, ['id' => 'dd_agent_id', 'class' => 'custom_select', 'prompt' => 'Select Agent']); ?>
-                                    </div>
-                                </div>
-
                                 <div class="table-responsive">
                                     <?= GridView::widget([
 										'id' => 'manage_num_grid',
@@ -133,26 +151,31 @@ $this->registerJs('
 											[
 												'label' => 'Bill Group',
 												'attribute' => 'billgroup_id',
-												//'filter' => $billgroups,
-												'filterInputOptions' => ['id' => 'billgroup_id_search'],
+												'filter' => $billgroups,
+												'filterInputOptions' => [
+													'id' => 'billgroup_id_search',
+													'prompt' => 'Select Bill Group',
+													'class' => 'custom_select'
+												],
 												'value' => function ($model) {
-													if ($model->billgroup_id !== 0) {
-														return $model->billgroup->name;
-													} else {
-														return '';
-													}
+													return isset($model->billgroup) ? $model->billgroup->name : null;
 												}
 											],
-											[
+												[
 												'label' => 'Agent Name',
-												//'filter' => $agents,
-												'filterInputOptions' => ['id' => 'agent_id_search'],												
+												'filter' => $agents,
+												'filterInputOptions' => [
+													'id' => 'agent_id_search',
+													'prompt' => 'Select Agent',
+													'class' => 'custom_select'
+												],												
 												'attribute' => 'agent_id',
 												'value' => function ($model) {
-													if ($model->agent_id !== 0) {
-														return $model->users->username;
-													}
-													return null;
+													return isset($model->users) ? $model->users->username : null;
+													//if ($model->agent_id !== 0) {
+														//return $model->users->username;
+													//}
+													//return null;
 												}
 											],
 											[
@@ -174,11 +197,11 @@ $this->registerJs('
 											[
 												'label' => 'Cld3 Rate',
 												'attribute' => 'cld3rate',
-												'footer' => 'Total records: ' . $totalCount,
-												'footerOptions' => ['style' => ['font-size' => 'larger', 'font-weight' => 'bold']],
 											],
 												[
 												'class' => 'yii\grid\ActionColumn',
+												'footer' => 'Total records: ' . $totalCount,
+												'footerOptions' => ['style' => ['font-size' => 'larger', 'font-weight' => 'bold', 'min-width' => '10em']],
 												'template' => ' {update-cld}', //{show-number-routes} ,  {delete-cld}
 												'buttons' => [
 													'show-number-routes' => function ($url, $model, $key) {
