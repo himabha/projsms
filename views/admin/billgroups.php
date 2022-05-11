@@ -48,7 +48,6 @@ $this->registerCss('
                             ]); ?>
                             <?= GridView::widget([
                                 'id' => 'users',
-                                //'filterPosition' => 'header',
                                 'showFooter' => true,
                                 'tableOptions' => [
                                     'class' => 'table table-striped table-no-bordered table-hover',
@@ -57,7 +56,18 @@ $this->registerCss('
                                 'dataProvider' => $dataProvider,
                                 'filterModel' => $searchModel,
                                 'columns' => [
-                                    //'id',
+                                    [
+                                        'attribute' => 'id',
+                                        'label' => 'Name',
+                                        'filter' => $billgroups,
+                                        'filterInputOptions' => [
+                                            'prompt' => 'Select Name',
+                                            'class' => 'custom_select'
+                                        ],
+                                        'value' => function($model){
+                                            return $model->name;
+                                        }
+                                    ],
                                     [
                                         'attribute' => 'country_id',
                                         'filter' => $countries,
@@ -116,6 +126,7 @@ $this->registerCss('
                                     [
                                         'header' => \Yii::t('app', 'Actions'),
                                         'class' => '\yii\grid\ActionColumn',
+                                        'headerOptions' => ['style' => ['min-width' => '10em']],
                                         'footer' => 'Total records: ' . $totalCount,
                                         'footerOptions' => ['style' => ['font-size' => 'larger', 'font-weight' => 'bold']],
                                         'contentOptions' => [

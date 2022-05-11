@@ -1545,6 +1545,7 @@ class AdminController extends \yii\web\Controller
         return $this->render('billgroups', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'billgroups' => $this->getBillgroupItems(),
             'countries' => $this->getCountryItems(),
             'country_networks' => $this->getCountryNetworkItems(),
             'currencies' => $this->getCurrencyItems(),

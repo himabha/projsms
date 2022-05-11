@@ -39,8 +39,18 @@ $totalCount = $dataProvider->getTotalCount();
                                 'filterModel' => $searchModel,
                                 'showFooter' => true,
                                 'columns' => [
-                                    //'id',
-                                    'name',
+                                    [
+                                        'attribute' => 'id',
+                                        'label' => 'Name',
+                                        'filter' => $billgroups,
+                                        'filterInputOptions' => [
+                                            'prompt' => 'Select Name',
+                                            'class' => 'custom_select'
+                                        ],
+                                        'value' => function($model){
+                                            return $model->name;
+                                        }
+                                    ],
                                     [
                                         'attribute' => 'country_id',
                                         'filter' => $countries,
@@ -83,6 +93,7 @@ $totalCount = $dataProvider->getTotalCount();
                                     ],
                                     [
                                         'attribute' => 'service',
+                                        'headerOptions' => ['style' => ['min-width' => '10em']],
                                         'filter' => $services,
                                         'filterInputOptions' => ['prompt' => 'Select Service', 'class' => 'custom_select'],
                                         'footer' => 'Total records: ' . $totalCount,
