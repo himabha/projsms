@@ -746,7 +746,7 @@ class ResellerController extends \yii\web\Controller
     /*
     * Add cld to users
     */
-    public function actionAddCld()
+    public function actionSmsNumbers()
     {
         $model = new Fsusertb();
         $search = isset($_GET['search']) ? $_GET['search'] : '';
@@ -766,6 +766,7 @@ class ResellerController extends \yii\web\Controller
             'dataProvider' => $dataProvider, 
             'searchModel' => $searchModel,
             'summary' => $summary,
+            'countries' => $this->getCountryItems(),
             'billgroups' => $this->getBillgroupItems(),
             'agents' => $this->getAgentItems(),
             'services' => $this->getServicesItems()
@@ -933,7 +934,7 @@ class ResellerController extends \yii\web\Controller
         }
         if ($model->load(Yii::$app->request->post())) {
             if ($model->save()) {
-                return $this->redirect(['add-cld']);
+                return $this->redirect(['sms-numbers']);
             }
         }
         return $this->render('update_cld', ['model' => $model]);
@@ -964,7 +965,7 @@ class ResellerController extends \yii\web\Controller
                 //->bindValue(':numbers', $numbers)
                 ->execute();
             if ($query) {
-                return $this->redirect(['add-cld']);
+                return $this->redirect(['sms-numbers']);
             } else {
                 throw new ForbiddenHttpException('Failed to edit number, Try again.');
             }
@@ -1000,71 +1001,31 @@ class ResellerController extends \yii\web\Controller
 
     protected function getCountryItems()
     {
-        $items = [];
-        $res = Country::find()->all();
-        if(is_array($res) && count($res) > 0)
-        {
-            foreach($res as $v)
-            {
-                $items[$v->ID] = $v->Country;
-            }
-        }
-        return $items;
+        $res = Country::find()->groupBy('Country')->all();
+        return \yii\helpers\ArrayHelper::map($res, 'ID', 'Country');
     }
 
     protected function getCountryNetworkItems()
     {
-        $items = [];
         $res = Country::find()->all();
-        if(is_array($res) && count($res) > 0)
-        {
-            foreach($res as $v)
-            {
-                $items[$v->ID] = $v->Country_Network;
-            }
-        }
-        return $items;
+        return \yii\helpers\ArrayHelper::map($res, 'ID', 'Country_Network');
     }
 
     protected function getCurrencyItems()
     {
-        $items = [];
         $res = \app\models\Currency::find()->all();
-        if(is_array($res) && count($res) > 0)
-        {
-            foreach($res as $v)
-            {
-                $items[$v->id] = $v->currency;
-            }
-        }
-        return $items;
+        return \yii\helpers\ArrayHelper::map($res, 'id', 'currency');
     }
     protected function getBillcycleItems()
     {
-        $items = [];
         $res = \app\models\Billcycle::find()->all();
-        if(is_array($res) && count($res) > 0)
-        {
-            foreach($res as $v)
-            {
-                $items[$v->ID] = $v->billcycle;
-            }
-        }
-        return $items;
+        return \yii\helpers\ArrayHelper::map($res, 'ID', 'billcycle');
     }
 
     protected function getSupplierItems()
     {
-        $items = [];
         $res = Supplier::find()->all();
-        if(is_array($res) && count($res) > 0)
-        {
-            foreach($res as $v)
-            {
-                $items[$v->id] = $v->name;
-            }
-        }
-        return $items;
+        return \yii\helpers\ArrayHelper::map($res, 'id', 'name');
     }
 
 

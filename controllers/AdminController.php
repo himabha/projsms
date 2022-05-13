@@ -46,10 +46,10 @@ class AdminController extends \yii\web\Controller
             ],
             'access' => [
                 'class' => AccessControl::className(),
-                'only' => ['add-cld', 'add-user', 'upload', 'update-cld', 'delete-cld', 'delete-user', 'list-assign-cld', 'cdr', 'list-user', 'assign-cld', 'edit-user', 'delete-assigned-cld', 'update-assigned-cld', 'date-report', 'detach-number', 'detach-number-reseller', 'show-assigned-reseller', 'detach-number-reseller-admin', 'show-assigned-reseller-admin', 'show-assigned', 'show-number-routes', 'fs-call-report', 'export-fscall', 'load-search-fields', 'agent-summary'],
+                'only' => ['sms-numbers', 'add-user', 'upload', 'update-cld', 'delete-cld', 'delete-user', 'list-assign-cld', 'cdr', 'list-user', 'assign-cld', 'edit-user', 'delete-assigned-cld', 'update-assigned-cld', 'date-report', 'detach-number', 'detach-number-reseller', 'show-assigned-reseller', 'detach-number-reseller-admin', 'show-assigned-reseller-admin', 'show-assigned', 'show-number-routes', 'fs-call-report', 'export-fscall', 'load-search-fields', 'agent-summary'],
                 'rules' => [
                     [
-                        'actions' => ['add-cld', 'add-user', 'upload', 'update-cld', 'delete-cld', 'delete-user', 'list-assign-cld', 'cdr', 'list-user', 'assign-cld', 'edit-user', 'delete-assigned-cld', 'update-assigned-cld', 'date-report', 'detach-number', 'show-assigned', 'detach-number-reseller', 'show-assigned-reseller', 'detach-number-reseller-admin', 'show-assigned-reseller-admin', 'show-number-routes', 'fs-call-report', 'export-fscall', 'load-search-fields', 'agent-summary'],
+                        'actions' => ['sms-numbers', 'add-user', 'upload', 'update-cld', 'delete-cld', 'delete-user', 'list-assign-cld', 'cdr', 'list-user', 'assign-cld', 'edit-user', 'delete-assigned-cld', 'update-assigned-cld', 'date-report', 'detach-number', 'show-assigned', 'detach-number-reseller', 'show-assigned-reseller', 'detach-number-reseller-admin', 'show-assigned-reseller-admin', 'show-number-routes', 'fs-call-report', 'export-fscall', 'load-search-fields', 'agent-summary'],
                         'allow' => true,
                         'roles' => ['@'],
                         'matchCallback' => function ($rule, $action) {
@@ -227,7 +227,7 @@ class AdminController extends \yii\web\Controller
     /*
     * Add cld to users
     */
-    public function actionAddCld()
+    public function actionSmsNumbers()
     {
         $model = new Fsusertb();
         $search = isset($_GET['search']) ? $_GET['search'] : '';
@@ -250,6 +250,7 @@ class AdminController extends \yii\web\Controller
             'summary' => $summary, 
             'search' => $search, 
             'filter' => $filter,
+            'countries' => $this->getCountryItems(),
             'billgroups' => $this->getBillgroupItems(),
             'suppliers' => $this->getSupplierItems(),
             'clients' => $this->getResellerAdminItems(),
@@ -387,7 +388,7 @@ class AdminController extends \yii\web\Controller
         }
         if ($model->load(Yii::$app->request->post())) {
             if ($model->save()) {
-                return $this->redirect(['add-cld']);
+                return $this->redirect(['sms-numbers']);
             }
         }
         return $this->render('update_cld', ['model' => $model]);
@@ -409,7 +410,7 @@ class AdminController extends \yii\web\Controller
         if (!$model->delete()) {
             throw new ForbiddenHttpException('Failed to delete user Try again.');
         }
-        return $this->redirect(['add-cld']);
+        return $this->redirect(['sms-numbers']);
     }
 
     /*
@@ -1463,7 +1464,7 @@ class AdminController extends \yii\web\Controller
                 //->bindValue(':numbers', $numbers)
                 ->execute();
             if ($query) {
-                return $this->redirect(['add-cld']);
+                return $this->redirect(['sms-numbers']);
             } else {
                 throw new ForbiddenHttpException('Failed to edit number, Try again.');
             }
@@ -1556,58 +1557,25 @@ class AdminController extends \yii\web\Controller
 
     protected function getCountryItems()
     {
-        $items = [];
-        //$items = ['' => "Select Country"];
-        $res = Country::find()->all();
-        if(is_array($res) && count($res) > 0)
-        {
-            foreach($res as $v)
-            {
-                $items[$v->ID] = $v->Country;
-            }
-        }
-        return $items;
+        $res = Country::find()->groupBy('Country')->all();
+        return \yii\helpers\ArrayHelper::map($res, 'ID', 'Country');
     }
 
     protected function getCountryNetworkItems()
     {
-        $items = [];
         $res = Country::find()->all();
-        if(is_array($res) && count($res) > 0)
-        {
-            foreach($res as $v)
-            {
-                $items[$v->ID] = $v->Country_Network;
-            }
-        }
-        return $items;
+        return \yii\helpers\ArrayHelper::map($res, 'ID', 'Country_Network');
     }
 
     protected function getCurrencyItems()
     {
-        $items = [];
         $res = \app\models\Currency::find()->all();
-        if(is_array($res) && count($res) > 0)
-        {
-            foreach($res as $v)
-            {
-                $items[$v->id] = $v->currency;
-            }
-        }
-        return $items;
+        return \yii\helpers\ArrayHelper::map($res, 'id', 'currency');
     }
     protected function getBillcycleItems()
     {
-        $items = [];
         $res = \app\models\Billcycle::find()->all();
-        if(is_array($res) && count($res) > 0)
-        {
-            foreach($res as $v)
-            {
-                $items[$v->ID] = $v->billcycle;
-            }
-        }
-        return $items;
+        return \yii\helpers\ArrayHelper::map($res, 'ID', 'billcycle');
     }
 
 

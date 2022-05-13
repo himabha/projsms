@@ -89,12 +89,18 @@ $this->registerJs('
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header card-header-primary">
-                        <h4 class="card-title ">Manage DDI</h4>
+                        <h4 class="card-title ">SMS Numbers</h4>
                     </div>
                     <div class="card-body">
                         <div>
                             <?php $form = ActiveForm::begin(['id' => 'searchForm', 'method' => 'get']); ?>
                             <ul class="gv_top">
+                                <li>
+                                    <?= Html::textInput('search', $search, ['id' => 'search_box', 'class' => 'search_box custom_search pull-left', 'placeholder' => 'Search....']); ?>
+                                </li>
+                                <li>
+                                    <?= Html::dropdownlist('filter', $filter, ['10' => '10', '20' => '20', '50' => '50', '100' => '100', '1000' => '1000'], ['id' => 'filter_box', 'class' => 'filter_box custom_filter pull-left']); ?>
+                                </li>
                                 <li>
                                     <?= Html::a('Assign DDI to Agent', ['assign-cld'], ['class' => 'btn btn-success pull-left']) ?>
                                 </li>
@@ -104,12 +110,6 @@ $this->registerJs('
                                 <li>
                                     <button type="button" class="btn btn-danger pull-left" id="edit_selected_number"
                                         onclick="javascript:void(0);">Edit Selected Numbers</button>
-                                </li>
-                                <li>
-                                    <?= Html::textInput('search', $search, ['id' => 'search_box', 'class' => 'search_box custom_search pull-left', 'placeholder' => 'Search....']); ?>
-                                </li>
-                                <li>
-                                    <?= Html::dropdownlist('filter', $filter, ['10' => '10', '20' => '20', '50' => '50', '100' => '100', '1000' => '1000'], ['id' => 'filter_box', 'class' => 'filter_box custom_filter pull-left']); ?>
                                 </li>
                             </ul>
                             <?php ActiveForm::end(); ?>
@@ -156,8 +156,16 @@ $this->registerJs('
 												'attribute' => 'cld1',
 											],
 											[
-												'label' => 'Country Name',
-												'attribute' => 'cld2description',
+												'label' => 'Country',
+												'attribute' => 'country_id',
+												'filter' => $countries,
+												'filterInputOptions' => [
+													'prompt' => 'Select Country',
+													'class' => 'custom_select'
+												],
+												'value' => function($model){
+													return isset($model->country) ? $model->country->Country : null;
+												}
 											],
 											[
 												'label' => 'Cld1 Rate',
@@ -173,6 +181,7 @@ $this->registerJs('
 											],
 												[
 												'class' => 'yii\grid\ActionColumn',
+												'header' => 'Action',
 												'footer' => 'Total records: ' . $totalCount,
 												'footerOptions' => ['style' => ['font-size' => 'larger', 'font-weight' => 'bold', 'min-width' => '10em']],
 												'template' => ' {update-cld}', //{show-number-routes} ,  {delete-cld}

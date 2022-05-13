@@ -19,7 +19,7 @@ class FsmastertbSearch extends Fsmastertb
     {
         $return = [
             [['fsmid'], 'integer'],
-            [['inboundip', 'cld1', 'cld2', 'outboundip', 'cld1description', 'cld2description'], 'safe'],
+            [['inboundip', 'cld1', 'cld2', 'outboundip', 'cld1description', 'cld2description', 'country_id'], 'safe'],
             [['cld1rate', 'cld2rate', 'cld3rate', 'billgroup_id'], 'number']
         ];
 
@@ -110,13 +110,15 @@ class FsmastertbSearch extends Fsmastertb
                 if(empty($search))
                 {
                     $query->andFilterWhere([
+                        'cld1rate' => $this->cld1rate,
                         'cld2rate' => $this->cld2rate,
                         'cld3rate' => $this->cld3rate,
                         'billgroup_id' => $this->billgroup_id,
                         //'agent_id' => \Yii::$app->user->identity->id
+                        'country_id' => $this->country_id
                     ]);
                     $query->andFilterWhere(['like', 'cld1', $this->cld1])
-                    ->andFilterWhere(['like', 'cld2description', $this->cld2description])
+                    //->andFilterWhere(['like', 'cld2description', $this->cld2description])
                     ;
                 }
             }
@@ -128,10 +130,11 @@ class FsmastertbSearch extends Fsmastertb
                         'cld2rate' => $this->cld2rate,
                         'cld3rate' => $this->cld3rate,
                         'billgroup_id' => $this->billgroup_id,
-                        'agent_id' => $this->agent_id
+                        'agent_id' => $this->agent_id,
+                        'country_id' => $this->country_id
                     ]);
                     $query->andFilterWhere(['like', 'cld1', $this->cld1])
-                    ->andFilterWhere(['like', 'cld2description', $this->cld2description])
+                    //->andFilterWhere(['like', 'cld2description', $this->cld2description])
                     ;
                 }
             } else if(\Yii::$app->user->identity->role == 4) { // reseller admin
@@ -140,10 +143,11 @@ class FsmastertbSearch extends Fsmastertb
                         'cld1rate' => $this->cld1rate,
                         'cld2rate' => $this->cld2rate,
                         'billgroup_id' => $this->billgroup_id,
-                        'reseller_id' => $this->reseller_id
+                        'reseller_id' => $this->reseller_id,
+                        'country_id' => $this->country_id
                     ]);
                     $query->andFilterWhere(['like', 'cld1', $this->cld1])
-                    ->andFilterWhere(['like', 'cld2description', $this->cld2description])
+                    //->andFilterWhere(['like', 'cld2description', $this->cld2description])
                     ;
                 }
             }
@@ -155,11 +159,12 @@ class FsmastertbSearch extends Fsmastertb
                     'billgroup_id' => $this->billgroup_id,
                     'sender_id' => $this->sender_id,
                     'admin_id' => $this->admin_id,
-                    'service_id' => $this->service_id
+                    'service_id' => $this->service_id,
+                    'country_id' => $this->country_id,
                 ]);
 
                 $query->andFilterWhere(['like', 'cld1', $this->cld1])
-                ->andFilterWhere(['like', 'cld2description', $this->cld2description])
+                //->andFilterWhere(['like', 'cld2description', $this->cld2description])
                 ;
             }
         }

@@ -513,31 +513,14 @@ class UserController extends Controller
 
     protected function getCountryItems()
     {
-        $items = [];
-        //$items = ['' => "Select Country"];
-        $res = Country::find()->all();
-        if(is_array($res) && count($res) > 0)
-        {
-            foreach($res as $v)
-            {
-                $items[$v->ID] = $v->Country;
-            }
-        }
-        return $items;
+        $res = Country::find()->groupBy('Country')->all();
+        return \yii\helpers\ArrayHelper::map($res, 'ID', 'Country');
     }
 
     protected function getCountryNetworkItems()
     {
-        $items = [];
         $res = Country::find()->all();
-        if(is_array($res) && count($res) > 0)
-        {
-            foreach($res as $v)
-            {
-                $items[$v->ID] = $v->Country_Network;
-            }
-        }
-        return $items;
+        return \yii\helpers\ArrayHelper::map($res, 'ID', 'Country_Network');
     }
 
     protected function getCurrencyItems()
@@ -597,7 +580,7 @@ class UserController extends Controller
     /*
     * Add cld to users
     */
-    public function actionAddCld()
+    public function actionSmsNumbers()
     {
         $model = new Fsusertb();
         $search = isset($_GET['search']) ? $_GET['search'] : '';
@@ -617,6 +600,7 @@ class UserController extends Controller
             'dataProvider' => $dataProvider, 
             'searchModel' => $searchModel,
             'summary' => $summary,
+            'countries' => $this->getCountryItems(),
             'billgroups' => $this->getBillgroupItems(),
         ]);
     }
