@@ -31,7 +31,7 @@ use app\models\Country;
 use app\models\Supplier;
 use app\models\Currency;
 
-
+use app\models\TdrSearch;
 
 class ResellerController extends \yii\web\Controller
 {
@@ -1029,6 +1029,33 @@ class ResellerController extends \yii\web\Controller
     }
 
 
+    public function actionSmsTdr()
+    {
+        $model = new Fsusertb();
+        $search = isset($_GET['search']) ? $_GET['search'] : '';
+        $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
+        $mysubusr = User::find()->select('id')->where(['role' => 2]);
 
+        if ($filter == 'all') {
+            $filter = '';
+        }
+
+        $searchModel = new TdrSearch();
+
+        //$summary = $model->getSummary($mysubusr, true);
+        $mysubusr = User::find()->select('id')->where(['reseller_id' => Yii::$app->user->identity->id, 'role' => 2]);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $mysubusr, $search, true);
+        $dataProvider->setPagination(['pageSize' => $filter]); 
+
+        return $this->render('tdr', [
+            'dataProvider' => $dataProvider, 
+            'searchModel' => $searchModel,
+            //'summary' => $summary, 
+            'search' => $search, 
+            'filter' => $filter,
+            'agents' => $this->getAgentItems(),
+            'suppliers' => $this->getSupplierItems(),
+        ]);
+    }
 
 }

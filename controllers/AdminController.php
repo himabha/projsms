@@ -31,6 +31,9 @@ use app\models\Country;
 use app\models\Numbers;
 use app\models\Supplier;
 
+use app\models\TdrSearch;
+
+
 class AdminController extends \yii\web\Controller
 {
     public function behaviors()
@@ -49,7 +52,7 @@ class AdminController extends \yii\web\Controller
                 'only' => ['sms-numbers', 'add-user', 'upload', 'update-cld', 'delete-cld', 'delete-user', 'list-assign-cld', 'cdr', 'list-user', 'assign-cld', 'edit-user', 'delete-assigned-cld', 'update-assigned-cld', 'date-report', 'detach-number', 'detach-number-reseller', 'show-assigned-reseller', 'detach-number-reseller-admin', 'show-assigned-reseller-admin', 'show-assigned', 'show-number-routes', 'fs-call-report', 'export-fscall', 'load-search-fields', 'agent-summary'],
                 'rules' => [
                     [
-                        'actions' => ['sms-numbers', 'add-user', 'upload', 'update-cld', 'delete-cld', 'delete-user', 'list-assign-cld', 'cdr', 'list-user', 'assign-cld', 'edit-user', 'delete-assigned-cld', 'update-assigned-cld', 'date-report', 'detach-number', 'show-assigned', 'detach-number-reseller', 'show-assigned-reseller', 'detach-number-reseller-admin', 'show-assigned-reseller-admin', 'show-number-routes', 'fs-call-report', 'export-fscall', 'load-search-fields', 'agent-summary'],
+                        'actions' => ['sms-numbers', 'add-user', 'upload', 'update-cld', 'delete-cld', 'delete-user', 'list-assign-cld', 'cdr', 'list-user', 'assign-cld', 'edit-user', 'delete-assigned-cld', 'update-assigned-cld', 'date-report', 'detach-number', 'show-assigned', 'detach-number-reseller', 'show-assigned-reseller', 'detach-number-reseller-admin', 'show-assigned-reseller-admin', 'show-number-routes', 'fs-call-report', 'export-fscall', 'load-search-fields', 'agent-summary', 'sms-tdr'],
                         'allow' => true,
                         'roles' => ['@'],
                         'matchCallback' => function ($rule, $action) {
@@ -258,7 +261,6 @@ class AdminController extends \yii\web\Controller
 
         ]);
     }
-
     protected function getBillgroupItems()
     {
         $items = [];
@@ -2120,4 +2122,40 @@ class AdminController extends \yii\web\Controller
         }
         throw new NotFoundHttpException('The requested page does not exist.');
     }
+
+
+    public function actionSmsTdr()
+    {
+        $model = new Fsusertb();
+        $search = isset($_GET['search']) ? $_GET['search'] : '';
+        $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
+        $mysubusr = User::find()->select('id')->where(['role' => 2]);
+
+        if ($filter == 'all') {
+            $filter = '';
+        }
+
+        $searchModel = new TdrSearch();
+
+        //$summary = $model->getSummary($mysubusr, true);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $mysubusr, $search, true);
+        $dataProvider->setPagination(['pageSize' => $filter]); 
+
+        return $this->render('tdr', [
+            'dataProvider' => $dataProvider, 
+            'searchModel' => $searchModel,
+            //'summary' => $summary, 
+            'search' => $search, 
+            'filter' => $filter,
+            'clients' => $this->getResellerAdminItems(),
+            'suppliers' => $this->getSupplierItems(),
+            //'countries' => $this->getCountryItems(),
+            //'billgroups' => $this->getBillgroupItems(),
+            //'services' => $this->getServicesItems(),
+
+        ]);
+    }
+
+
+
 }

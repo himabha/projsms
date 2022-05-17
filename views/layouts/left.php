@@ -78,7 +78,7 @@ use yii\helpers\Url;
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="<?= Url::to(['/']); ?>">
+            <a class="nav-link" href="<?= Url::to(['/reseller-admin/sms-tdr']); ?>">
               <i class="material-icons">library_books</i>
               <p>SMS TDR</p>
             </a>
@@ -115,7 +115,7 @@ use yii\helpers\Url;
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="<?= Url::to(['/']); ?>">
+            <a class="nav-link" href="<?= Url::to(['/reseller/sms-tdr']); ?>">
               <i class="material-icons">library_books</i>
               <p>SMS TDR</p>
             </a>
@@ -152,7 +152,7 @@ use yii\helpers\Url;
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="<?= Url::to(['/']); ?>">
+            <a class="nav-link" href="<?= Url::to(['/admin/sms-tdr']); ?>">
               <i class="material-icons">library_books</i>
               <p>SMS TDR</p>
             </a>
@@ -327,7 +327,7 @@ use yii\helpers\Url;
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="<?= Url::to(['/']); ?>">
+            <a class="nav-link" href="<?= Url::to(['/user/sms-tdr']); ?>">
               <i class="material-icons">library_books</i>
               <p>SMS TDR</p>
             </a>

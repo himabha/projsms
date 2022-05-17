@@ -26,6 +26,9 @@ use app\models\FsmastertbSearch;
 use app\models\Numbers;
 use app\models\Supplier;
 
+use app\models\TdrSearch;
+
+
 
 class UserController extends Controller
 {
@@ -618,5 +621,33 @@ class UserController extends Controller
         }
         return $items;
     }
+
+    public function actionSmsTdr()
+    {
+        $model = new Fsusertb();
+        $search = isset($_GET['search']) ? $_GET['search'] : '';
+        $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
+        $mysubusr = User::find()->select('id')->where(['role' => 2]);
+
+        if ($filter == 'all') {
+            $filter = '';
+        }
+
+        $searchModel = new TdrSearch();
+
+        //$summary = $model->getSummary($mysubusr, true);
+        $mysubusr = User::find()->select('id')->where(['agent_id' => Yii::$app->user->identity->id, 'role' => 2]);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $mysubusr, $search, true);
+        $dataProvider->setPagination(['pageSize' => $filter]); 
+
+        return $this->render('tdr', [
+            'dataProvider' => $dataProvider, 
+            'searchModel' => $searchModel,
+            //'summary' => $summary, 
+            'search' => $search, 
+            'filter' => $filter
+        ]);
+    }
+
 
 }
