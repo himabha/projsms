@@ -1044,7 +1044,7 @@ class ResellerController extends \yii\web\Controller
 
         //$summary = $model->getSummary($mysubusr, true);
         $mysubusr = User::find()->select('id')->where(['reseller_id' => Yii::$app->user->identity->id, 'role' => 2]);
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $mysubusr, $search, true);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $mysubusr, $search, false);
         $dataProvider->setPagination(['pageSize' => $filter]); 
 
         return $this->render('tdr', [

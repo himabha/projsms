@@ -136,19 +136,6 @@ $this->registerJs('
                                                 return isset($model->users) ? $model->users->username : null;
                                             }
                                         ],
-                                    	[
-											'label' => 'Suppliers',
-											'attribute' => 'sender_id',
-											'filter' => $suppliers,
-											'filterInputOptions' => [
-												'id' => 'sender_id_search',
-												'prompt' => 'Select Supplier',
-												'class' => 'custom_select'
-											],
-											'value' => function ($model) {
-												return isset($model->supplier) ? $model->supplier->name : null;	
-											}
-										],
                                         [
                                             'attribute' => 'delivered_time',
 											'footer' => 'Total records: ' . $totalCount,
