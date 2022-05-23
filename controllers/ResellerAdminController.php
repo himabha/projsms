@@ -972,9 +972,7 @@ class ResellerAdminController extends \yii\web\Controller
             'countries' => $this->getCountryItems(),
             'country_networks' => $this->getCountryNetworkItems(),
             'currencies' => $this->getCurrencyItems(),
-            'billcycles' => $this->getBillcycleItems(),
-            'services' => $this->getServicesItems(),
-            'suppliers' => $this->getSupplierItems(),
+            'billcycles' => $this->getBillcycleItems()
         ]);
     }
 

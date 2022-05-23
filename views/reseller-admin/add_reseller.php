@@ -13,7 +13,7 @@ use yii\helpers\Html;
 				<h4 class="card-title">
 					<span>Add Reseller</span>
 					<div class="pull-right">
-						<?= Html::a(Html::tag('b', 'keyboard_arrow_left', ['class' => 'material-icons']), ['reseller-admin/add-cld'], [
+						<?= Html::a(Html::tag('b', 'keyboard_arrow_left', ['class' => 'material-icons']), ['reseller-admin/list-reseller'], [
 							'class' => 'btn btn-xs btn-success btn-round btn-fab',
 							'rel' => "tooltip",
 							'data' => [

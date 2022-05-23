@@ -147,6 +147,10 @@ $this->registerJs('
 												}
 											],
 											[
+												'label' => 'Caller Number',
+												'attribute' => 'cld1',
+											],
+											[
 												'label' => 'Bill Group',
 												'attribute' => 'billgroup_id',
 												'filter' => $billgroups,
@@ -173,10 +177,6 @@ $this->registerJs('
 												}
 											],
 											[
-												'label' => 'Caller Number',
-												'attribute' => 'cld1',
-											],
-											[
 												'label' => 'Country',
 												'attribute' => 'country_id',
 												'filter' => $countries,
@@ -195,8 +195,11 @@ $this->registerJs('
 											[
 												'label' => 'Cld2 Rate',
 												'attribute' => 'cld2rate',
+												'footer' => 'Total records: ' . $totalCount,
+												'footerOptions' => ['style' => ['font-size' => 'larger', 'font-weight' => 'bold', 'min-width' => '10em']],
 											],
-												[
+											/*
+											[
 												'class' => 'yii\grid\ActionColumn',
 												'header' => 'Action',
 												'footer' => 'Total records: ' . $totalCount,
@@ -241,7 +244,7 @@ $this->registerJs('
 													}
 												],
 											]
-
+											*/
 										],
 									]); ?>
                                 </div>

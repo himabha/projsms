@@ -74,17 +74,6 @@ $this->registerCss('
                                         }
                                     ],
                                     [
-                                        'attribute' => 'sender_id',
-                                        'filter' => $suppliers,
-                                        'filterInputOptions' => [
-                                            'prompt' => 'Select Supplier', 
-                                            'class' => 'custom_select'
-                                        ],
-                                        'value' => function($model){
-                                            return isset($model->supplier) ? $model->supplier->name : null;
-                                        }
-                                    ],
-                                    [
                                         'attribute' => 'currency_id',
                                         'filter' => $currencies,
                                         'filterInputOptions' => [
@@ -102,22 +91,10 @@ $this->registerCss('
                                             'prompt' => 'Select Bill Cycle', 
                                             'class' => 'custom_select'
                                         ],
+                                        'footerOptions' => ['style' => ['font-size' => 'larger', 'font-weight' => 'bold']],
+                                        'footer' => 'Total records: ' . $totalCount,
                                         'value' => function($model){
                                             return $model->billcycle->billcycle;
-                                        }
-                                    ],
-                                    [
-                                        'attribute' => 'service',
-                                        'filter' => $services,
-                                        'filterInputOptions' => [
-                                            'prompt' => 'Select Service',
-                                            'class' => 'custom_select'
-                                        ],
-                                        'headerOptions' => ['style' => ['min-width' => '10em']],
-                                        'footer' => 'Total records: ' . $totalCount,
-                                        'footerOptions' => ['style' => ['font-size' => 'larger', 'font-weight' => 'bold']],
-                                        'value' => function($model){
-                                            return isset(\Yii::$app->params['services'][$model->service]) ? \Yii::$app->params['services'][$model->service] : '';
                                         }
                                     ],
                                 ],

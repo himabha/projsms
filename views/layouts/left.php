@@ -12,7 +12,7 @@ use yii\helpers\Url;
         Tip 2: you can also add an image using data-image tag
     -->
   <div class="logo"><a href="<?= Url::to(['/']); ?>" class="simple-text logo-normal">
-      V+ Panel</a>
+      SMS+ Panel</a>
   </div>
   <div class="sidebar-wrapper">
     <ul class="nav">
@@ -169,9 +169,9 @@ use yii\helpers\Url;
               <p>Import</p>
             </a>
           </li> -->
-          <li class="nav-item">
+          <!-- <li class="nav-item">
             <a class="nav-link" data-toggle="collapse" href="#reseller" aria-expanded="true">
-              <i><img style="width:25px" src="<?= \Yii::getAlias('@web/img/yii-logo.svg'); ?>"></i>
+              <i><img style="width:25px" src="<?//= \Yii::getAlias('@web/img/yii-logo.svg'); ?>"></i>
               <p>Reseller
                 <b class="caret"></b>
               </p>
@@ -179,47 +179,45 @@ use yii\helpers\Url;
             <div class="collapse show" id="reseller">
               <ul class="nav">
                 <li class="nav-item">
-                  <a class="nav-link" href="<?= Url::to(['/admin/add-reseller']); ?>">
+                  <a class="nav-link" href="<?//= Url::to(['/admin/add-reseller']); ?>">
                     <span class="sidebar-mini"> AR </span>
                     <span class="sidebar-normal">Add Reseller</span>
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link" href="<?= Url::to(['/admin/list-reseller']); ?>">
+                  <a class="nav-link" href="<?//= Url::to(['/admin/list-reseller']); ?>">
                     <span class="sidebar-mini"> LR </span>
                     <span class="sidebar-normal">List Reseller</span>
                   </a>
                 </li>
               </ul>
             </div>
-          </li>
+          </li> -->
           <li class="nav-item">
-            <a class="nav-link" data-toggle="collapse" href="#resellerAdmin" aria-expanded="true">
-              <i><img style="width:25px" src="<?= \Yii::getAlias('@web/img/yii-logo.svg'); ?>"></i>
-              <p>Reseller Admin
-                <b class="caret"></b>
-              </p>
+            <a class="nav-link" href="<?= Url::to(['/admin/list-reseller-admin']); ?>">
+              <i class="material-icons">library_books</i>
+              <p>Reseller Admin</p>
             </a>
-            <div class="collapse show" id="resellerAdmin">
+            <!-- <div class="collapse show" id="resellerAdmin">
               <ul class="nav">
                 <li class="nav-item">
-                  <a class="nav-link" href="<?= Url::to(['/admin/add-reseller-admin']); ?>">
+                  <a class="nav-link" href="<?//= Url::to(['/admin/add-reseller-admin']); ?>">
                     <span class="sidebar-mini"> ARD </span>
                     <span class="sidebar-normal">Add Reseller Admin</span>
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link" href="<?= Url::to(['/admin/list-reseller-admin']); ?>">
+                  <a class="nav-link" href="<?//= Url::to(['/admin/list-reseller-admin']); ?>">
                     <span class="sidebar-mini"> LRD </span>
                     <span class="sidebar-normal">List Reseller Admin</span>
                   </a>
                 </li>
               </ul>
-            </div>
+            </div> -->
           </li>
           <!-- <li class="nav-item">
             <a class="nav-link" data-toggle="collapse" href="#manageDDI" aria-expanded="true">
-              <i><img style="width:25px" src="<?= \Yii::getAlias('@web/img/yii-logo.svg'); ?>"></i>
+              <i><img style="width:25px" src="<?//= \Yii::getAlias('@web/img/yii-logo.svg'); ?>"></i>
               <p>SMS Numbers
                 <b class="caret"></b>
               </p>
@@ -227,25 +225,25 @@ use yii\helpers\Url;
             <div class="collapse show" id="manageDDI">
               <ul class="nav">
                 <li class="nav-item">
-                  <a class="nav-link" href="<?= Url::to(['/admin/sms-numbers']); ?>">
+                  <a class="nav-link" href="<?//= Url::to(['/admin/sms-numbers']); ?>">
                     <span class="sidebar-mini"> DS </span>
                     <span class="sidebar-normal">SMS Numbers</span>
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link" href="<?= Url::to(['/admin/show-assigned-reseller-admin']); ?>">
+                  <a class="nav-link" href="<?//= Url::to(['/admin/show-assigned-reseller-admin']); ?>">
                     <span class="sidebar-mini"> RD </span>
                     <span class="sidebar-normal"> Detach Number - Reseller Admin </span>
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link" href="<?= Url::to(['/admin/show-assigned-reseller']); ?>">
+                  <a class="nav-link" href="<?//= Url::to(['/admin/show-assigned-reseller']); ?>">
                     <span class="sidebar-mini"> RD </span>
                     <span class="sidebar-normal"> Detach Number - Reseller </span>
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link" href="<?= Url::to(['/admin/show-assigned']); ?>">
+                  <a class="nav-link" href="<?//= Url::to(['/admin/show-assigned']); ?>">
                     <span class="sidebar-mini"> RD </span>
                     <span class="sidebar-normal"> Detach Number - User </span>
                   </a>
