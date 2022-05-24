@@ -4,10 +4,22 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use kartik\select2\Select2;
 use yii\widgets\ActiveForm;
+use kartik\daterange\DateRangePicker;
 
 $search = isset($_GET['search']) ? $_GET['search'] : '';
 $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
-$totalCount = $dataProvider->getTotalCount();
+$totalCount = $dataProvider->getTotalCount(); 
+$dr_start = '';
+$dr_end = '';
+if(!empty($_GET['TdrSearch']['delivered_time']))
+{
+	$dr_arr = explode("to", $_GET['TdrSearch']['delivered_time']);
+	if(is_array($dr_arr) && count($dr_arr) > 0)
+	{
+		if(!empty(trim($dr_arr[0]))) $dr_start = trim($dr_arr[0]);
+		if(!empty(trim($dr_arr[1]))) $dr_end = trim($dr_arr[1]);
+	}
+}
 $this->registerCss('
 	.pagination {
 		margin-left: 1em;
@@ -75,6 +87,80 @@ $this->registerJs('
 				alert("Please select at least one number");
 			}
 		});
+
+		$("#dd_admin_id").change(function(){
+			$("#admin_id_search").val(jQuery(this).val()).trigger("change");
+		});
+		$("#dd_sender_id").change(function(){
+			$("#sender_id_search").val(jQuery(this).val()).trigger("change");
+		});
+
+		$("#btnClearRange").click(function(){
+			$("#dr_from_date").val("");
+			$("#dr_to_date").val("");
+			$("#delivered_time_search").val("").trigger("change");
+		});
+		$("#btnRefresh").click(function(){
+			$("#delivered_time_search").trigger("change");
+		});
+
+		$("#dr_to_date").keyup(function() {
+			$(this).trigger("change");
+		});
+
+		$("#dr_to_date").change(function(){
+			let dr_from = $("#dr_from_date").val();
+			let dr_to = $("#dr_to_date").val();
+			if(dr_from != "" && dr_to != "")
+			{
+				if(moment(dr_to, "DD-MM-YYYY HH:mm") > moment(dr_from, "DD-MM-YYYY HH:mm"))
+				{
+					$("#delivered_time_search").val(dr_from + " to " + dr_to).trigger("change");
+				} else {
+					alert("From date must earlier than To date");
+				}
+			}
+		});
+
+		$("#btnToday").click(function(){
+			let dt_from = moment().format("DD-MM-YYYY 00:00");
+			let dt_to = moment().format("DD-MM-YYYY 23:59");
+			$("#dr_from_date").val(dt_from);
+			$("#dr_to_date").val(dt_to).trigger("change");
+		});
+		$("#btnYesterday").click(function(){
+			let dt_from = moment().subtract(1, "day").format("DD-MM-YYYY 00:00");
+			let dt_to = moment().subtract(1, "day").format("DD-MM-YYYY 23:59");
+			$("#dr_from_date").val(dt_from);
+			$("#dr_to_date").val(dt_to).trigger("change");
+		});
+		$("#btnLast7Days").click(function(){
+			let dt_from = moment().subtract(7, "day").format("DD-MM-YYYY 00:00");
+			let dt_to = moment().subtract(1, "day").format("DD-MM-YYYY 23:59");
+			$("#dr_from_date").val(dt_from);
+			$("#dr_to_date").val(dt_to).trigger("change");
+		});
+		$("#btnFullWeek").click(function(){
+			let startLastWeek = moment().subtract(1, "week").startOf("isoWeek")
+			let endLastWeek = moment().subtract(1, "week").endOf("isoWeek")
+
+			let dt_from = startLastWeek.subtract(1, "day").format("DD-MM-YYYY 00:00");
+			let dt_to = endLastWeek.subtract(1, "day").format("DD-MM-YYYY 23:59");
+			$("#dr_from_date").val(dt_from);
+			$("#dr_to_date").val(dt_to).trigger("change");
+		});
+		$("#btnThisMonth").click(function(){
+			let dt_from = moment().startOf("month").format("DD-MM-YYYY 00:00");
+			let dt_to = moment().endOf("month").format("DD-MM-YYYY 23:59");
+			$("#dr_from_date").val(dt_from);
+			$("#dr_to_date").val(dt_to).trigger("change");
+		});
+		$("#btnLastMonth").click(function(){
+			let dt_from = moment().subtract(1, "month").startOf("month").format("DD-MM-YYYY 00:00");
+			let dt_to = moment().subtract(1, "month").endOf("month").format("DD-MM-YYYY 23:59");
+			$("#dr_from_date").val(dt_from);
+			$("#dr_to_date").val(dt_to).trigger("change");
+		});
 	});
 ');
 ?>
@@ -99,6 +185,79 @@ $this->registerJs('
                             </ul>
                             <?php ActiveForm::end(); ?>
                         </div>
+                        <div>
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <?php
+									echo '<div class="input-group">';
+									echo '<label>From';
+									echo DateRangePicker::widget([
+    									'id'=> 'dr_from_date',
+    									'name'=> 'dr_from_date',
+    									'value'=> $dr_start,
+    									'useWithAddon'=>true,
+    									'convertFormat'=>true,
+    									'pluginOptions'=>[
+        									'timePicker'=>true,
+        									'timePickerIncrement'=>15,
+        									'locale'=>['format' => 'd-m-Y h:m'],
+        									'singleDatePicker'=>true,
+        									'showDropdowns'=>true
+    									]
+									]);
+									echo '<label>';
+									echo '</div>';
+									?>
+                                </div>
+                                <div class="col-md-2">
+                                    <?php
+									echo '<div class="input-group">';
+									echo '<label>To';
+									echo DateRangePicker::widget([
+    									'id'=>'dr_to_date',
+    									'name'=>'dr_to_date',
+										'value'=> $dr_end,
+    									'useWithAddon'=>true,
+    									'convertFormat'=>true,
+    									'pluginOptions'=>[
+        									'timePicker'=>true,
+        									'timePickerIncrement'=>15,
+        									'locale'=>['format' => 'd-m-Y h:m'],
+        									'singleDatePicker'=>true,
+        									'showDropdowns'=>true
+    									]
+									]);
+									echo '<label>';
+									echo '</div>';
+									?>
+                                </div>
+								<div class="col-md-4">
+									<?php
+									echo Html::button('Clear Range', ['id' => 'btnClearRange', 'class' => 'btn btn-success']); 
+									echo Html::button('Refresh', ['id' => 'btnRefresh', 'class' => 'btn btn-success']); 
+									?>
+								</div>
+                            </div>
+							<div style="margin-bottom:1em;">
+							<?= Html::button('TODAY', ['id' => 'btnToday', 'class' => 'btn btn-dark btn-sm']); ?>
+							<?= Html::button('YESTERDAY', ['id' => 'btnYesterday', 'class' => 'btn btn-dark btn-sm']); ?>
+							<?= Html::button('LAST 7 DAYS', ['id' => 'btnLast7Days', 'class' => 'btn btn-dark btn-sm']); ?>
+							<?= Html::button('LAST FULL WEEKS', ['id' => 'btnFullWeek', 'class' => 'btn btn-dark btn-sm']); ?>
+							<?= Html::button('THIS MONTH', ['id' => 'btnThisMonth', 'class' => 'btn btn-dark btn-sm']); ?>
+							<?= Html::button('LAST MONTH', ['id' => 'btnLastMonth', 'class' => 'btn btn-dark btn-sm']); ?>
+							</div>
+                        </div>
+                        <div id="dropdown_top">
+                            <ul class="gv_top">
+                                <li>
+                                    <?= Html::dropdownlist('dd_admin_id',  isset($_GET['TdrSearch']['admin_id']) ?  $_GET['TdrSearch']['admin_id'] : ""  , $clients, ['id' => 'dd_admin_id', 'class' => 'btn-dark btn-sm', 'prompt' => 'Select Client']); ?>
+                                </li>
+                                <li>
+                                    <?= Html::dropdownlist('dd_sender_id',  isset($_GET['TdrSearch']['sender_id']) ?  $_GET['TdrSearch']['sender_id'] : ""  , $suppliers, ['id' => 'dd_sender_id', 'class' => 'btn-dark btn-sm', 'prompt' => 'Select Supplier']); ?>
+                                </li>
+                            </ul>
+                        </div>
+
                         <div>
                             <div class="table-responsive">
                                 <?= GridView::widget([
@@ -151,6 +310,19 @@ $this->registerJs('
 										],
                                         [
                                             'attribute' => 'delivered_time',
+											'value' => function($model)
+											{
+												if(isset($model->delivered_time)) 
+												{
+													return date('d-m-Y H:i:s', strtotime($model->delivered_time));
+												} else {
+													return null;
+												}
+											},
+											'filterInputOptions' => [
+												'id' => 'delivered_time_search',
+												'class' => 'custom_select'
+											],
 											'footer' => 'Total records: ' . $totalCount,
 											'footerOptions' => ['style' => ['font-weight' => 'bold']]
                                         ]

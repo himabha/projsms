@@ -4,17 +4,17 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use kartik\select2\Select2;
 use yii\widgets\ActiveForm;
+use yii\helpers\ArrayHelper;
 use kartik\daterange\DateRangePicker;
-
 
 $search = isset($_GET['search']) ? $_GET['search'] : '';
 $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
-$totalCount = $dataProvider->getTotalCount();
+$totalCount = $dataProvider->getTotalCount(); 
 $dr_start = '';
 $dr_end = '';
-if(!empty($_GET['TdrSearch']['delivered_time']))
+if(!empty($_GET['TdrSearchSummary']['delivered_time']))
 {
-	$dr_arr = explode("to", $_GET['TdrSearch']['delivered_time']);
+	$dr_arr = explode("to", $_GET['TdrSearchSummary']['delivered_time']);
 	if(is_array($dr_arr) && count($dr_arr) > 0)
 	{
 		if(!empty(trim($dr_arr[0]))) $dr_start = trim($dr_arr[0]);
@@ -59,6 +59,7 @@ $this->registerCss('
 	}
 ');
 $this->registerJs('
+	var date_range = "";
 	$(document).ready(function(){
 		$("#search_box").keyup(function() {
 			if ($(this).val().length > 3) {
@@ -89,19 +90,37 @@ $this->registerJs('
 			}
 		});
 
+		function doSearch() {
+			const params = new URLSearchParams(location.search);
+			params.append("TdrSearchSummary[billgroup_id]", $("#dd_billgroup_id").val());
+			params.append("TdrSearchSummary[reseller_id]", $("#dd_reseller_id").val());
+			//params.append("TdrSearchSummary[sender_id]", $("#dd_sender_id").val());
+			params.append("TdrSearchSummary[delivered_time]", date_range);
+			//window.history.replaceState({}, "", `${location.pathname}?${params.toString()}`);
+			window.location.replace(`${location.pathname}?${params.toString()}`);
+		}; 
+
+		$("#dd_billgroup_id").change(function(){
+			doSearch();
+		});
+		$("#dd_reseller_id").change(function(){
+			doSearch();
+		});
+		// $("#dd_sender_id").change(function(){
+		// 	doSearch();
+		// });
 		$("#btnClearRange").click(function(){
 			$("#dr_from_date").val("");
 			$("#dr_to_date").val("");
-			$("#delivered_time_search").val("").trigger("change");
+			date_range = "";
+			doSearch();
 		});
 		$("#btnRefresh").click(function(){
-			$("#delivered_time_search").trigger("change");
+			doSearch();
 		});
-
 		$("#dr_to_date").keyup(function() {
 			$(this).trigger("change");
 		});
-
 		$("#dr_to_date").change(function(){
 			let dr_from = $("#dr_from_date").val();
 			let dr_to = $("#dr_to_date").val();
@@ -109,13 +128,13 @@ $this->registerJs('
 			{
 				if(moment(dr_to, "DD-MM-YYYY HH:mm") > moment(dr_from, "DD-MM-YYYY HH:mm"))
 				{
-					$("#delivered_time_search").val(dr_from + " to " + dr_to).trigger("change");
+					date_range = dr_from + " to " + dr_to;
+					doSearch();
 				} else {
 					alert("From date must earlier than To date");
 				}
 			}
 		});
-
 		$("#btnToday").click(function(){
 			let dt_from = moment().format("DD-MM-YYYY 00:00");
 			let dt_to = moment().format("DD-MM-YYYY 23:59");
@@ -155,7 +174,6 @@ $this->registerJs('
 			$("#dr_from_date").val(dt_from);
 			$("#dr_to_date").val(dt_to).trigger("change");
 		});
-		
 	});
 ');
 ?>
@@ -165,9 +183,10 @@ $this->registerJs('
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header card-header-primary">
-                        <h4 class="card-title ">SMS TDR</h4>
+                        <h4 class="card-title ">Detailed Report</h4>
                     </div>
                     <div class="card-body">
+
                         <div>
                             <?php $form = ActiveForm::begin(['id' => 'searchForm', 'method' => 'get']); ?>
                             <ul class="gv_top">
@@ -226,108 +245,129 @@ $this->registerJs('
 									echo '</div>';
 									?>
                                 </div>
-								<div class="col-md-4">
-									<?php
+                                <div class="col-md-4">
+                                    <?php
 									echo Html::button('Clear Range', ['id' => 'btnClearRange', 'class' => 'btn btn-success']); 
 									echo Html::button('Refresh', ['id' => 'btnRefresh', 'class' => 'btn btn-success']); 
 									?>
-								</div>
+                                </div>
                             </div>
-							<div style="margin-bottom:1em;">
-							<?= Html::button('TODAY', ['id' => 'btnToday', 'class' => 'btn btn-dark btn-sm']); ?>
-							<?= Html::button('YESTERDAY', ['id' => 'btnYesterday', 'class' => 'btn btn-dark btn-sm']); ?>
-							<?= Html::button('LAST 7 DAYS', ['id' => 'btnLast7Days', 'class' => 'btn btn-dark btn-sm']); ?>
-							<?= Html::button('LAST FULL WEEKS', ['id' => 'btnFullWeek', 'class' => 'btn btn-dark btn-sm']); ?>
-							<?= Html::button('THIS MONTH', ['id' => 'btnThisMonth', 'class' => 'btn btn-dark btn-sm']); ?>
-							<?= Html::button('LAST MONTH', ['id' => 'btnLastMonth', 'class' => 'btn btn-dark btn-sm']); ?>
-							</div>
+                            <div style="margin-bottom:1em;">
+                                <?= Html::button('TODAY', ['id' => 'btnToday', 'class' => 'btn btn-dark btn-sm']); ?>
+                                <?= Html::button('YESTERDAY', ['id' => 'btnYesterday', 'class' => 'btn btn-dark btn-sm']); ?>
+                                <?= Html::button('LAST 7 DAYS', ['id' => 'btnLast7Days', 'class' => 'btn btn-dark btn-sm']); ?>
+                                <?= Html::button('LAST FULL WEEKS', ['id' => 'btnFullWeek', 'class' => 'btn btn-dark btn-sm']); ?>
+                                <?= Html::button('THIS MONTH', ['id' => 'btnThisMonth', 'class' => 'btn btn-dark btn-sm']); ?>
+                                <?= Html::button('LAST MONTH', ['id' => 'btnLastMonth', 'class' => 'btn btn-dark btn-sm']); ?>
+                            </div>
                         </div>
-                        <div>
-                            <div class="table-responsive">
-                                <?= GridView::widget([
-									'id' => 'manage_num_grid',
-									'dataProvider' => $dataProvider,
-									'filterModel' => $searchModel,
-									'showFooter' => true,
-									'tableOptions' => [
-										'id' => 'list_cld_tbl',
-										'class' => 'table'
+                        <div id="dropdown_top">
+                            <ul class="gv_top">
+                                <li>
+                                    <?= Html::dropdownlist('dd_billgroup_id',  isset($_GET['TdrSearchSummary']['billgroup_id']) ?  $_GET['TdrSearchSummary']['billgroup_id'] : ""  , $billgroups, ['id' => 'dd_billgroup_id', 'class' => 'btn-dark btn-sm', 'prompt' => 'Select Billgroup']); ?>
+                                </li>
+                                <li>
+                                    <?= Html::dropdownlist('dd_reseller_id',  isset($_GET['TdrSearchSummary']['reseller_id']) ?  $_GET['TdrSearchSummary']['reseller_id'] : ""  , $resellers, ['id' => 'dd_reseller_id', 'class' => 'btn-dark btn-sm', 'prompt' => 'Select Reseller']); ?>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="table-responsive">
+							<h4><b>Summary</b></h4>
+                            <?= GridView::widget([
+								'dataProvider' => $dataProvider,
+								//'filterModel' => $searchModel,
+								'tableOptions' => [
+									'id' => 'list_cld_tbl',
+									'class' => 'table'
+								],
+								'columns' => [
+									[
+										'attribute' => 'billgroup_id',
+										'label' => 'Billgroup',
+										'filter' => $billgroups,
+										'filterInputOptions' => [
+											'id' => 'billgroup_id_search',
+											'prompt' => 'Select Bill Group',
+											'class' => 'custom_select'
+										],
+										'value' => function($model)
+										{
+											return isset($model->billgroup) ? $model->billgroup->name : null;
+										}
 									],
-									'columns' => [
-                                        [
-                                            'attribute' => 'id'
-										],
-                                        [
-                                            'attribute' => 'from_number'
-										],
-                                        [
-                                            'attribute' => 'to_number'
-										],
-                                        [
-                                            'attribute' => 'sms_message'
-										],
-                                        [
-                                            'attribute' => 'delivered_time',
-											'value' => function($model)
-											{
-												if(isset($model->delivered_time)) 
-												{
-													return date('d-m-Y H:i:s', strtotime($model->delivered_time));
-												} else {
-													return null;
-												}
-											},
-											'filterInputOptions' => [
-												'id' => 'delivered_time_search',
-												'class' => 'custom_select'
-											],
-											'footer' => 'Total records: ' . $totalCount,
-											'footerOptions' => ['style' => ['font-weight' => 'bold']]
-                                        ]
-                                        /*
-										[
-											'class' => 'yii\grid\CheckboxColumn',
-											'checkboxOptions' => function ($model, $key, $index, $column) {
-												return ['value' => $model->fsmid];
-											}
-										],
-										[
-											'class' => 'yii\grid\ActionColumn',
-											'header' => 'Action',
-											'footer' => 'Total records: ' . $totalCount,
-											'footerOptions' => ['style' => ['font-size' => 'larger', 'font-weight' => 'bold', 'min-width'=> '10em']],
-											'template' => '{update-cld}', // {show-number-routes} {delete-cld}',
-											'buttons' => [
-												'show-number-routes' => function ($url, $model, $key) {
-													return Html::a('<span class="glyphicon glyphicon-eye-open"></span>', $url, [
-														'class' => 'btn btn-info btn-xs',
-														'data-toggle' => 'tooltip',
-														'title' => 'Show list of all users who hold this number',
-													]);
-												},
-												'update-cld' => function ($url, $model, $key) {
-													return Html::a('<span class="glyphicon glyphicon-pencil"></span>', $url, [
-														'class' => 'btn btn-success btn-xs',
-														'data-toggle' => 'tooltip',
-														'title' => 'Edit'
-													]);
-												},
-												'delete-cld' => function ($url, $model, $key) {
-													return Html::a('<span class="glyphicon glyphicon-trash"></span>', $url, [
-														'class' => 'btn btn-danger btn-xs',
-														'data-pjax' => "0",
-														'data-method' => 'post',
-														'data-confirm' => 'Are you sure you want to delete CLD1?',
-														'data-toggle' => 'tooltip',
-														'title' => 'Delete'
-													]);
-												}
-											],
-										]
-                                        */
+									[
+										'attribute' => 'currency',
+										'label' => 'Currency'
 									],
-								]); ?>
-                            </div>
+									[
+										'attribute' => 'msgs',
+										'label' => 'Msgs',
+									],
+									[
+										'attribute' => 'rev_in',
+										'label' => 'Rev In'
+									],
+									[
+										'attribute' => 'rev_out',
+										'label' => 'Rev Out'
+									],
+									[
+										'attribute' => 'profit',
+										'label' => 'Profit'
+									],
+									[
+										'attribute' => 'profit_percentage',
+										'label' => '% Profit'
+									],
+								],
+							]); ?>
+                        </div>
+                        <div class="table-responsive">
+                            <h4><b>Results</b></h4>
+                            <?= GridView::widget([
+								'dataProvider' => $dataProvider_1,
+								//'filterModel' => $searchModel,
+								'tableOptions' => [
+									'id' => 'list_result_tbl',
+									'class' => 'table'
+								],
+								'columns' => [
+									[
+										'attribute' => 'countrynetwork_id',
+										'label' => 'Country Network',
+                                        'value' => function($model){
+                                            return isset($model->country) ? $model->country->Country_Network: null;
+                                        }
+									],
+									[
+										'attribute' => 'billgroup_id',
+										'label' => 'Billgroup',
+										'value' => function($model)
+										{
+											return isset($model->billgroup) ? $model->billgroup->name : null;
+										}
+									],
+									[
+										'label' => 'Reseller',
+										'attribute' => 'reseller_id',
+										'value' => function ($model) {
+											return isset($model->resellers) ? $model->resellers->username : null;
+										}
+									],
+									[
+										'attribute' => 'cli',
+										'label' => 'CLI'
+									],
+									[
+										'attribute' => 'bnum',
+										'label' => 'BNUM'
+									],
+									[
+										'attribute' => 'msgs',
+										'label' => 'Total SMS',
+									],
+								],
+							]); ?>
                         </div>
                     </div>
                 </div>

@@ -32,6 +32,8 @@ use app\models\Supplier;
 use app\models\Currency;
 
 use app\models\TdrSearch;
+use app\models\TdrSearchSummary;
+use app\models\TdrSearchDetailed;
 
 class ResellerController extends \yii\web\Controller
 {
@@ -1057,5 +1059,67 @@ class ResellerController extends \yii\web\Controller
             'suppliers' => $this->getSupplierItems(),
         ]);
     }
+
+
+    public function actionSummaryReport()
+    {
+        $model = new Fsusertb();
+        $search = isset($_GET['search']) ? $_GET['search'] : '';
+        $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
+
+        if ($filter == 'all') {
+            $filter = '';
+        }
+
+        $searchModel = new TdrSearchSummary();
+
+        $mysubusr = User::find()->select('id')->where(['reseller_id' => Yii::$app->user->identity->id, 'role' => 2]);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $mysubusr, $search, false, false);
+        $dataProvider->setPagination(['pageSize' => $filter]); 
+
+        return $this->render('summary_report', [
+            'dataProvider' => $dataProvider, 
+            'searchModel' => $searchModel,
+            'search' => $search, 
+            'filter' => $filter,
+            //'clients' => $this->getResellerAdminItems(),
+            'agents' => $this->getAgentItems(),
+            //'suppliers' => $this->getSupplierItems(),
+            'billgroups' => $this->getBillgroupItems(),
+        ]);
+    }
+
+    public function actionDetailedReport()
+    {
+        $model = new Fsusertb();
+        $search = isset($_GET['search']) ? $_GET['search'] : '';
+        $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
+
+        if ($filter == 'all') {
+            $filter = '';
+        }
+
+        $mysubusr = User::find()->select('id')->where(['reseller_id' => Yii::$app->user->identity->id, 'role' => 2]);
+        $searchModel = new TdrSearchSummary();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $mysubusr, $search, false, true);
+        $dataProvider->setPagination(['pageSize' => $filter]); 
+
+        $searchModel_1 = new TdrSearchDetailed();
+        $dataProvider_1 = $searchModel_1->search(Yii::$app->request->queryParams, $mysubusr, $search, false);
+        $dataProvider_1->setPagination(['pageSize' => $filter]); 
+
+        return $this->render('detail_report', [
+            'dataProvider' => $dataProvider, 
+            'dataProvider_1' => $dataProvider_1, 
+            'search' => $search, 
+            'filter' => $filter,
+            //'clients' => $this->getResellerAdminItems(),
+            'agents' => $this->getAgentItems(),
+            //'suppliers' => $this->getSupplierItems(),
+            'billgroups' => $this->getBillgroupItems(),
+        ]);
+    }
+
+
 
 }

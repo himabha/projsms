@@ -9,6 +9,12 @@ use Yii;
 
 class Smscdr extends \yii\db\ActiveRecord
 {
+	public $msgs;
+	public $rev_in;
+	public $rev_out;
+	public $profit;
+	public $profit_percentage;
+
 	/**
 	 * Constants
 	 */
@@ -33,6 +39,8 @@ class Smscdr extends \yii\db\ActiveRecord
             [['admin_id', 'delivered_time_time', 'reseller_id', 'agent_id', 'sender_id'], 'integer'],
             [['sms_message'], 'safe'],
             [['from_number', 'to_number'], 'string' , 'max' => 15],
+            [['msgs', 'billgroup_id'], 'integer'],
+            [['rev_in', 'rev_out', 'profit', 'profit_percentage'], 'number'],
         ];
 	}
 
@@ -40,6 +48,7 @@ class Smscdr extends \yii\db\ActiveRecord
     {
         return [
 			'id' => 'ID',
+			'billgroup_id_id' => 'Billgroup',
 			'admin_id' => 'Client',
 			'sender_id' => 'Supplier',
 			'delivered_time' => 'Delivered Time',
@@ -67,6 +76,16 @@ class Smscdr extends \yii\db\ActiveRecord
 	public function getSupplier()
     {
         return $this->hasOne(Supplier::className(),['id' => 'sender_id']);
+    }
+
+	public function getBillgroup()
+    {
+        return $this->hasOne(Billgroup::className(),['id' => 'billgroup_id']);
+    }
+
+	public function getCountry()
+    {
+        return $this->hasOne(Country::className(),['ID' => 'country_id']);
     }
 
 

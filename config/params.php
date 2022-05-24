@@ -7,6 +7,8 @@ return [
     'services' => [
         0 => 'Terminate',
         1 => 'Route'         
-    ]
+    ],
+    'bsDependencyEnabled' => false, // this will not load Bootstrap CSS and JS for all Krajee extensions
+    'bsVersion' => '4', // this will set globally `bsVersion` to Bootstrap 5.x for all Krajee Extensions
 ];
 

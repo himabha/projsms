@@ -10,11 +10,12 @@ use app\models\Smscdr;
 /**
  * FsmastertbSearch represents the model behind the search form of `app\models\Smscdr`.
  */
-class TdrSearch extends Smscdr
+class TdrSearchSummary extends Smscdr
 {
     public $dr;
     public $dr_from;
     public $dr_to;
+    //public $msgs;
 
     /**
      * @inheritdoc
@@ -22,10 +23,11 @@ class TdrSearch extends Smscdr
     public function rules()
     {
         $return = [
-            [['id'], 'number'],
+            [['currency'], 'safe'],
+            [['msgs', 'billgroup_id'], 'integer'],
+            [['rev_in', 'rev_out', 'profit', 'profit_percentage'], 'number'],
             [['admin_id', 'reseller_id', 'agent_id', 'sender_id'], 'integer'],
-            [['sms_message', 'delivered_time'], 'safe'],
-            [['from_number', 'to_number'], 'string'],
+            [['delivered_time'], 'safe'],
         ];
 
         return $return;
@@ -48,9 +50,14 @@ class TdrSearch extends Smscdr
      *
      * @return ActiveDataProvider
      */
-    public function search($params, $users, $search=null, $isAdmin = false)
+    public function search($params, $users, $search=null, $isAdmin = false, $detail = false)
     {
-        $query = Smscdr::find();
+        if($detail)
+        {
+            $query = Smscdr::find()->select("billgroup_id, currency, count(*) as msgs, sum(cost_rate) as rev_out, sum(cld1rate + cld2rate + cld3rate) as rev_in, sum(cld1rate + cld2rate + cld3rate-cost_rate) as profit");
+        } else {
+            $query = Smscdr::find()->select("currency, count(*) as msgs, sum(cost_rate) as rev_out, sum(cld1rate + cld2rate + cld3rate) as rev_in, sum(cld1rate + cld2rate + cld3rate-cost_rate) as profit");
+        }
 
         // if(!$isAdmin)  => NOT SURE WHAT THIS BLOCK FOR
         // {
@@ -96,6 +103,9 @@ class TdrSearch extends Smscdr
             $query->orFilterWhere([
                 'id' => $search
             ]);
+            $query->orFilterWhere([
+                'billgroup_id' => $this->billgroup_id,
+            ]);
             if($isAdmin){
                 $query->orFilterWhere([
                     'admin_id' => $search,
@@ -134,6 +144,9 @@ class TdrSearch extends Smscdr
             // for all roles
             $query->andFilterWhere([
                 'id' => $this->id,
+            ]);
+            $query->andFilterWhere([
+                'billgroup_id' => $this->billgroup_id,
             ]);
 
             if(!$isAdmin){
@@ -182,6 +195,13 @@ class TdrSearch extends Smscdr
             } else if(Yii::$app->user->identity->role == 3) { // reseller
                 $query->andFilterWhere(['in', 'sms_cdr.reseller_id', Yii::$app->user->identity->id]);
             }
+        }
+        
+        if($detail)
+        {
+            $query->groupBy('billgroup_id, currency');
+        } else {
+            $query->groupBy('currency');
         }
 
         $dataProvider = new ActiveDataProvider([

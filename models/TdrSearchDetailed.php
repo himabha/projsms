@@ -10,11 +10,12 @@ use app\models\Smscdr;
 /**
  * FsmastertbSearch represents the model behind the search form of `app\models\Smscdr`.
  */
-class TdrSearch extends Smscdr
+class TdrSearchDetailed extends Smscdr
 {
     public $dr;
     public $dr_from;
     public $dr_to;
+    //public $msgs;
 
     /**
      * @inheritdoc
@@ -22,10 +23,10 @@ class TdrSearch extends Smscdr
     public function rules()
     {
         $return = [
-            [['id'], 'number'],
+            [['currency'], 'safe'],
+            [['msgs', 'countrynetwork_id',  'billgroup_id'], 'integer'],
             [['admin_id', 'reseller_id', 'agent_id', 'sender_id'], 'integer'],
-            [['sms_message', 'delivered_time'], 'safe'],
-            [['from_number', 'to_number'], 'string'],
+            [['delivered_time'], 'safe'],
         ];
 
         return $return;
@@ -50,7 +51,18 @@ class TdrSearch extends Smscdr
      */
     public function search($params, $users, $search=null, $isAdmin = false)
     {
-        $query = Smscdr::find();
+        if($isAdmin)
+        {
+            $query = Smscdr::find()->select("countrynetwork_id, billgroup_id, sender_id, admin_id, count(*) as msgs");
+        } else {
+            if(Yii::$app->user->identity->role == 3) { // reseller
+                $query = Smscdr::find()->select("countrynetwork_id, billgroup_id, agent_id, count(*) as msgs");
+            } else if(Yii::$app->user->identity->role == 4){ // reseller admin
+                $query = Smscdr::find()->select("countrynetwork_id, billgroup_id, reseller_id, count(*) as msgs");
+            } else if(Yii::$app->user->identity->role == 2) { //user
+                $query = Smscdr::find()->select("countrynetwork_id, billgroup_id, count(*) as msgs");
+            }
+        }
 
         // if(!$isAdmin)  => NOT SURE WHAT THIS BLOCK FOR
         // {
@@ -62,6 +74,30 @@ class TdrSearch extends Smscdr
         // }
 
         $this->load($params);
+        if(isset($params['TdrSearchSummary']['billgroup_id']))
+        {
+            $this->billgroup_id = $params['TdrSearchSummary']['billgroup_id'];
+        }
+        if(isset($params['TdrSearchSummary']['admin_id']))
+        {
+            $this->admin_id = $params['TdrSearchSummary']['admin_id'];
+        }
+        if(isset($params['TdrSearchSummary']['agent_id']))
+        {
+            $this->agent_id = $params['TdrSearchSummary']['agent_id'];
+        }
+        if(isset($params['TdrSearchSummary']['reseller_id']))
+        {
+            $this->reseller_id = $params['TdrSearchSummary']['reseller_id'];
+        }
+        if(isset($params['TdrSearchSummary']['sender_id']))
+        {
+            $this->sender_id = $params['TdrSearchSummary']['sender_id'];
+        }
+        if(isset($params['TdrSearchSummary']['delviered_time']))
+        {
+            $this->sender_id = $params['TdrSearchSummary']['delivered_time'];
+        }
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
@@ -95,6 +131,9 @@ class TdrSearch extends Smscdr
         if(!empty($search)){
             $query->orFilterWhere([
                 'id' => $search
+            ]);
+            $query->orFilterWhere([
+                'billgroup_id' => $this->billgroup_id,
             ]);
             if($isAdmin){
                 $query->orFilterWhere([
@@ -134,6 +173,9 @@ class TdrSearch extends Smscdr
             // for all roles
             $query->andFilterWhere([
                 'id' => $this->id,
+            ]);
+            $query->andFilterWhere([
+                'billgroup_id' => $this->billgroup_id,
             ]);
 
             if(!$isAdmin){
@@ -183,7 +225,18 @@ class TdrSearch extends Smscdr
                 $query->andFilterWhere(['in', 'sms_cdr.reseller_id', Yii::$app->user->identity->id]);
             }
         }
-
+        
+        if($isAdmin){
+            $query->groupBy('countrynetwork_id, billgroup_id, sender_id, admin_id');
+        } else {
+            if(Yii::$app->user->identity->role == 3) { // reseller
+                $query->groupBy('countrynetwork_id, billgroup_id, agent_id');
+            } else if(Yii::$app->user->identity->role == 4){ // reseller admin
+                $query->groupBy('countrynetwork_id, billgroup_id, reseller_id');
+            } else if(Yii::$app->user->identity->role == 2) { //user
+                $query->groupBy('countrynetwork_id, billgroup_id');
+            }
+        }
         $dataProvider = new ActiveDataProvider([
             'query' => $query
         ]);
