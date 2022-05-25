@@ -2139,22 +2139,17 @@ class AdminController extends \yii\web\Controller
 
         $searchModel = new TdrSearch();
 
-        //$summary = $model->getSummary($mysubusr, true);
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $mysubusr, $search, true);
         $dataProvider->setPagination(['pageSize' => $filter]); 
 
         return $this->render('tdr', [
             'dataProvider' => $dataProvider, 
             'searchModel' => $searchModel,
-            //'summary' => $summary, 
             'search' => $search, 
             'filter' => $filter,
+            'billgroups' => $this->getBillgroupItems(),
             'clients' => $this->getResellerAdminItems(),
             'suppliers' => $this->getSupplierItems(),
-            //'countries' => $this->getCountryItems(),
-            //'billgroups' => $this->getBillgroupItems(),
-            //'services' => $this->getServicesItems(),
-
         ]);
     }
 

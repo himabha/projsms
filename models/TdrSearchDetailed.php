@@ -94,9 +94,9 @@ class TdrSearchDetailed extends Smscdr
         {
             $this->sender_id = $params['TdrSearchSummary']['sender_id'];
         }
-        if(isset($params['TdrSearchSummary']['delviered_time']))
+        if(isset($params['TdrSearchSummary']['delivered_time']))
         {
-            $this->sender_id = $params['TdrSearchSummary']['delivered_time'];
+            $this->delivered_time = $params['TdrSearchSummary']['delivered_time'];
         }
 
         if (!$this->validate()) {
@@ -113,14 +113,14 @@ class TdrSearchDetailed extends Smscdr
                 switch (count($this->dr))
                 {
                     case 1: 
-                        $dr_start_time = date_create_from_format('d-m-Y H:i', trim($this->dr[0]));
-                        $this->dr_from = date_format($dr_start_time, 'Y-m-d H:i');
+                        $dr_start_time = date_create_from_format('d-m-Y', trim($this->dr[0]));
+                        $this->dr_from = date_format($dr_start_time, 'Y-m-d 00:00');
                         break;
                     case 2: 
-                        $dr_start_time = date_create_from_format('d-m-Y H:i', trim($this->dr[0]));
-                        $this->dr_from = date_format($dr_start_time, 'Y-m-d H:i');
-                        $dr_end_time = date_create_from_format('d-m-Y H:i', trim($this->dr[1]));
-                        $this->dr_to = date_format($dr_end_time, 'Y-m-d H:i');
+                        $dr_start_time = date_create_from_format('d-m-Y', trim($this->dr[0]));
+                        $this->dr_from = date_format($dr_start_time, 'Y-m-d 00:00');
+                        $dr_end_time = date_create_from_format('d-m-Y', trim($this->dr[1]));
+                        $this->dr_to = date_format($dr_end_time, 'Y-m-d 23:59');
                         break;
                 }             
             } catch (\Exception $e) {

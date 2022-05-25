@@ -23,7 +23,7 @@ class TdrSearch extends Smscdr
     {
         $return = [
             [['id'], 'number'],
-            [['admin_id', 'reseller_id', 'agent_id', 'sender_id'], 'integer'],
+            [['billgroup_id', 'admin_id', 'reseller_id', 'agent_id', 'sender_id'], 'integer'],
             [['sms_message', 'delivered_time'], 'safe'],
             [['from_number', 'to_number'], 'string'],
         ];
@@ -77,14 +77,14 @@ class TdrSearch extends Smscdr
                 switch (count($this->dr))
                 {
                     case 1: 
-                        $dr_start_time = date_create_from_format('d-m-Y H:i', trim($this->dr[0]));
-                        $this->dr_from = date_format($dr_start_time, 'Y-m-d H:i');
+                        $dr_start_time = date_create_from_format('d-m-Y', trim($this->dr[0]));
+                        $this->dr_from = date_format($dr_start_time, 'Y-m-d 00:00');
                         break;
                     case 2: 
-                        $dr_start_time = date_create_from_format('d-m-Y H:i', trim($this->dr[0]));
-                        $this->dr_from = date_format($dr_start_time, 'Y-m-d H:i');
-                        $dr_end_time = date_create_from_format('d-m-Y H:i', trim($this->dr[1]));
-                        $this->dr_to = date_format($dr_end_time, 'Y-m-d H:i');
+                        $dr_start_time = date_create_from_format('d-m-Y', trim($this->dr[0]));
+                        $this->dr_from = date_format($dr_start_time, 'Y-m-d 00:00');
+                        $dr_end_time = date_create_from_format('d-m-Y', trim($this->dr[1]));
+                        $this->dr_to = date_format($dr_end_time, 'Y-m-d 23:59');
                         break;
                 }             
             } catch (\Exception $e) {
@@ -98,6 +98,7 @@ class TdrSearch extends Smscdr
             ]);
             if($isAdmin){
                 $query->orFilterWhere([
+                    'billgroup_id' => $search,
                     'admin_id' => $search,
                     'sender_id' => $search,
                 ]);
@@ -134,6 +135,7 @@ class TdrSearch extends Smscdr
             // for all roles
             $query->andFilterWhere([
                 'id' => $this->id,
+                'billgroup_id' => $this->billgroup_id
             ]);
 
             if(!$isAdmin){

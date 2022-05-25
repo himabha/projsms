@@ -635,7 +635,6 @@ class UserController extends Controller
 
         $searchModel = new TdrSearch();
 
-        //$summary = $model->getSummary($mysubusr, true);
         $mysubusr = User::find()->select('id')->where(['agent_id' => Yii::$app->user->identity->id, 'role' => 2]);
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $mysubusr, $search, false);
         $dataProvider->setPagination(['pageSize' => $filter]); 
@@ -643,9 +642,9 @@ class UserController extends Controller
         return $this->render('tdr', [
             'dataProvider' => $dataProvider, 
             'searchModel' => $searchModel,
-            //'summary' => $summary, 
             'search' => $search, 
-            'filter' => $filter
+            'filter' => $filter,
+            'billgroups' => $this->getBillgroupItems(),
         ]);
     }
 
