@@ -129,6 +129,11 @@ class Fsmastertb extends \yii\db\ActiveRecord
         return $this->hasOne(Supplier::className(),['id' => 'sender_id']);
     }
 
+    public function getCountry()
+    {
+        return $this->hasOne(Country::className(),['ID' => 'country_id']);
+    }
+
 
 
 }

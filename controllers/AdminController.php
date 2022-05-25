@@ -31,6 +31,11 @@ use app\models\Country;
 use app\models\Numbers;
 use app\models\Supplier;
 
+use app\models\TdrSearch;
+use app\models\TdrSearchSummary;
+use app\models\TdrSearchDetailed;
+
+
 class AdminController extends \yii\web\Controller
 {
     public function behaviors()
@@ -46,10 +51,10 @@ class AdminController extends \yii\web\Controller
             ],
             'access' => [
                 'class' => AccessControl::className(),
-                'only' => ['add-cld', 'add-user', 'upload', 'update-cld', 'delete-cld', 'delete-user', 'list-assign-cld', 'cdr', 'list-user', 'assign-cld', 'edit-user', 'delete-assigned-cld', 'update-assigned-cld', 'date-report', 'detach-number', 'detach-number-reseller', 'show-assigned-reseller', 'detach-number-reseller-admin', 'show-assigned-reseller-admin', 'show-assigned', 'show-number-routes', 'fs-call-report', 'export-fscall', 'load-search-fields', 'agent-summary'],
+                'only' => ['sms-numbers', 'add-user', 'upload', 'update-cld', 'delete-cld', 'delete-user', 'list-assign-cld', 'cdr', 'list-user', 'assign-cld', 'edit-user', 'delete-assigned-cld', 'update-assigned-cld', 'date-report', 'detach-number', 'detach-number-reseller', 'show-assigned-reseller', 'detach-number-reseller-admin', 'show-assigned-reseller-admin', 'show-assigned', 'show-number-routes', 'fs-call-report', 'export-fscall', 'load-search-fields', 'agent-summary'],
                 'rules' => [
                     [
-                        'actions' => ['add-cld', 'add-user', 'upload', 'update-cld', 'delete-cld', 'delete-user', 'list-assign-cld', 'cdr', 'list-user', 'assign-cld', 'edit-user', 'delete-assigned-cld', 'update-assigned-cld', 'date-report', 'detach-number', 'show-assigned', 'detach-number-reseller', 'show-assigned-reseller', 'detach-number-reseller-admin', 'show-assigned-reseller-admin', 'show-number-routes', 'fs-call-report', 'export-fscall', 'load-search-fields', 'agent-summary'],
+                        'actions' => ['sms-numbers', 'add-user', 'upload', 'update-cld', 'delete-cld', 'delete-user', 'list-assign-cld', 'cdr', 'list-user', 'assign-cld', 'edit-user', 'delete-assigned-cld', 'update-assigned-cld', 'date-report', 'detach-number', 'show-assigned', 'detach-number-reseller', 'show-assigned-reseller', 'detach-number-reseller-admin', 'show-assigned-reseller-admin', 'show-number-routes', 'fs-call-report', 'export-fscall', 'load-search-fields', 'agent-summary', 'sms-tdr'],
                         'allow' => true,
                         'roles' => ['@'],
                         'matchCallback' => function ($rule, $action) {
@@ -250,6 +255,7 @@ class AdminController extends \yii\web\Controller
             'summary' => $summary, 
             'search' => $search, 
             'filter' => $filter,
+            'countries' => $this->getCountryItems(),
             'billgroups' => $this->getBillgroupItems(),
             'suppliers' => $this->getSupplierItems(),
             'clients' => $this->getResellerAdminItems(),
@@ -257,7 +263,6 @@ class AdminController extends \yii\web\Controller
 
         ]);
     }
-
     protected function getBillgroupItems()
     {
         $items = [];
@@ -387,7 +392,7 @@ class AdminController extends \yii\web\Controller
         }
         if ($model->load(Yii::$app->request->post())) {
             if ($model->save()) {
-                return $this->redirect(['add-cld']);
+                return $this->redirect(['sms-numbers']);
             }
         }
         return $this->render('update_cld', ['model' => $model]);
@@ -409,7 +414,7 @@ class AdminController extends \yii\web\Controller
         if (!$model->delete()) {
             throw new ForbiddenHttpException('Failed to delete user Try again.');
         }
-        return $this->redirect(['add-cld']);
+        return $this->redirect(['sms-numbers']);
     }
 
     /*
@@ -1463,7 +1468,7 @@ class AdminController extends \yii\web\Controller
                 //->bindValue(':numbers', $numbers)
                 ->execute();
             if ($query) {
-                return $this->redirect(['add-cld']);
+                return $this->redirect(['sms-numbers']);
             } else {
                 throw new ForbiddenHttpException('Failed to edit number, Try again.');
             }
@@ -1545,6 +1550,7 @@ class AdminController extends \yii\web\Controller
         return $this->render('billgroups', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'billgroups' => $this->getBillgroupItems(),
             'countries' => $this->getCountryItems(),
             'country_networks' => $this->getCountryNetworkItems(),
             'currencies' => $this->getCurrencyItems(),
@@ -1555,58 +1561,25 @@ class AdminController extends \yii\web\Controller
 
     protected function getCountryItems()
     {
-        $items = [];
-        //$items = ['' => "Select Country"];
-        $res = Country::find()->all();
-        if(is_array($res) && count($res) > 0)
-        {
-            foreach($res as $v)
-            {
-                $items[$v->ID] = $v->Country;
-            }
-        }
-        return $items;
+        $res = Country::find()->groupBy('Country')->all();
+        return \yii\helpers\ArrayHelper::map($res, 'ID', 'Country');
     }
 
     protected function getCountryNetworkItems()
     {
-        $items = [];
         $res = Country::find()->all();
-        if(is_array($res) && count($res) > 0)
-        {
-            foreach($res as $v)
-            {
-                $items[$v->ID] = $v->Country_Network;
-            }
-        }
-        return $items;
+        return \yii\helpers\ArrayHelper::map($res, 'ID', 'Country_Network');
     }
 
     protected function getCurrencyItems()
     {
-        $items = [];
         $res = \app\models\Currency::find()->all();
-        if(is_array($res) && count($res) > 0)
-        {
-            foreach($res as $v)
-            {
-                $items[$v->id] = $v->currency;
-            }
-        }
-        return $items;
+        return \yii\helpers\ArrayHelper::map($res, 'id', 'currency');
     }
     protected function getBillcycleItems()
     {
-        $items = [];
         $res = \app\models\Billcycle::find()->all();
-        if(is_array($res) && count($res) > 0)
-        {
-            foreach($res as $v)
-            {
-                $items[$v->ID] = $v->billcycle;
-            }
-        }
-        return $items;
+        return \yii\helpers\ArrayHelper::map($res, 'ID', 'billcycle');
     }
 
 
@@ -1724,7 +1697,7 @@ class AdminController extends \yii\web\Controller
                             {
                                 $model->addError('number_list', 'At least 1 number required');
                             } else {
-                                $number_list_arr = explode("\n", $model->number_list);
+                                $number_list_arr = explode("\r\n", $model->number_list);
                                 $numbers = [];
                                 foreach($number_list_arr as $v)
                                 {
@@ -2151,4 +2124,96 @@ class AdminController extends \yii\web\Controller
         }
         throw new NotFoundHttpException('The requested page does not exist.');
     }
+
+
+    public function actionSmsTdr()
+    {
+        $model = new Fsusertb();
+        $search = isset($_GET['search']) ? $_GET['search'] : '';
+        $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
+        $mysubusr = User::find()->select('id')->where(['role' => 2]);
+
+        if ($filter == 'all') {
+            $filter = '';
+        }
+
+        $searchModel = new TdrSearch();
+
+        //$summary = $model->getSummary($mysubusr, true);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $mysubusr, $search, true);
+        $dataProvider->setPagination(['pageSize' => $filter]); 
+
+        return $this->render('tdr', [
+            'dataProvider' => $dataProvider, 
+            'searchModel' => $searchModel,
+            //'summary' => $summary, 
+            'search' => $search, 
+            'filter' => $filter,
+            'clients' => $this->getResellerAdminItems(),
+            'suppliers' => $this->getSupplierItems(),
+            //'countries' => $this->getCountryItems(),
+            //'billgroups' => $this->getBillgroupItems(),
+            //'services' => $this->getServicesItems(),
+
+        ]);
+    }
+
+    public function actionSummaryReport()
+    {
+        $model = new Fsusertb();
+        $search = isset($_GET['search']) ? $_GET['search'] : '';
+        $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
+        $mysubusr = User::find()->select('id')->where(['role' => 2]);
+
+        if ($filter == 'all') {
+            $filter = '';
+        }
+
+        $searchModel = new TdrSearchSummary();
+
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $mysubusr, $search, true, false);
+        $dataProvider->setPagination(['pageSize' => $filter]); 
+
+        return $this->render('summary_report', [
+            'dataProvider' => $dataProvider, 
+            'searchModel' => $searchModel,
+            'search' => $search, 
+            'filter' => $filter,
+            'clients' => $this->getResellerAdminItems(),
+            'suppliers' => $this->getSupplierItems(),
+            'billgroups' => $this->getBillgroupItems(),
+        ]);
+    }
+
+    public function actionDetailedReport()
+    {
+        $model = new Fsusertb();
+        $search = isset($_GET['search']) ? $_GET['search'] : '';
+        $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
+        $mysubusr = User::find()->select('id')->where(['role' => 2]);
+
+        if ($filter == 'all') {
+            $filter = '';
+        }
+
+        $searchModel = new TdrSearchSummary();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $mysubusr, $search, true, true);
+        $dataProvider->setPagination(['pageSize' => $filter]); 
+
+        $searchModel_1 = new TdrSearchDetailed();
+        $dataProvider_1 = $searchModel_1->search(Yii::$app->request->queryParams, $mysubusr, $search, true);
+        $dataProvider_1->setPagination(['pageSize' => $filter]); 
+
+        return $this->render('detail_report', [
+            'dataProvider' => $dataProvider, 
+            'dataProvider_1' => $dataProvider_1, 
+            'search' => $search, 
+            'filter' => $filter,
+            'clients' => $this->getResellerAdminItems(),
+            'suppliers' => $this->getSupplierItems(),
+            'billgroups' => $this->getBillgroupItems(),
+        ]);
+    }
+
+
 }

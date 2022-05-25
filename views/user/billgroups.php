@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+$totalCount = $dataProvider->getTotalCount();
 $this->registerCss('
     .custom_select{
         border:none;
@@ -38,8 +39,18 @@ $this->registerCss('
                                 'dataProvider' => $dataProvider,
                                 'filterModel' => $searchModel,
                                 'columns' => [
-                                    //'id',
-                                    'name',
+                                    [
+                                        'attribute' => 'id',
+                                        'label' => 'Name',
+                                        'filter' => $billgroups,
+                                        'filterInputOptions' => [
+                                            'prompt' => 'Select Name',
+                                            'class' => 'custom_select'
+                                        ],
+                                        'value' => function($model){
+                                            return $model->name;
+                                        }
+                                    ],
                                     [
                                         'attribute' => 'country_id',
                                         'filter' => $countries,
@@ -84,6 +95,9 @@ $this->registerCss('
                                         'attribute' => 'service',
                                         'filter' => $services,
                                         'filterInputOptions' => ['prompt' => 'Select Service', 'class' => 'custom_select'],
+                                        'headerOptions' => ['style' => ['min-width' => '10em']],
+                                        'footer' => 'Total records: ' . $totalCount,
+                                        'footerOptions' => ['style' => ['font-size' => 'larger', 'font-weight' => 'bold']],
                                         'value' => function($model){
                                             return isset(\Yii::$app->params['services'][$model->service]) ? \Yii::$app->params['services'][$model->service] : '';
                                         }

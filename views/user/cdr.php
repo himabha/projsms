@@ -8,45 +8,45 @@ use yii\widgets\ActiveForm;
 use kartik\daterange\DateRangePicker;
 ?>
 <div class="content">
-	<div class="container-fluid">
-		<div class="row">
-			<div class="col-md-12">
-				<div class="card">
-					<div class="card-header card-header-primary">
-						<h4 class="card-title ">My CDR</h4>
-					</div>
-					<div class="card-body">
-		<?php Pjax::begin(['id' => 'pjax_cdr_list']) ?>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header card-header-primary">
+                        <h4 class="card-title ">My CDR</h4>
+                    </div>
+                    <div class="card-body">
+                        <?php Pjax::begin(['id' => 'pjax_cdr_list']) ?>
 
 
-		<div class="row margin_20">
-			<div class="col-sm-4">
-				<div class="summary_sm-box">
-					<strong>Total Calls</strong><br>
-					<?= $value['count'] ?>
-				</div>
-			</div>
-			<div class="col-sm-4">
-				<div class="summary_sm-box">
-					<strong>Total minutes Called</strong><br>
-					<?= $value['min_sum'].' Minutes'?>
-				</div>
-			</div>
-<!--			<div class="col-sm-4">
+                        <div class="row margin_20">
+                            <div class="col-sm-4">
+                                <div class="summary_sm-box">
+                                    <strong>Total Calls</strong><br>
+                                    <?= $value['count'] ?>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="summary_sm-box">
+                                    <strong>Total minutes Called</strong><br>
+                                    <?= $value['min_sum'].' Minutes'?>
+                                </div>
+                            </div>
+                            <!--			<div class="col-sm-4">
 				<div class="summary_sm-box">
 					<strong>Total Revanue</strong><br>
 					<?= '$'.round($value['revenue'],4); ?>
 				</div>
 			</div>
 -->
-		</div>
+                        </div>
 
-		<div class="margin_20">
-			<?php
+                        <div class="margin_20">
+                            <?php
 			$form = ActiveForm::begin(['id' => 'searchForm','method'=>'get','action' => ['cdr']]);
 			?>
-			<div class="date_from">
-				<?php
+                            <div class="date_from">
+                                <?php
 				echo DateRangePicker::widget([
 					'name'=>'date_range',
 					'value' => $date,
@@ -61,21 +61,21 @@ use kartik\daterange\DateRangePicker;
 
 				])
 				?>
-			</div>
-			<?= Html::textInput('caller_id',$caller_id,['class' => 'filter-input','placeholder' => 'Caller Id']); ?>
+                            </div>
+                            <?= Html::textInput('caller_id',$caller_id,['class' => 'filter-input','placeholder' => 'Caller Id']); ?>
 
-			<?= Html::textInput('called_no',$called_no,['class' => 'filter-input','placeholder' => 'Called Number']); ?>
-			<button type="submit" class="btn btn-success">Filter</button>
+                            <?= Html::textInput('called_no',$called_no,['class' => 'filter-input','placeholder' => 'Called Number']); ?>
+                            <button type="submit" class="btn btn-success">Filter</button>
 
-			<?php ActiveForm::end(); ?>
-		</div>
+                            <?php ActiveForm::end(); ?>
+                        </div>
 
-		<!-- <div class="pull-right">
+                        <!-- <div class="pull-right">
 			<input type="text" name="search_box">
 		</div> -->
 
-		<div class="table-responsive">
-			<?= GridView::widget([
+                        <div class="table-responsive">
+                            <?= GridView::widget([
 				'dataProvider' => $dataProvider,
 				'tableOptions' => [
 					'id'=>'list_cld_tbl',
@@ -123,27 +123,27 @@ use kartik\daterange\DateRangePicker;
 
 				],
 			]); ?>
-		</div>
+                        </div>
 
-		<?php Pjax::end() ?>
-		<?php
+                        <?php Pjax::end() ?>
+                        <?php
 		$form = ActiveForm::begin(['id' => 'exportForm','method'=>'get','action' => ['export-mycdr']]);
 		?>
 
-		<?= Html::hiddenInput('export_date', $date,['id' => 'export_date']); ?>
-		<?= Html::hiddenInput('export_caller_id', $caller_id,['id' => 'export_caller_id']); ?>
-		<?= Html::hiddenInput('export_called_no', $called_no,['id' => 'export_called_no']); ?>
-		<?= Html::submitButton('Export to Excel', ['class' => 'btn btn-success exprt_btn']) ?>
+                        <?= Html::hiddenInput('export_date', $date,['id' => 'export_date']); ?>
+                        <?= Html::hiddenInput('export_caller_id', $caller_id,['id' => 'export_caller_id']); ?>
+                        <?= Html::hiddenInput('export_called_no', $called_no,['id' => 'export_called_no']); ?>
+                        <?= Html::submitButton('Export to Excel', ['class' => 'btn btn-success exprt_btn']) ?>
 
-		<?php ActiveForm::end(); ?>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+                        <?php ActiveForm::end(); ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 <script type="text/javascript">
-	if ($('body').find('.pagination').length == 0) {
-		$('.exprt_btn').css('bottom','0px');
-	}
+if ($('body').find('.pagination').length == 0) {
+    $('.exprt_btn').css('bottom', '0px');
+}
 </script>

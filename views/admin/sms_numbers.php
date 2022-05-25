@@ -22,6 +22,18 @@ $this->registerCss('
 		border:none;
 		margin-right:2em;
 	}
+	input.custom_search{
+		margin-bottom:6px;
+		line-height:2.5em;
+		padding-left:0.5em;
+		padding-right:0.5em;
+	}
+	select.custom_filter{
+		margin-bottom:6px;
+		line-height:2.8em;
+		padding-left:0.5em;
+		padding-right:0.5em;
+	}
 	ul.gv_top{
 		list-style-type:none;
 		padding-left:0;
@@ -29,22 +41,25 @@ $this->registerCss('
 	ul.gv_top li{
 		display:inline-block;
 	}
+	#dropdown_top ul.gv_top select{
+		margin-bottom:0.5em;
+	}
 ');
 $this->registerJs('
 	$(document).ready(function(){
-		$("#billgroup_id_search").attr("type", "hidden");
+		//$("#billgroup_id_search").attr("type", "hidden");
 		$("#dd_billgroup_id").change(function(){
 			$("#billgroup_id_search").val(jQuery(this).val()).trigger("change");
 		});
-		$("#sender_id_search").attr("type", "hidden");
+		//$("#sender_id_search").attr("type", "hidden");
 		$("#dd_sender_id").change(function(){
 			$("#sender_id_search").val(jQuery(this).val()).trigger("change");
 		});
-		$("#admin_id_search").attr("type", "hidden");
+		//$("#admin_id_search").attr("type", "hidden");
 		$("#dd_admin_id").change(function(){
 			$("#admin_id_search").val(jQuery(this).val()).trigger("change");
 		});
-		$("#service_id_search").attr("type", "hidden");
+		//$("#service_id_search").attr("type", "hidden");
 		$("#dd_service_id").change(function(){
 			$("#service_id_search").val(jQuery(this).val()).trigger("change");
 		});
@@ -52,6 +67,9 @@ $this->registerJs('
 			if ($(this).val().length > 3) {
 				$("#searchForm").submit();
 			}
+		});
+		$("#search_box").focusout(function() {
+			if($(this).val() == "") $("#searchForm").submit();
 		});
 		$(document).on("change", "#filter_box", function() {
 			$("#searchForm").submit();
@@ -83,7 +101,7 @@ $this->registerJs('
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header card-header-primary">
-                        <h4 class="card-title ">Add CLD</h4>
+                        <h4 class="card-title ">SMS Numbers</h4>
                     </div>
                     <div class="card-body">
                         <div class="row summary_outer">
@@ -100,7 +118,14 @@ $this->registerJs('
                             </div>
                         </div>
                         <div>
+                            <?php $form = ActiveForm::begin(['id' => 'searchForm', 'method' => 'get']); ?>
                             <ul class="gv_top">
+                                <li>
+                                    <?= Html::textInput('search', $search, ['id' => 'search_box', 'class' => 'search_box custom_search pull-left', 'placeholder' => 'Search....']); ?>
+                                </li>
+                                <li>
+                                    <?= Html::dropdownlist('filter', $filter, ['10' => '10', '20' => '20', '50' => '50', '100' => '100', '1000' => '1000'], ['id' => 'filter_box', 'class' => 'filter_box custom_filter pull-left']); ?>
+                                </li>
                                 <li>
                                     <?= Html::a('Assign DDI to Reseller Admin', ['assign-cld-reseller-admin'], ['class' => 'btn btn-success pull-left']) ?>
                                 </li>
@@ -114,23 +139,24 @@ $this->registerJs('
                                     <button type="button" class="btn btn-danger pull-left" id="edit_selected_number"
                                         onclick="javascript:void(0);">Edit Selected Numbers</button>
                                 </li>
+                            </ul>
+                            <?php ActiveForm::end(); ?>
+                        </div>
+                        <div id="dropdown_top">
+                            <ul class="gv_top">
                                 <li>
-                                    <?php $form = ActiveForm::begin(['id' => 'searchForm', 'method' => 'get']); ?>
-                                    <div class="pull_right-medium">
-                                    <?= Html::textInput('search', $search, ['id' => 'search_box', 'class' => 'search_box', 'placeholder' => 'Search....']); ?>
-                                    <?= Html::dropdownlist('filter', $filter, ['10' => '10', '20' => '20', '50' => '50', '100' => '100', '1000' => '1000'], ['id' => 'filter_box', 'class' => 'filter_box']); ?>
-                                    </div>
-                                    <?php ActiveForm::end(); ?>
+                                    <?= Html::dropdownList('dd_billgroup_id',  isset($_GET['FsmastertbSearch']['billgroup_id']) ?  $_GET['FsmastertbSearch']['billgroup_id'] : ""  , $billgroups, ['id' => 'dd_billgroup_id', 'class' => 'btn-dark btn-sm', 'prompt' => 'Select Bill Group', 'role' => 'button']); ?>
+                                </li>
+                                <li>
+                                    <?= Html::dropdownlist('dd_sender_id',  isset($_GET['FsmastertbSearch']['sender_id']) ?  $_GET['FsmastertbSearch']['sender_id'] : ""  , $suppliers, ['id' => 'dd_sender_id', 'class' => 'btn-dark btn-sm', 'prompt' => 'Select Supplier']); ?>
+                                </li>
+                                <li>
+                                    <?= Html::dropdownlist('dd_admin_id',  isset($_GET['FsmastertbSearch']['admin_id']) ?  $_GET['FsmastertbSearch']['admin_id'] : ""  , $clients, ['id' => 'dd_admin_id', 'class' => 'btn-dark btn-sm', 'prompt' => 'Select Client']); ?>
+                                </li>
+                                <li>
+                                    <?= Html::dropdownlist('dd_service_id',  isset($_GET['FsmastertbSearch']['service_id']) ?  $_GET['FsmastertbSearch']['service_id'] : ""  , $services, ['id' => 'dd_service_id', 'class' => 'btn-dark btn-sm', 'prompt' => 'Select Service']); ?>
                                 </li>
                             </ul>
-                        </div>
-                        <div id="dropdown_top" style="margin-bottom:2em;">
-                            <div class="form-group">
-                                <?= Html::dropdownList('dd_billgroup_id',  isset($_GET['FsmastertbSearch']['billgroup_id']) ?  $_GET['FsmastertbSearch']['billgroup_id'] : ""  , $billgroups, ['id' => 'dd_billgroup_id', 'class' => 'custom_select', 'prompt' => 'Select Bill Group', 'role' => 'button']); ?>
-                                <?= Html::dropdownlist('dd_sender_id',  isset($_GET['FsmastertbSearch']['sender_id']) ?  $_GET['FsmastertbSearch']['sender_id'] : ""  , $suppliers, ['id' => 'dd_sender_id', 'class' => 'custom_select', 'prompt' => 'Select Supplier']); ?>
-                                <?= Html::dropdownlist('dd_admin_id',  isset($_GET['FsmastertbSearch']['admin_id']) ?  $_GET['FsmastertbSearch']['admin_id'] : ""  , $clients, ['id' => 'dd_admin_id', 'class' => 'custom_select', 'prompt' => 'Select Client']); ?>
-                                <?= Html::dropdownlist('dd_service_id',  isset($_GET['FsmastertbSearch']['service_id']) ?  $_GET['FsmastertbSearch']['service_id'] : ""  , $services, ['id' => 'dd_service_id', 'class' => 'custom_select', 'prompt' => 'Select Service']); ?>
-                            </div>
                         </div>
                         <div>
                             <div class="table-responsive">
@@ -153,9 +179,11 @@ $this->registerJs('
 										[
 											'label' => 'Bill Group',
 											'attribute' => 'billgroup_id',
-											//'filter' => $billgroups,
+											'filter' => $billgroups,
 											'filterInputOptions' => [
-												'id' => 'billgroup_id_search'
+												'id' => 'billgroup_id_search',
+												'prompt' => 'Select Bill Group',
+												'class' => 'custom_select'
 											],
 											'value' => function ($model) {
 												return isset($model->billgroup) ? $model->billgroup->name : null;
@@ -164,9 +192,11 @@ $this->registerJs('
 										[
 											'label' => 'Suppliers',
 											'attribute' => 'sender_id',
-											//'filter' => $suppliers,
+											'filter' => $suppliers,
 											'filterInputOptions' => [
-												'id' => 'sender_id_search'
+												'id' => 'sender_id_search',
+												'prompt' => 'Select Supplier',
+												'class' => 'custom_select'
 											],
 											'value' => function ($model) {
 												return isset($model->supplier) ? $model->supplier->name : null;	
@@ -174,9 +204,11 @@ $this->registerJs('
 										],
 										[
 											'label' => 'Clients',
-											//'filter' => $clients,
+											'filter' => $clients,
 											'filterInputOptions' => [
-												'id' => 'admin_id_search'
+												'id' => 'admin_id_search',
+												'prompt' => 'Select Client',
+												'class' => 'custom_select'
 											],
 											'attribute' => 'admin_id',
 											'value' => function ($model) {
@@ -186,9 +218,11 @@ $this->registerJs('
 										[
 											'label' => 'Services',
 											'attribute' => 'service_id',
-											//'filter' => $services,
+											'filter' => $services,
 											'filterInputOptions' => [
-												'id' => 'service_id_search'
+												'id' => 'service_id_search',
+												'prompt' => 'Select Service',
+												'class' => 'custom_select'
 											],
 											'value' => function ($model) {
 												return isset(\Yii::$app->params['services'][$model->service_id]) ? \Yii::$app->params['services'][$model->service_id] : null;											
@@ -224,27 +258,30 @@ $this->registerJs('
 											}
 										],
 										[
-											'label' => 'Country Name',
-											'attribute' => 'cld2description',
+											'label' => 'Country',
+											'attribute' => 'country_id',
+											'filter' => $countries,
+											'filterInputOptions' => [
+												'prompt' => 'Select Country',
+												'class' => 'custom_select'
+											],
+											'value' => function($model){
+												return isset($model->country) ? $model->country->Country : null;
+											}
 										],
 										[
 											'label' => 'Cld1 Rate',
 											'attribute' => 'cld1rate',
-											//'filterInputOptions' => [
-											//	'placeholder' => 'Search Cld1 Rate',
-											//]
 										],
 										[
 											'label' => 'Cld2 Rate',
 											'attribute' => 'cld2rate',
-											'footer' => 'Total records: ' . $totalCount,
-											'footerOptions' => ['style' => ['font-size' => 'larger', 'font-weight' => 'bold']],
-											//'filterInputOptions' => [
-											//	'placeholder' => 'Search Cld2 Rate',
-											//]
 										],
 										[
 											'class' => 'yii\grid\ActionColumn',
+											'header' => 'Action',
+											'footer' => 'Total records: ' . $totalCount,
+											'footerOptions' => ['style' => ['font-size' => 'larger', 'font-weight' => 'bold', 'min-width'=> '10em']],
 											'template' => '{update-cld}', // {show-number-routes} {delete-cld}',
 											'buttons' => [
 												'show-number-routes' => function ($url, $model, $key) {

@@ -20,6 +20,16 @@ use yii\widgets\ActiveForm;
 							} else {
 								echo 'User';
 							} ?> List
+							<div class="pull-right">
+                                <?= Html::a(Html::tag('b', 'add', ['class' => 'material-icons']), ['/admin/add-reseller-admin'], [
+                                    'class' => 'btn btn-xs btn-primary btn-round btn-fab',
+                                    'rel' => "tooltip",
+                                    'data' => [
+                                        'placement' => 'bottom',
+                                        'original-title' => 'Create Reseller ADmin'
+                                    ],
+                                ]) ?>
+                            </div>
 						</h4>
 					</div>
 					<div class="card-body">

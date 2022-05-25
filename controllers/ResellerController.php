@@ -31,7 +31,9 @@ use app\models\Country;
 use app\models\Supplier;
 use app\models\Currency;
 
-
+use app\models\TdrSearch;
+use app\models\TdrSearchSummary;
+use app\models\TdrSearchDetailed;
 
 class ResellerController extends \yii\web\Controller
 {
@@ -766,6 +768,7 @@ class ResellerController extends \yii\web\Controller
             'dataProvider' => $dataProvider, 
             'searchModel' => $searchModel,
             'summary' => $summary,
+            'countries' => $this->getCountryItems(),
             'billgroups' => $this->getBillgroupItems(),
             'agents' => $this->getAgentItems(),
             'services' => $this->getServicesItems()
@@ -933,7 +936,7 @@ class ResellerController extends \yii\web\Controller
         }
         if ($model->load(Yii::$app->request->post())) {
             if ($model->save()) {
-                return $this->redirect(['add-cld']);
+                return $this->redirect(['sms-numbers']);
             }
         }
         return $this->render('update_cld', ['model' => $model]);
@@ -964,7 +967,7 @@ class ResellerController extends \yii\web\Controller
                 //->bindValue(':numbers', $numbers)
                 ->execute();
             if ($query) {
-                return $this->redirect(['add-cld']);
+                return $this->redirect(['sms-numbers']);
             } else {
                 throw new ForbiddenHttpException('Failed to edit number, Try again.');
             }
@@ -988,6 +991,7 @@ class ResellerController extends \yii\web\Controller
         return $this->render('billgroups', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'billgroups' => $this->getBillgroupItems(),
             'countries' => $this->getCountryItems(),
             'country_networks' => $this->getCountryNetworkItems(),
             'currencies' => $this->getCurrencyItems(),
@@ -999,73 +1003,122 @@ class ResellerController extends \yii\web\Controller
 
     protected function getCountryItems()
     {
-        $items = [];
-        $res = Country::find()->all();
-        if(is_array($res) && count($res) > 0)
-        {
-            foreach($res as $v)
-            {
-                $items[$v->ID] = $v->Country;
-            }
-        }
-        return $items;
+        $res = Country::find()->groupBy('Country')->all();
+        return \yii\helpers\ArrayHelper::map($res, 'ID', 'Country');
     }
 
     protected function getCountryNetworkItems()
     {
-        $items = [];
         $res = Country::find()->all();
-        if(is_array($res) && count($res) > 0)
-        {
-            foreach($res as $v)
-            {
-                $items[$v->ID] = $v->Country_Network;
-            }
-        }
-        return $items;
+        return \yii\helpers\ArrayHelper::map($res, 'ID', 'Country_Network');
     }
 
     protected function getCurrencyItems()
     {
-        $items = [];
         $res = \app\models\Currency::find()->all();
-        if(is_array($res) && count($res) > 0)
-        {
-            foreach($res as $v)
-            {
-                $items[$v->id] = $v->currency;
-            }
-        }
-        return $items;
+        return \yii\helpers\ArrayHelper::map($res, 'id', 'currency');
     }
     protected function getBillcycleItems()
     {
-        $items = [];
         $res = \app\models\Billcycle::find()->all();
-        if(is_array($res) && count($res) > 0)
-        {
-            foreach($res as $v)
-            {
-                $items[$v->ID] = $v->billcycle;
-            }
-        }
-        return $items;
+        return \yii\helpers\ArrayHelper::map($res, 'ID', 'billcycle');
     }
 
     protected function getSupplierItems()
     {
-        $items = [];
         $res = Supplier::find()->all();
-        if(is_array($res) && count($res) > 0)
-        {
-            foreach($res as $v)
-            {
-                $items[$v->id] = $v->name;
-            }
-        }
-        return $items;
+        return \yii\helpers\ArrayHelper::map($res, 'id', 'name');
     }
 
+
+    public function actionSmsTdr()
+    {
+        $model = new Fsusertb();
+        $search = isset($_GET['search']) ? $_GET['search'] : '';
+        $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
+        $mysubusr = User::find()->select('id')->where(['role' => 2]);
+
+        if ($filter == 'all') {
+            $filter = '';
+        }
+
+        $searchModel = new TdrSearch();
+
+        //$summary = $model->getSummary($mysubusr, true);
+        $mysubusr = User::find()->select('id')->where(['reseller_id' => Yii::$app->user->identity->id, 'role' => 2]);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $mysubusr, $search, false);
+        $dataProvider->setPagination(['pageSize' => $filter]); 
+
+        return $this->render('tdr', [
+            'dataProvider' => $dataProvider, 
+            'searchModel' => $searchModel,
+            //'summary' => $summary, 
+            'search' => $search, 
+            'filter' => $filter,
+            'agents' => $this->getAgentItems(),
+            'suppliers' => $this->getSupplierItems(),
+        ]);
+    }
+
+
+    public function actionSummaryReport()
+    {
+        $model = new Fsusertb();
+        $search = isset($_GET['search']) ? $_GET['search'] : '';
+        $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
+
+        if ($filter == 'all') {
+            $filter = '';
+        }
+
+        $searchModel = new TdrSearchSummary();
+
+        $mysubusr = User::find()->select('id')->where(['reseller_id' => Yii::$app->user->identity->id, 'role' => 2]);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $mysubusr, $search, false, false);
+        $dataProvider->setPagination(['pageSize' => $filter]); 
+
+        return $this->render('summary_report', [
+            'dataProvider' => $dataProvider, 
+            'searchModel' => $searchModel,
+            'search' => $search, 
+            'filter' => $filter,
+            //'clients' => $this->getResellerAdminItems(),
+            'agents' => $this->getAgentItems(),
+            //'suppliers' => $this->getSupplierItems(),
+            'billgroups' => $this->getBillgroupItems(),
+        ]);
+    }
+
+    public function actionDetailedReport()
+    {
+        $model = new Fsusertb();
+        $search = isset($_GET['search']) ? $_GET['search'] : '';
+        $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
+
+        if ($filter == 'all') {
+            $filter = '';
+        }
+
+        $mysubusr = User::find()->select('id')->where(['reseller_id' => Yii::$app->user->identity->id, 'role' => 2]);
+        $searchModel = new TdrSearchSummary();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $mysubusr, $search, false, true);
+        $dataProvider->setPagination(['pageSize' => $filter]); 
+
+        $searchModel_1 = new TdrSearchDetailed();
+        $dataProvider_1 = $searchModel_1->search(Yii::$app->request->queryParams, $mysubusr, $search, false);
+        $dataProvider_1->setPagination(['pageSize' => $filter]); 
+
+        return $this->render('detail_report', [
+            'dataProvider' => $dataProvider, 
+            'dataProvider_1' => $dataProvider_1, 
+            'search' => $search, 
+            'filter' => $filter,
+            //'clients' => $this->getResellerAdminItems(),
+            'agents' => $this->getAgentItems(),
+            //'suppliers' => $this->getSupplierItems(),
+            'billgroups' => $this->getBillgroupItems(),
+        ]);
+    }
 
 
 
