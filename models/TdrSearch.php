@@ -63,6 +63,11 @@ class TdrSearch extends Smscdr
 
         $this->load($params);
 
+        if(empty($search) && empty($params))
+        {
+            $query->andFilterWhere(['id' => 0]); // set empty        
+        }
+
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
             // $query->where('0=1');
@@ -77,14 +82,14 @@ class TdrSearch extends Smscdr
                 switch (count($this->dr))
                 {
                     case 1: 
-                        $dr_start_time = date_create_from_format('d-m-Y', trim($this->dr[0]));
-                        $this->dr_from = date_format($dr_start_time, 'Y-m-d 00:00');
+                        $dr_start_time = date_create_from_format('d-m-Y H:i A', trim($this->dr[0]));
+                        $this->dr_from = date_format($dr_start_time, 'Y-m-d H:i');
                         break;
                     case 2: 
-                        $dr_start_time = date_create_from_format('d-m-Y', trim($this->dr[0]));
-                        $this->dr_from = date_format($dr_start_time, 'Y-m-d 00:00');
-                        $dr_end_time = date_create_from_format('d-m-Y', trim($this->dr[1]));
-                        $this->dr_to = date_format($dr_end_time, 'Y-m-d 23:59');
+                        $dr_start_time = date_create_from_format('d-m-Y H:i A', trim($this->dr[0]));
+                        $this->dr_from = date_format($dr_start_time, 'Y-m-d H:m');
+                        $dr_end_time = date_create_from_format('d-m-Y H:i A', trim($this->dr[1]));
+                        $this->dr_to = date_format($dr_end_time, 'Y-m-d H:i');
                         break;
                 }             
             } catch (\Exception $e) {
@@ -96,31 +101,28 @@ class TdrSearch extends Smscdr
             $query->orFilterWhere([
                 'id' => $search
             ]);
-            if($isAdmin){
-                $query->orFilterWhere([
-                    'billgroup_id' => $search,
-                    'admin_id' => $search,
-                    'sender_id' => $search,
-                ]);
-            } else {
-                if(\Yii::$app->user->identity->role == 2) // user
-                {
-                    // nothing
-                } else if(\Yii::$app->user->identity->role == 3) // reseller
-                {
-                    $query->orFilterWhere([
-                        'agent_id' => $search,
-                    ]);
-                } else if(\Yii::$app->user->identity->role == 4) { // reseller admin
-                    $query->orFilterWhere([
-                        'reseller_id' => $search,
-                    ]);
-                }
-            }
+            // if($isAdmin){
+            //     $query->orFilterWhere([
+            //         'billgroup_id' => $search,
+            //         'admin_id' => $search,
+            //         'sender_id' => $search,
+            //     ]);
+            // } else {
+            //     if(\Yii::$app->user->identity->role == 2) { // user
+            //         // nothing
+            //     } else if(\Yii::$app->user->identity->role == 3) { // reseller
+            //         $query->orFilterWhere([
+            //             'agent_id' => $search,
+            //         ]);
+            //     } else if(\Yii::$app->user->identity->role == 4) { // reseller admin
+            //         $query->orFilterWhere([
+            //             'reseller_id' => $search,
+            //         ]);
+            //     }
+            // }
             $query->orFilterWhere(['like', 'from_number', $search])
             ->orFilterWhere(['like', 'to_number', $search])
             ->orFilterWhere(['like', 'sms_message', $search])
-            //->orFilterWhere(['like', 'delivered_time', $search])
             ;
 
             if(!empty($this->dr_from) && !empty($this->dr_to))

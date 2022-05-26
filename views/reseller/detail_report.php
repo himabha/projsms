@@ -10,6 +10,7 @@ use kartik\daterange\DateRangePicker;
 $search = isset($_GET['search']) ? $_GET['search'] : '';
 $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
 $totalCount = $dataProvider->getTotalCount(); 
+$today = !isset($_GET['TdrSearchSummary']) && !isset($_GET['TdrSearchDetailed']) && !isset($_GET['search']) ? date('d-m-Y') . ' 00:00 AM'  . ' to ' . date('d-m-Y')  . ' 12:59 PM': '';
 $this->registerCss('
 	.pagination {
 		margin-left: 1em;
@@ -87,6 +88,12 @@ $this->registerJs('
 			}
 		});
 
+		let today = "' . $today . '";
+		if(today != "") {
+			$("#dr_from_to_date").val(today);
+			doSearch();
+		}
+
 		$("#dd_billgroup_id").change(function(){
 			doSearch();
 		});
@@ -123,21 +130,23 @@ $this->registerJs('
                         </div>
                         <div>
                             <div class="row">
-                                <div class="col-md-3">
+                                <div class="col-md-4">
                                     <?php
 									echo '<label>Select date</label>';
 									echo '<div class="input-group">';
 									echo DateRangePicker::widget([
     									'id'=> 'dr_from_to_date',
     									'name'=> 'dr_from_to_date',
-    									'value'=> isset($_GET['TdrSearchSummary']['delivered_time']) ? $_GET['TdrSearchSummary']['delivered_time'] : '',
+    									'value'=> isset($_GET['TdrSearchSummary']['delivered_time']) ? $_GET['TdrSearchSummary']['delivered_time'] : $today,
     									'useWithAddon'=>true,
     									'convertFormat'=>true,
 										'initRangeExpr' => true,
 										'startAttribute' => 'start_date',
 										'endAttribute' => 'end_date',
     									'pluginOptions'=>[
-        									'locale'=>['format' => 'd-m-Y', 'separator' => ' to '],
+											'timePicker'=>true,
+											//'timePickerIncrement' => 15,
+											'locale'=>['format' => 'd-m-Y H:i A', 'separator' => ' to '],
         									'showDropdowns'=>true,
 											'ranges' => [
 												"Today" => [
@@ -220,22 +229,48 @@ $this->registerJs('
 									[
 										'attribute' => 'msgs',
 										'label' => 'Msgs',
+										'headerOptions' => ['style' => ['text-align' => 'right']],
+										'contentOptions' => ['style' => ['text-align' => 'right']],
 									],
 									[
 										'attribute' => 'rev_in',
-										'label' => 'Rev In'
+										'label' => 'Rev In',
+										'headerOptions' => ['style' => ['text-align' => 'right']],
+										'contentOptions' => ['style' => ['text-align' => 'right']],
+										'value' => function($model)
+										{
+											return $model->currency . number_format($model->rev_in, 2);
+										}
 									],
 									[
 										'attribute' => 'rev_out',
-										'label' => 'Rev Out'
+										'label' => 'Rev Out',
+										'headerOptions' => ['style' => ['text-align' => 'right']],
+										'contentOptions' => ['style' => ['text-align' => 'right']],
+										'value' => function($model)
+										{
+											return $model->currency . number_format($model->rev_out, 2);
+										}
 									],
 									[
 										'attribute' => 'profit',
-										'label' => 'Profit'
+										'label' => 'Profit',
+										'headerOptions' => ['style' => ['text-align' => 'right']],
+										'contentOptions' => ['style' => ['text-align' => 'right']],
+										'value' => function($model)
+										{
+											return $model->currency . number_format($model->profit, 2);
+										}
 									],
 									[
 										'attribute' => 'profit_percentage',
-										'label' => '% Profit'
+										'label' => '% Profit',
+										'headerOptions' => ['style' => ['text-align' => 'right']],
+										'contentOptions' => ['style' => ['text-align' => 'right']],
+										'value' => function($model)
+										{
+											return number_format($model->profit_percentage, 2);
+										}
 									],
 								],
 							]); ?>
@@ -289,6 +324,8 @@ $this->registerJs('
 									[
 										'attribute' => 'msgs',
 										'label' => 'Total SMS',
+										'headerOptions' => ['style' => ['text-align' => 'right']],
+										'contentOptions' => ['style' => ['text-align' => 'right']],
 									],
 								],
 							]); ?>

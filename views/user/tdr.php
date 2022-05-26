@@ -10,6 +10,7 @@ use kartik\daterange\DateRangePicker;
 $search = isset($_GET['search']) ? $_GET['search'] : '';
 $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
 $totalCount = $dataProvider->getTotalCount();
+$today = !isset($_GET['TdrSearch']) && !isset($_GET['search']) ? date('d-m-Y') . ' 00:00 AM'  . ' to ' . date('d-m-Y')  . ' 12:59 PM': '';
 $this->registerCss('
 	.pagination {
 		margin-left: 1em;
@@ -78,6 +79,9 @@ $this->registerJs('
 			}
 		});
 
+		let today = "' . $today . '";
+		if(today != "") $("#delivered_time_search").val(today).trigger("change");
+
 		$("#dd_billgroup_id").change(function(){
 			$("#billgroup_id_search").val(jQuery(this).val()).trigger("change");
 		});
@@ -110,21 +114,23 @@ $this->registerJs('
                         </div>
                         <div>
                             <div class="row">
-                                <div class="col-md-3">
+                                <div class="col-md-4">
                                     <?php
 									echo '<label>Select date</label>';
 									echo '<div class="input-group">';
 									echo DateRangePicker::widget([
     									'id'=> 'dr_from_to_date',
     									'name'=> 'dr_from_to_date',
-    									'value'=> isset($_GET['TdrSearch']['delivered_time']) ? $_GET['TdrSearch']['delivered_time'] : '',
+    									'value'=> isset($_GET['TdrSearch']['delivered_time']) ? $_GET['TdrSearch']['delivered_time'] : $today,
     									'useWithAddon'=>true,
     									'convertFormat'=>true,
 										'initRangeExpr' => true,
 										'startAttribute' => 'start_date',
 										'endAttribute' => 'end_date',
     									'pluginOptions'=>[
-        									'locale'=>['format' => 'd-m-Y', 'separator' => ' to '],
+											'timePicker'=>true,
+											//'timePickerIncrement' => 15,
+											'locale'=>['format' => 'd-m-Y H:i A', 'separator' => ' to '],
         									'showDropdowns'=>true,
 											'ranges' => [
 												"Today" => [
