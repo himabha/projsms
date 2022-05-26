@@ -235,16 +235,16 @@ $this->registerJs('
 											return $model->currency . number_format($model->rev_in, 2);
 										}
 									],
-									[
-										'attribute' => 'rev_out',
-										'label' => 'Rev Out',
-										'headerOptions' => ['style' => ['text-align' => 'right']],
-										'contentOptions' => ['style' => ['text-align' => 'right']],
-										'value' => function($model)
-										{
-											return $model->currency . number_format($model->rev_out, 2);
-										}
-									],
+									// [
+									// 	'attribute' => 'rev_out',
+									// 	'label' => 'Rev Out',
+									// 	'headerOptions' => ['style' => ['text-align' => 'right']],
+									// 	'contentOptions' => ['style' => ['text-align' => 'right']],
+									// 	'value' => function($model)
+									// 	{
+									// 		return $model->currency . number_format($model->rev_out, 2);
+									// 	}
+									// ],
 									[
 										'attribute' => 'profit',
 										'label' => 'Profit',
@@ -255,16 +255,17 @@ $this->registerJs('
 											return $model->currency . number_format($model->profit, 2);
 										}
 									],
-									[
-										'attribute' => 'profit_percentage',
-										'label' => '% Profit',
-										'headerOptions' => ['style' => ['text-align' => 'right']],
-										'contentOptions' => ['style' => ['text-align' => 'right']],
-										'value' => function($model)
-										{
-											return number_format($model->profit_percentage, 2);
-										}
-									],								],
+									// [
+									// 	'attribute' => 'profit_percentage',
+									// 	'label' => '% Profit',
+									// 	'headerOptions' => ['style' => ['text-align' => 'right']],
+									// 	'contentOptions' => ['style' => ['text-align' => 'right']],
+									// 	'value' => function($model)
+									// 	{
+									// 		return number_format($model->profit_percentage, 2);
+									// 	}
+									// ],								
+								],
 							]); ?>
                         </div>
                         <div class="table-responsive">

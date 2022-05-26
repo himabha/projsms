@@ -64,9 +64,9 @@ class TdrSearchSummary extends Smscdr
             if(\Yii::$app->user->identity->role == 2) { // user
                 if($detail)
                 {
-                    $query = Smscdr::find()->select("billgroup_id, currency, count(*) as msgs, sum(cld1rate) as rev_in, sum(cld3rate) as rev_out, sum(cld1rate - cld3rate) as profit, ((sum(cld1rate) / sum(cld3rate)) * 100) as profit_percentage");
+                    $query = Smscdr::find()->select("billgroup_id, currency, count(*) as msgs, sum(cld3rate) as rev_in, sum(cld3rate) as profit");
                 } else {
-                    $query = Smscdr::find()->select("currency, count(*) as msgs, sum(cld1rate) as rev_in, sum(cld3rate) as rev_out, sum(cld1rate - cld3rate) as profit, ((sum(cld1rate) / sum(cld3rate)) * 100) as profit_percentage");
+                    $query = Smscdr::find()->select("currency, count(*) as msgs, sum(cld3rate) as rev_in, sum(cld3rate) as profit");
                 }
             } else if(\Yii::$app->user->identity->role == 3) { // reseller
                 if($detail)

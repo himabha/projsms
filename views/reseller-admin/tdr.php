@@ -178,7 +178,7 @@ $this->registerJs('
                                     <?= Html::dropdownlist('dd_billgroup_id',  isset($_GET['TdrSearch']['billgroup_id']) ?  $_GET['TdrSearch']['billgroup_id'] : ""  , $billgroups, ['id' => 'dd_billgroup_id', 'class' => 'btn btn-dark btn-sm', 'prompt' => 'Select Billgroup']); ?>
                                 </li>
                                 <li>
-                                    <?= Html::dropdownlist('dd_reseller_id',  isset($_GET['TdrSearch']['reseller_id']) ?  $_GET['TdrSearch']['reseller_id'] : ""  , $resellers, ['id' => 'dd_reseller_id', 'class' => 'btn btn-dark btn-sm', 'prompt' => 'Select Reseller']); ?>
+                                    <?= Html::dropdownlist('dd_reseller_id',  isset($_GET['TdrSearch']['reseller_id']) ?  $_GET['TdrSearch']['reseller_id'] : ""  , $resellers, ['id' => 'dd_reseller_id', 'class' => 'btn btn-dark btn-sm', 'prompt' => 'Select Client']); ?>
                                 </li>
                                 <li>
                                     <?= Html::button('Refresh', ['id' => 'btnRefresh', 'class' => 'btn btn-success btn-sm']); ?>
@@ -223,12 +223,12 @@ $this->registerJs('
 											}
 										],
                                         [
-                                            'label' => 'Reseller',
+                                            'label' => 'Client',
                                             'attribute' => 'reseller_id',
                                             'filter' => $resellers,
                                             'filterInputOptions' => [
                                                 'id' => 'reseller_id_search',
-                                                'prompt' => 'Select Reseller',
+                                                'prompt' => 'Select Client',
                                                 'class' => 'custom_select'
                                             ],												
                                             'value' => function ($model) {

@@ -105,17 +105,17 @@ $this->registerJs('
                                         <li>
                                             <?= Html::dropdownlist('filter', $filter, ['10' => '10', '20' => '20', '50' => '50', '100' => '100', '1000' => '1000'], ['id' => 'filter_box', 'class' => 'filter_box custom_filter pull-left']); ?>
                                         </li>
+                                        <!-- <li>
+                                            <?php //= Html::a('Assign DDI to Reseller', ['assign-cld'], ['class' => 'btn btn-success pull-left']) ?>
+                                        </li> -->
                                         <li>
-                                            <?= Html::a('Assign DDI to Reseller', ['assign-cld'], ['class' => 'btn btn-success pull-left']) ?>
+                                            <?= Html::a('Unallocate Reseller', ['show-assigned'], ['class' => 'btn btn-success pull-left']) ?>
                                         </li>
-                                        <li>
-                                            <?= Html::a('Detach DDI to Reseller', ['show-assigned'], ['class' => 'btn btn-success pull-left']) ?>
-                                        </li>
-                                        <li>
+                                        <!-- <li>
                                             <button type="button" class="btn btn-danger pull-left"
                                                 id="edit_selected_number" onclick="javascript:void(0);">Edit Selected
                                                 Numbers</button>
-                                        </li>
+                                        </li> -->
                                     </ul>
                                     <?php ActiveForm::end(); ?>
                                 </div>
