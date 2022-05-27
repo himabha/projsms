@@ -314,11 +314,11 @@ $this->registerJs('
 										}
 									],
 									[
-										'attribute' => 'cli',
+										'attribute' => 'from_number',
 										'label' => 'CLI'
 									],
 									[
-										'attribute' => 'bnum',
+										'attribute' => 'to_number',
 										'label' => 'BNUM'
 									],
 									[

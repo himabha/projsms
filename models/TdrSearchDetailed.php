@@ -23,7 +23,7 @@ class TdrSearchDetailed extends Smscdr
     public function rules()
     {
         $return = [
-            [['currency'], 'safe'],
+            [['currency', 'from_number', 'to_number'], 'safe'],
             [['msgs', 'countrynetwork_id',  'billgroup_id'], 'integer'],
             [['admin_id', 'reseller_id', 'agent_id', 'sender_id'], 'integer'],
             [['delivered_time'], 'safe'],
@@ -53,14 +53,14 @@ class TdrSearchDetailed extends Smscdr
     {
         if($isAdmin)
         {
-            $query = Smscdr::find()->select("countrynetwork_id, billgroup_id, sender_id, admin_id, count(*) as msgs");
+            $query = Smscdr::find()->select("countrynetwork_id, billgroup_id, sender_id, admin_id, count(*) as msgs, from_number, to_number");
         } else {
             if(Yii::$app->user->identity->role == 3) { // reseller
-                $query = Smscdr::find()->select("countrynetwork_id, billgroup_id, agent_id, count(*) as msgs");
+                $query = Smscdr::find()->select("countrynetwork_id, billgroup_id, agent_id, count(*) as msgs, from_number, to_number");
             } else if(Yii::$app->user->identity->role == 4){ // reseller admin
-                $query = Smscdr::find()->select("countrynetwork_id, billgroup_id, reseller_id, count(*) as msgs");
+                $query = Smscdr::find()->select("countrynetwork_id, billgroup_id, reseller_id, count(*) as msgs, from_number, to_number");
             } else if(Yii::$app->user->identity->role == 2) { //user
-                $query = Smscdr::find()->select("countrynetwork_id, billgroup_id, count(*) as msgs");
+                $query = Smscdr::find()->select("countrynetwork_id, billgroup_id, count(*) as msgs, from_number, to_number");
             }
         }
 
@@ -232,14 +232,14 @@ class TdrSearchDetailed extends Smscdr
         }
         
         if($isAdmin){
-            $query->groupBy('countrynetwork_id, billgroup_id, sender_id, admin_id');
+            $query->groupBy('countrynetwork_id, billgroup_id, sender_id, admin_id, from_number, to_number');
         } else {
             if(Yii::$app->user->identity->role == 3) { // reseller
-                $query->groupBy('countrynetwork_id, billgroup_id, agent_id');
+                $query->groupBy('countrynetwork_id, billgroup_id, agent_id, from_number, to_number');
             } else if(Yii::$app->user->identity->role == 4){ // reseller admin
-                $query->groupBy('countrynetwork_id, billgroup_id, reseller_id');
+                $query->groupBy('countrynetwork_id, billgroup_id, reseller_id, from_number, to_number');
             } else if(Yii::$app->user->identity->role == 2) { //user
-                $query->groupBy('countrynetwork_id, billgroup_id');
+                $query->groupBy('countrynetwork_id, billgroup_id, from_number, to_number');
             }
         }
         $dataProvider = new ActiveDataProvider([
