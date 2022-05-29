@@ -1044,7 +1044,6 @@ class ResellerController extends \yii\web\Controller
 
         $searchModel = new TdrSearch();
 
-        //$summary = $model->getSummary($mysubusr, true);
         $mysubusr = User::find()->select('id')->where(['reseller_id' => Yii::$app->user->identity->id, 'role' => 2]);
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $mysubusr, $search, false);
         $dataProvider->setPagination(['pageSize' => $filter]); 
@@ -1052,9 +1051,9 @@ class ResellerController extends \yii\web\Controller
         return $this->render('tdr', [
             'dataProvider' => $dataProvider, 
             'searchModel' => $searchModel,
-            //'summary' => $summary, 
             'search' => $search, 
             'filter' => $filter,
+            'billgroups' => $this->getBillgroupItems(),
             'agents' => $this->getAgentItems(),
             'suppliers' => $this->getSupplierItems(),
         ]);
@@ -1082,9 +1081,7 @@ class ResellerController extends \yii\web\Controller
             'searchModel' => $searchModel,
             'search' => $search, 
             'filter' => $filter,
-            //'clients' => $this->getResellerAdminItems(),
             'agents' => $this->getAgentItems(),
-            //'suppliers' => $this->getSupplierItems(),
             'billgroups' => $this->getBillgroupItems(),
         ]);
     }

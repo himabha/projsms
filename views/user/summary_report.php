@@ -10,17 +10,7 @@ use kartik\daterange\DateRangePicker;
 $search = isset($_GET['search']) ? $_GET['search'] : '';
 $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
 $totalCount = $dataProvider->getTotalCount(); 
-$dr_start = '';
-$dr_end = '';
-if(!empty($_GET['TdrSearchSummary']['delivered_time']))
-{
-	$dr_arr = explode("to", $_GET['TdrSearchSummary']['delivered_time']);
-	if(is_array($dr_arr) && count($dr_arr) > 0)
-	{
-		if(!empty(trim($dr_arr[0]))) $dr_start = trim($dr_arr[0]);
-		if(!empty(trim($dr_arr[1]))) $dr_end = trim($dr_arr[1]);
-	}
-}
+$today = !isset($_GET['TdrSearchSummary']) && !isset($_GET['search']) ? date('d-m-Y') . ' 00:00 AM'  . ' to ' . date('d-m-Y')  . ' 12:59 PM': '';
 $this->registerCss('
 	.pagination {
 		margin-left: 1em;
@@ -59,7 +49,14 @@ $this->registerCss('
 	}
 ');
 $this->registerJs('
-	var date_range = "";
+
+	function doSearch() {
+		const params = new URLSearchParams(location.search);
+		params.append("TdrSearchSummary[billgroup_id]", document.getElementById("dd_billgroup_id").value);
+		params.append("TdrSearchSummary[delivered_time]", document.getElementById("dr_from_to_date").value);
+		window.location.replace(`${location.pathname}?${params.toString()}`);
+	}; 
+
 	$(document).ready(function(){
 		$("#search_box").keyup(function() {
 			if ($(this).val().length > 3) {
@@ -90,83 +87,18 @@ $this->registerJs('
 			}
 		});
 
-		function doSearch() {
-			const params = new URLSearchParams(location.search);
-			params.append("TdrSearchSummary[billgroup_id]", $("#dd_billgroup_id").val());
-			params.append("TdrSearchSummary[delivered_time]", date_range);
-			//window.history.replaceState({}, "", `${location.pathname}?${params.toString()}`);
-			window.location.replace(`${location.pathname}?${params.toString()}`);
-		}; 
+		let today = "' . $today . '";
+		if(today != "") {
+			$("#dr_from_to_date").val(today);
+			doSearch();
+		}
 
 		$("#dd_billgroup_id").change(function(){
-			doSearch();
-		});
-		$("#btnClearRange").click(function(){
-			$("#dr_from_date").val("");
-			$("#dr_to_date").val("");
-			date_range = "";
 			doSearch();
 		});
 		$("#btnRefresh").click(function(){
 			doSearch();
 		});
-		$("#dr_to_date").keyup(function() {
-			$(this).trigger("change");
-		});
-		$("#dr_to_date").change(function(){
-			let dr_from = $("#dr_from_date").val();
-			let dr_to = $("#dr_to_date").val();
-			if(dr_from != "" && dr_to != "")
-			{
-				if(moment(dr_to, "DD-MM-YYYY HH:mm") > moment(dr_from, "DD-MM-YYYY HH:mm"))
-				{
-					date_range = dr_from + " to " + dr_to;
-					doSearch();
-				} else {
-					alert("From date must earlier than To date");
-				}
-			}
-		});
-		$("#btnToday").click(function(){
-			let dt_from = moment().format("DD-MM-YYYY 00:00");
-			let dt_to = moment().format("DD-MM-YYYY 23:59");
-			$("#dr_from_date").val(dt_from);
-			$("#dr_to_date").val(dt_to).trigger("change");
-		});
-		$("#btnYesterday").click(function(){
-			let dt_from = moment().subtract(1, "day").format("DD-MM-YYYY 00:00");
-			let dt_to = moment().subtract(1, "day").format("DD-MM-YYYY 23:59");
-			$("#dr_from_date").val(dt_from);
-			$("#dr_to_date").val(dt_to).trigger("change");
-		});
-		$("#btnLast7Days").click(function(){
-			let dt_from = moment().subtract(7, "day").format("DD-MM-YYYY 00:00");
-			let dt_to = moment().subtract(1, "day").format("DD-MM-YYYY 23:59");
-			$("#dr_from_date").val(dt_from);
-			$("#dr_to_date").val(dt_to).trigger("change");
-		});
-		$("#btnFullWeek").click(function(){
-			let startLastWeek = moment().subtract(1, "week").startOf("isoWeek")
-			let endLastWeek = moment().subtract(1, "week").endOf("isoWeek")
-
-			let dt_from = startLastWeek.subtract(1, "day").format("DD-MM-YYYY 00:00");
-			let dt_to = endLastWeek.subtract(1, "day").format("DD-MM-YYYY 23:59");
-			$("#dr_from_date").val(dt_from);
-			$("#dr_to_date").val(dt_to).trigger("change");
-		});
-		$("#btnThisMonth").click(function(){
-			let dt_from = moment().startOf("month").format("DD-MM-YYYY 00:00");
-			let dt_to = moment().endOf("month").format("DD-MM-YYYY 23:59");
-			$("#dr_from_date").val(dt_from);
-			$("#dr_to_date").val(dt_to).trigger("change");
-		});
-		$("#btnLastMonth").click(function(){
-			let dt_from = moment().subtract(1, "month").startOf("month").format("DD-MM-YYYY 00:00");
-			let dt_to = moment().subtract(1, "month").endOf("month").format("DD-MM-YYYY 23:59");
-			$("#dr_from_date").val(dt_from);
-			$("#dr_to_date").val(dt_to).trigger("change");
-		});
-
 	});
 ');
 ?>
@@ -194,78 +126,75 @@ $this->registerJs('
                         </div>
                         <div>
                             <div class="row">
-                                <div class="col-md-2">
-                                    <?php
-									echo '<div class="input-group">';
-									echo '<label>From';
-									echo DateRangePicker::widget([
-    									'id'=> 'dr_from_date',
-    									'name'=> 'dr_from_date',
-    									'value'=> $dr_start,
-    									'useWithAddon'=>true,
-    									'convertFormat'=>true,
-    									'pluginOptions'=>[
-        									'timePicker'=>true,
-        									'timePickerIncrement'=>15,
-        									'locale'=>['format' => 'd-m-Y h:m'],
-        									'singleDatePicker'=>true,
-        									'showDropdowns'=>true
-    									]
-									]);
-									echo '<label>';
-									echo '</div>';
-									?>
-                                </div>
-                                <div class="col-md-2">
-                                    <?php
-									echo '<div class="input-group">';
-									echo '<label>To';
-									echo DateRangePicker::widget([
-    									'id'=>'dr_to_date',
-    									'name'=>'dr_to_date',
-										'value'=> $dr_end,
-    									'useWithAddon'=>true,
-    									'convertFormat'=>true,
-    									'pluginOptions'=>[
-        									'timePicker'=>true,
-        									'timePickerIncrement'=>15,
-        									'locale'=>['format' => 'd-m-Y h:m'],
-        									'singleDatePicker'=>true,
-        									'showDropdowns'=>true
-    									]
-									]);
-									echo '<label>';
-									echo '</div>';
-									?>
-                                </div>
                                 <div class="col-md-4">
                                     <?php
-									echo Html::button('Clear Range', ['id' => 'btnClearRange', 'class' => 'btn btn-success']); 
-									echo Html::button('Refresh', ['id' => 'btnRefresh', 'class' => 'btn btn-success']); 
+									echo '<label>Select date</label>';
+									echo '<div class="input-group">';
+									echo DateRangePicker::widget([
+    									'id'=> 'dr_from_to_date',
+    									'name'=> 'dr_from_to_date',
+    									'value'=> isset($_GET['TdrSearchSummary']['delivered_time']) ? $_GET['TdrSearchSummary']['delivered_time'] : $today,
+    									'useWithAddon'=>true,
+    									'convertFormat'=>true,
+										'initRangeExpr' => true,
+										'startAttribute' => 'start_date',
+										'endAttribute' => 'end_date',
+    									'pluginOptions'=>[
+											'timePicker'=>true,
+											//'timePickerIncrement' => 15,
+											'locale'=>['format' => 'd-m-Y H:i A', 'separator' => ' to '],
+        									'showDropdowns'=>true,
+											'ranges' => [
+												"Today" => [
+													"moment().startOf('day')", 
+													"moment().endOf('day')"
+												],
+												"Yesterday" => [
+													"moment().startOf('day').subtract(1,'days')", 
+													"moment().endOf('day').subtract(1,'days')"
+												],
+												"Last 7 Days" => [
+													"moment().subtract(7, 'day')", 
+													"moment().subtract(1, 'day')"
+												],
+												"Last Full Week" => [
+													"moment().subtract(1, 'week').startOf('isoWeek').subtract(1, 'day')", 
+													"moment().subtract(1, 'week').endOf('isoWeek').subtract(1, 'day')"
+												],
+												"This Month" => [
+													"moment().startOf('month')", 
+													"moment().endOf('month')"
+												],
+												"Last Month" => [
+													"moment().subtract(1, 'month').startOf('month')", 
+													"moment().subtract(1, 'month').endOf('month')"
+												],
+											]										
+											],
+											'pluginEvents' => [
+												"apply.daterangepicker" => "function() { 
+													doSearch();
+												}",
+											]
+									]);
+									echo '</div>';
 									?>
                                 </div>
                             </div>
-                            <div style="margin-bottom:1em;">
-                                <?= Html::button('TODAY', ['id' => 'btnToday', 'class' => 'btn btn-dark btn-sm']); ?>
-                                <?= Html::button('YESTERDAY', ['id' => 'btnYesterday', 'class' => 'btn btn-dark btn-sm']); ?>
-                                <?= Html::button('LAST 7 DAYS', ['id' => 'btnLast7Days', 'class' => 'btn btn-dark btn-sm']); ?>
-                                <?= Html::button('LAST FULL WEEKS', ['id' => 'btnFullWeek', 'class' => 'btn btn-dark btn-sm']); ?>
-                                <?= Html::button('THIS MONTH', ['id' => 'btnThisMonth', 'class' => 'btn btn-dark btn-sm']); ?>
-                                <?= Html::button('LAST MONTH', ['id' => 'btnLastMonth', 'class' => 'btn btn-dark btn-sm']); ?>
-                            </div>
                         </div>
-                        <div id="dropdown_top">
+                        <div id="dropdown_top" style="margin-top:1em;">
                             <ul class="gv_top">
                                 <li>
-                                    <?= Html::dropdownlist('dd_billgroup_id',  isset($_GET['TdrSearchSummary']['billgroup_id']) ?  $_GET['TdrSearchSummary']['billgroup_id'] : ""  , $billgroups, ['id' => 'dd_billgroup_id', 'class' => 'btn-dark btn-sm', 'prompt' => 'Select Billgroup']); ?>
+                                    <?= Html::dropdownlist('dd_billgroup_id',  isset($_GET['TdrSearchSummary']['billgroup_id']) ?  $_GET['TdrSearchSummary']['billgroup_id'] : ""  , $billgroups, ['id' => 'dd_billgroup_id', 'class' => 'btn btn-dark btn-sm', 'prompt' => 'Select Billgroup']); ?>
+                                </li>
+                                <li>
+                                    <?= Html::button('Refresh', ['id' => 'btnRefresh', 'class' => 'btn btn-success btn-sm']); ?>
                                 </li>
                             </ul>
                         </div>
                         <div class="table-responsive">
-                            <h4><b>Summary</b></h4>
                             <?= GridView::widget([
 								'dataProvider' => $dataProvider,
-								//'filterModel' => $searchModel,
 								'tableOptions' => [
 									'id' => 'list_cld_tbl',
 									'class' => 'table'
@@ -278,27 +207,53 @@ $this->registerJs('
 									[
 										'attribute' => 'msgs',
 										'label' => 'Msgs',
+										'headerOptions' => ['style' => ['text-align' => 'right']],
+										'contentOptions' => ['style' => ['text-align' => 'right']],
 									],
 									[
 										'attribute' => 'rev_in',
-										'label' => 'Rev In'
+										'label' => 'Rev In',
+										'headerOptions' => ['style' => ['text-align' => 'right']],
+										'contentOptions' => ['style' => ['text-align' => 'right']],
+										'value' => function($model)
+										{
+											return $model->currency . number_format($model->rev_in, 2);
+										}
 									],
-									[
-										'attribute' => 'rev_out',
-										'label' => 'Rev Out'
-									],
+									// [
+									// 	'attribute' => 'rev_out',
+									// 	'label' => 'Rev Out',
+									// 	'headerOptions' => ['style' => ['text-align' => 'right']],
+									// 	'contentOptions' => ['style' => ['text-align' => 'right']],
+									// 	'value' => function($model)
+									// 	{
+									// 		return $model->currency . number_format($model->rev_out, 2);
+									// 	}
+									// ],
 									[
 										'attribute' => 'profit',
-										'label' => 'Profit'
+										'label' => 'Profit',
+										'headerOptions' => ['style' => ['text-align' => 'right']],
+										'contentOptions' => ['style' => ['text-align' => 'right']],
+										'value' => function($model)
+										{
+											return $model->currency . number_format($model->profit, 2);
+										}
 									],
-									[
-										'attribute' => 'profit_percentage',
-										'label' => '% Profit'
-									],
+									// [
+									// 	'attribute' => 'profit_percentage',
+									// 	'label' => '% Profit',
+									// 	'headerOptions' => ['style' => ['text-align' => 'right']],
+									// 	'contentOptions' => ['style' => ['text-align' => 'right']],
+									// 	'value' => function($model)
+									// 	{
+									// 		return number_format($model->profit_percentage, 2);
+									// 	}
+									// ],
 								],
 							]); ?>
                         </div>
-					</div>
+                    </div>
                 </div>
             </div>
         </div>

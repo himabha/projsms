@@ -23,7 +23,7 @@ class TdrSearchDetailed extends Smscdr
     public function rules()
     {
         $return = [
-            [['currency'], 'safe'],
+            [['currency', 'from_number', 'to_number'], 'safe'],
             [['msgs', 'countrynetwork_id',  'billgroup_id'], 'integer'],
             [['admin_id', 'reseller_id', 'agent_id', 'sender_id'], 'integer'],
             [['delivered_time'], 'safe'],
@@ -53,14 +53,14 @@ class TdrSearchDetailed extends Smscdr
     {
         if($isAdmin)
         {
-            $query = Smscdr::find()->select("countrynetwork_id, billgroup_id, sender_id, admin_id, count(*) as msgs");
+            $query = Smscdr::find()->select("countrynetwork_id, billgroup_id, sender_id, admin_id, count(*) as msgs, from_number, to_number");
         } else {
             if(Yii::$app->user->identity->role == 3) { // reseller
-                $query = Smscdr::find()->select("countrynetwork_id, billgroup_id, agent_id, count(*) as msgs");
+                $query = Smscdr::find()->select("countrynetwork_id, billgroup_id, agent_id, count(*) as msgs, from_number, to_number");
             } else if(Yii::$app->user->identity->role == 4){ // reseller admin
-                $query = Smscdr::find()->select("countrynetwork_id, billgroup_id, reseller_id, count(*) as msgs");
+                $query = Smscdr::find()->select("countrynetwork_id, billgroup_id, reseller_id, count(*) as msgs, from_number, to_number");
             } else if(Yii::$app->user->identity->role == 2) { //user
-                $query = Smscdr::find()->select("countrynetwork_id, billgroup_id, count(*) as msgs");
+                $query = Smscdr::find()->select("countrynetwork_id, billgroup_id, count(*) as msgs, from_number, to_number");
             }
         }
 
@@ -74,6 +74,11 @@ class TdrSearchDetailed extends Smscdr
         // }
 
         $this->load($params);
+        if(empty($search) && empty($params))
+        {
+            $query->andFilterWhere(['id' => 0]); // set empty        
+        }
+
         if(isset($params['TdrSearchSummary']['billgroup_id']))
         {
             $this->billgroup_id = $params['TdrSearchSummary']['billgroup_id'];
@@ -94,9 +99,9 @@ class TdrSearchDetailed extends Smscdr
         {
             $this->sender_id = $params['TdrSearchSummary']['sender_id'];
         }
-        if(isset($params['TdrSearchSummary']['delviered_time']))
+        if(isset($params['TdrSearchSummary']['delivered_time']))
         {
-            $this->sender_id = $params['TdrSearchSummary']['delivered_time'];
+            $this->delivered_time = $params['TdrSearchSummary']['delivered_time'];
         }
 
         if (!$this->validate()) {
@@ -113,13 +118,13 @@ class TdrSearchDetailed extends Smscdr
                 switch (count($this->dr))
                 {
                     case 1: 
-                        $dr_start_time = date_create_from_format('d-m-Y H:i', trim($this->dr[0]));
+                        $dr_start_time = date_create_from_format('d-m-Y H:i A', trim($this->dr[0]));
                         $this->dr_from = date_format($dr_start_time, 'Y-m-d H:i');
                         break;
                     case 2: 
-                        $dr_start_time = date_create_from_format('d-m-Y H:i', trim($this->dr[0]));
-                        $this->dr_from = date_format($dr_start_time, 'Y-m-d H:i');
-                        $dr_end_time = date_create_from_format('d-m-Y H:i', trim($this->dr[1]));
+                        $dr_start_time = date_create_from_format('d-m-Y H:i A', trim($this->dr[0]));
+                        $this->dr_from = date_format($dr_start_time, 'Y-m-d H:m');
+                        $dr_end_time = date_create_from_format('d-m-Y H:i A', trim($this->dr[1]));
                         $this->dr_to = date_format($dr_end_time, 'Y-m-d H:i');
                         break;
                 }             
@@ -132,29 +137,29 @@ class TdrSearchDetailed extends Smscdr
             $query->orFilterWhere([
                 'id' => $search
             ]);
-            $query->orFilterWhere([
-                'billgroup_id' => $this->billgroup_id,
-            ]);
-            if($isAdmin){
-                $query->orFilterWhere([
-                    'admin_id' => $search,
-                    'sender_id' => $search,
-                ]);
-            } else {
-                if(\Yii::$app->user->identity->role == 2) // user
-                {
-                    // nothing
-                } else if(\Yii::$app->user->identity->role == 3) // reseller
-                {
-                    $query->orFilterWhere([
-                        'agent_id' => $search,
-                    ]);
-                } else if(\Yii::$app->user->identity->role == 4) { // reseller admin
-                    $query->orFilterWhere([
-                        'reseller_id' => $search,
-                    ]);
-                }
-            }
+            // $query->orFilterWhere([
+            //     'billgroup_id' => $this->billgroup_id,
+            // ]);
+            // if($isAdmin){
+            //     $query->orFilterWhere([
+            //         'admin_id' => $search,
+            //         'sender_id' => $search,
+            //     ]);
+            // } else {
+            //     if(\Yii::$app->user->identity->role == 2) // user
+            //     {
+            //         // nothing
+            //     } else if(\Yii::$app->user->identity->role == 3) // reseller
+            //     {
+            //         $query->orFilterWhere([
+            //             'agent_id' => $search,
+            //         ]);
+            //     } else if(\Yii::$app->user->identity->role == 4) { // reseller admin
+            //         $query->orFilterWhere([
+            //             'reseller_id' => $search,
+            //         ]);
+            //     }
+            // }
             $query->orFilterWhere(['like', 'from_number', $search])
             ->orFilterWhere(['like', 'to_number', $search])
             ->orFilterWhere(['like', 'sms_message', $search])
@@ -227,14 +232,14 @@ class TdrSearchDetailed extends Smscdr
         }
         
         if($isAdmin){
-            $query->groupBy('countrynetwork_id, billgroup_id, sender_id, admin_id');
+            $query->groupBy('countrynetwork_id, billgroup_id, sender_id, admin_id, from_number, to_number');
         } else {
             if(Yii::$app->user->identity->role == 3) { // reseller
-                $query->groupBy('countrynetwork_id, billgroup_id, agent_id');
+                $query->groupBy('countrynetwork_id, billgroup_id, agent_id, from_number, to_number');
             } else if(Yii::$app->user->identity->role == 4){ // reseller admin
-                $query->groupBy('countrynetwork_id, billgroup_id, reseller_id');
+                $query->groupBy('countrynetwork_id, billgroup_id, reseller_id, from_number, to_number');
             } else if(Yii::$app->user->identity->role == 2) { //user
-                $query->groupBy('countrynetwork_id, billgroup_id');
+                $query->groupBy('countrynetwork_id, billgroup_id, from_number, to_number');
             }
         }
         $dataProvider = new ActiveDataProvider([

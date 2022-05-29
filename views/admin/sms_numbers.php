@@ -278,6 +278,10 @@ $this->registerJs('
 											'attribute' => 'cld2rate',
 										],
 										[
+											'label' => 'Allocated Date',
+											'attribute' => 'allocated_date',
+										],
+										[
 											'class' => 'yii\grid\ActionColumn',
 											'header' => 'Action',
 											'footer' => 'Total records: ' . $totalCount,
