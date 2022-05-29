@@ -113,7 +113,7 @@ $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
 </div>
 <script type="text/javascript">
 	$("#search_box").keyup(function() {
-		if ($(this).val().length > 3) {
+		if ($(this).val().length > 2 || !$(this).val().length) {
 			$('#searchForm').submit();
 		}
 	});

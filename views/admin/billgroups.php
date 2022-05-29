@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
 $totalCount = $dataProvider->getTotalCount();
 $this->registerCss('
     .custom_select{
@@ -17,8 +18,8 @@ $this->registerCss('
                 <div class="card">
                     <div class="card-header card-header-primary card-header-icon">
                         <div class="card-icon">
-                            <i class="material-icons">account_box</i>
-                        </div> 
+                            <i class="material-icons">content_paste</i>
+                        </div>
                         <h4 class="card-title">
                             Bill groups
                             <div class="pull-right">
@@ -64,7 +65,7 @@ $this->registerCss('
                                             'prompt' => 'Select Name',
                                             'class' => 'custom_select'
                                         ],
-                                        'value' => function($model){
+                                        'value' => function ($model) {
                                             return $model->name;
                                         }
                                     ],
@@ -75,7 +76,7 @@ $this->registerCss('
                                             'prompt' => 'Select Country',
                                             'class' => 'custom_select'
                                         ],
-                                        'value' => function($model){
+                                        'value' => function ($model) {
                                             return $model->country->Country;
                                         }
                                     ],
@@ -86,7 +87,7 @@ $this->registerCss('
                                             'prompt' => 'Select Country Network',
                                             'class' => 'custom_select'
                                         ],
-                                        'value' => function($model){
+                                        'value' => function ($model) {
                                             return $model->country->Country_Network;
                                         }
                                     ],
@@ -94,10 +95,10 @@ $this->registerCss('
                                         'attribute' => 'currency_id',
                                         'filter' => $currencies,
                                         'filterInputOptions' => [
-                                            'prompt' => 'Select Currency', 
+                                            'prompt' => 'Select Currency',
                                             'class' => 'custom_select'
                                         ],
-                                        'value' => function($model){
+                                        'value' => function ($model) {
                                             return $model->currency->currency;
                                         }
                                     ],
@@ -105,10 +106,10 @@ $this->registerCss('
                                         'attribute' => 'billcycle_id',
                                         'filter' => $billcycles,
                                         'filterInputOptions' => [
-                                            'prompt' => 'Select Bill Cycle', 
+                                            'prompt' => 'Select Bill Cycle',
                                             'class' => 'custom_select'
                                         ],
-                                        'value' => function($model){
+                                        'value' => function ($model) {
                                             return $model->billcycle->billcycle;
                                         }
                                     ],
@@ -119,7 +120,7 @@ $this->registerCss('
                                             'prompt' => 'Select Service',
                                             'class' => 'custom_select'
                                         ],
-                                        'value' => function($model){
+                                        'value' => function ($model) {
                                             return isset(\Yii::$app->params['services'][$model->service]) ? \Yii::$app->params['services'][$model->service] : '';
                                         }
                                     ],

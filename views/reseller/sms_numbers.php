@@ -54,12 +54,9 @@ $this->registerJs('
 		});
 
 		$("#search_box").keyup(function() {
-			if ($(this).val().length > 3) {
+			if ($(this).val().length > 2 || !$(this).val().length) {
 				$("#searchForm").submit();
 			}
-		});
-		$("#search_box").focusout(function() {
-			if($(this).val() == "") $("#searchForm").submit();
 		});
 		$(document).on("change", "#filter_box", function() {
 			$("#searchForm").submit();
@@ -86,53 +83,43 @@ $this->registerJs('
 ?>
 
 <div class="content">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header card-header-primary">
-                        <h4 class="card-title ">SMS Numbers</h4>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-sm-12">
-                                <div>
-                                    <?php $form = ActiveForm::begin(['id' => 'searchForm', 'method' => 'get']); ?>
-                                    <ul class="gv_top">
-                                        <li>
-                                            <?= Html::textInput('search', $search, ['id' => 'search_box', 'class' => 'search_box custom_search pull-left', 'placeholder' => 'Search....']); ?>
-                                        </li>
-                                        <li>
-                                            <?= Html::dropdownlist('filter', $filter, ['10' => '10', '20' => '20', '50' => '50', '100' => '100', '1000' => '1000'], ['id' => 'filter_box', 'class' => 'filter_box custom_filter pull-left']); ?>
-                                        </li>
-                                        <!-- <li>
-                                            <?php //= Html::a('Assign DDI to Agent', ['assign-cld'], ['class' => 'btn btn-success pull-left']) ?>
-                                        </li> -->
-
-                                        <li>
-                                            <?= Html::a('Unallocate Agent', ['show-assigned'], ['class' => 'btn btn-success pull-left']) ?>
-                                        </li>
-
-                                        <!-- <li>
-                                            <button type="button" class="btn btn-danger pull-left"
-                                                id="edit_selected_number" onclick="javascript:void(0);">Edit Selected
-                                                Numbers</button>
-                                        </li> -->
-                                    </ul>
-                                    <?php ActiveForm::end(); ?>
-                                </div>
-                                <div id="dropdown_top">
-                                    <ul class="gv_top">
-                                        <li>
-                                            <?= Html::dropdownList('dd_billgroup_id',  isset($_GET['FsmastertbSearch']['billgroup_id']) ?  $_GET['FsmastertbSearch']['billgroup_id'] : ""  , $billgroups, ['id' => 'dd_billgroup_id', 'class' => 'btn-dark btn-sm', 'prompt' => 'Select Bill Group', 'role' => 'button']); ?>
-                                        </li>
-                                        <li>
-                                            <?= Html::dropdownlist('dd_agent_id',  isset($_GET['FsmastertbSearch']['agent_id']) ?  $_GET['FsmastertbSearch']['agent_id'] : ""  , $agents, ['id' => 'dd_agent_id', 'class' => 'btn-dark btn-sm', 'prompt' => 'Select Agent']); ?>
-                                        </li>
-                                    </ul>
-                                </div>
-                                <div class="table-responsive">
-                                    <?= GridView::widget([
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-md-12">
+				<div class="card">
+					<div class="card-header card-header-primary card-header-icon">
+						<div class="card-icon">
+							<i class="material-icons">library_books</i>
+						</div>
+						<h4 class="card-title ">SMS Numbers</h4>
+					</div>
+					<div class="card-body">
+						<div class="row">
+							<div class="col-sm-12">
+								<div id="dropdown_top">
+									<ul class="gv_top">
+										<li>
+											<?= Html::dropdownList('dd_billgroup_id',  isset($_GET['FsmastertbSearch']['billgroup_id']) ?  $_GET['FsmastertbSearch']['billgroup_id'] : "", $billgroups, ['id' => 'dd_billgroup_id', 'class' => 'btn-dark btn-sm', 'prompt' => 'Select Bill Group', 'role' => 'button']); ?>
+										</li>
+										<li>
+											<?= Html::dropdownlist('dd_agent_id',  isset($_GET['FsmastertbSearch']['agent_id']) ?  $_GET['FsmastertbSearch']['agent_id'] : "", $agents, ['id' => 'dd_agent_id', 'class' => 'btn-dark btn-sm', 'prompt' => 'Select Agent']); ?>
+										</li>
+									</ul>
+								</div>
+								<div class="table-responsive">
+									<div class="pull-right">
+										<ul class="gv_top">
+											<?php $form = ActiveForm::begin(['id' => 'searchForm', 'method' => 'get']); ?>
+											<li>
+												<?= Html::textInput('search', $search, ['id' => 'search_box', 'class' => 'search_box custom_search pull-left', 'placeholder' => 'Search....']); ?>
+											</li>
+											<li>
+												<?= Html::dropdownlist('filter', $filter, ['10' => '10', '20' => '20', '50' => '50', '100' => '100', '1000' => '1000'], ['id' => 'filter_box', 'class' => 'filter_box custom_filter pull-left']); ?>
+											</li>
+											<?php ActiveForm::end(); ?>
+										</ul>
+									</div>
+									<?= GridView::widget([
 										'id' => 'manage_num_grid',
 										'dataProvider' => $dataProvider,
 										'filterModel' => $searchModel,
@@ -161,14 +148,14 @@ $this->registerJs('
 													return isset($model->billgroup) ? $model->billgroup->name : null;
 												}
 											],
-												[
+											[
 												'label' => 'Agent Name',
 												'filter' => $agents,
 												'filterInputOptions' => [
 													'id' => 'agent_id_search',
 													'prompt' => 'Select Agent',
 													'class' => 'custom_select'
-												],												
+												],
 												'attribute' => 'agent_id',
 												'value' => function ($model) {
 													return isset($model->users) ? $model->users->username : null;
@@ -186,7 +173,7 @@ $this->registerJs('
 													'prompt' => 'Select Country',
 													'class' => 'custom_select'
 												],
-												'value' => function($model){
+												'value' => function ($model) {
 													return isset($model->country) ? $model->country->Country : null;
 												}
 											],
@@ -202,7 +189,7 @@ $this->registerJs('
 												'label' => 'Cld3 Rate',
 												'attribute' => 'cld3rate',
 											],
-												[
+											/* [
 												'class' => 'yii\grid\ActionColumn',
 												'header' => 'Action',
 												'footer' => 'Total records: ' . $totalCount,
@@ -234,44 +221,44 @@ $this->registerJs('
 														]);
 													}
 												],
-											]
+											] */
 
 										],
 									]); ?>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
 
-            <div id="manage_confirm" class="modal fade" role="dialog">
-                <div class="modal-dialog">
-                    <!-- Modal content-->
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h4 class="float-right m-0">Update CLD3 Rate</h4>
-                            <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        </div>
-                        <div class="modal-body">
-                            <div id="detach_message"></div>
-                            <?php
+			<div id="manage_confirm" class="modal fade" role="dialog">
+				<div class="modal-dialog">
+					<!-- Modal content-->
+					<div class="modal-content">
+						<div class="modal-header">
+							<h4 class="float-right m-0">Update CLD3 Rate</h4>
+							<button type="button" class="close" data-dismiss="modal">&times;</button>
+						</div>
+						<div class="modal-body">
+							<div id="detach_message"></div>
+							<?php
 							$form = ActiveForm::begin(['id' => 'detachForm', 'method' => 'post', 'action' => ['reseller/edit-number']]);
 							?>
-                            <!-- <?= Html::hiddenInput('btn_id', '', ['id' => 'btn_id']); ?> -->
-                            <?= Html::label('CLD3 Rate', 'cld3rate'); ?>
-                            <?= Html::textInput('cld3rate', '', ['class' => "form-control"]); ?>
-                            <?= Html::hiddenInput('btn_number', '', ['id' => 'btn_number']); ?>
-                            <div class="media form-group">
-                                <button type="submit" class="btn btn-primary">Yes</button>
-                                <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
+							<!-- <?= Html::hiddenInput('btn_id', '', ['id' => 'btn_id']); ?> -->
+							<?= Html::label('CLD3 Rate', 'cld3rate'); ?>
+							<?= Html::textInput('cld3rate', '', ['class' => "form-control"]); ?>
+							<?= Html::hiddenInput('btn_number', '', ['id' => 'btn_number']); ?>
+							<div class="media form-group">
+								<button type="submit" class="btn btn-primary">Yes</button>
+								<button type="button" class="btn btn-default" data-dismiss="modal">No</button>
 
-                                <?php ActiveForm::end(); ?>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+								<?php ActiveForm::end(); ?>
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>

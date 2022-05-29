@@ -137,7 +137,7 @@ class ResellerController extends \yii\web\Controller
     /*
     * Add user
     */
-    public function actionAddUser()
+    public function actionAddAgent()
     {
         $flag = 0;
         $user = new User();
@@ -156,13 +156,13 @@ class ResellerController extends \yii\web\Controller
                 Yii::$app->session->setFlash('user_add_failed', "Failed to save detail try again.");
             }
         }
-        return $this->render('add_user', ['user' => $user]);
+        return $this->render('add_agent', ['user' => $user]);
     }
 
     /*
     * List all Users
     */
-    public function actionListUser()
+    public function actionListAgent()
     {
         $name = isset($_GET['name']) ? $_GET['name'] : '';
         $query = User::find()->where(['role' => 2, 'reseller_id' => Yii::$app->user->identity->id]);
@@ -175,7 +175,7 @@ class ResellerController extends \yii\web\Controller
 
         $query->andFilterWhere(['like', 'username', $name]);
 
-        return $this->render('list_user', ['dataProvider' => $dataProvider, 'name' => $name]);
+        return $this->render('list_agent', ['dataProvider' => $dataProvider, 'name' => $name]);
     }
 
     /*

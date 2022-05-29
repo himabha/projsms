@@ -9,18 +9,21 @@ use yii\widgets\ActiveForm;
 		<div class="row">
 			<div class="col-md-12">
 				<div class="card">
-					<div class="card-header card-header-primary">
+					<div class="card-header card-header-primary card-header-icon">
+						<div class="card-icon">
+							<i class="material-icons">account_box</i>
+						</div>
 						<h4 class="card-title ">Resellers List
-						<div class="pull-right">
-                                <?= Html::a(Html::tag('b', 'add', ['class' => 'material-icons']), ['add-reseller'], [
-                                    'class' => 'btn btn-xs btn-primary btn-round btn-fab',
-                                    'rel' => "tooltip",
-                                    'data' => [
-                                        'placement' => 'bottom',
-                                        'original-title' => 'Create Reseller'
-                                    ],
-                                ]) ?>
-                            </div>
+							<div class="pull-right">
+								<?= Html::a(Html::tag('b', 'add', ['class' => 'material-icons']), ['add-reseller'], [
+									'class' => 'btn btn-xs btn-primary btn-round btn-fab',
+									'rel' => "tooltip",
+									'data' => [
+										'placement' => 'bottom',
+										'original-title' => 'Create Reseller'
+									],
+								]) ?>
+							</div>
 						</h4>
 						<!-- <p class="card-category"> Here is a subtitle for this table</p> -->
 					</div>
@@ -35,7 +38,8 @@ use yii\widgets\ActiveForm;
 								<?= Html::a('Reset', ['list-user'], ['class' => 'btn btn-primary']); ?>
 							</div>
 							<!-- <div class="col-sm-3 col-xs-6">
-								<?//= Html::a('ADD Reseller', ['add-reseller'], ['class' => 'btn btn-success pull-left']) ?>
+								<? //= Html::a('ADD Reseller', ['add-reseller'], ['class' => 'btn btn-success pull-left']) 
+								?>
 							</div> -->
 						</div>
 						<div class="table-responsive">
