@@ -178,11 +178,11 @@ $this->registerJs('
 												}
 											],
 											[
-												'label' => 'Cld1 Rate',
+												'label' => 'Rev. In Rate',
 												'attribute' => 'cld1rate',
 											],
 											[
-												'label' => 'Cld2 Rate',
+												'label' => 'Rev. Out Rate',
 												'attribute' => 'cld2rate',
 												'footer' => 'Total records: ' . $totalCount,
 												'footerOptions' => ['style' => ['font-size' => 'larger', 'font-weight' => 'bold', 'min-width' => '10em']],

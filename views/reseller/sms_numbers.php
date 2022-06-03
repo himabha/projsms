@@ -178,11 +178,11 @@ $this->registerJs('
 												}
 											],
 											[
-												'label' => 'Cld1 Rate',
+												'label' => 'Rev. In Rate',
 												'attribute' => 'cld1rate',
 											],
 											[
-												'label' => 'Cld2 Rate',
+												'label' => 'Rev. Out Rate',
 												'attribute' => 'cld2rate',
 											],
 											[

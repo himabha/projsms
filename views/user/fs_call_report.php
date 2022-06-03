@@ -122,10 +122,10 @@ use kartik\daterange\DateRangePicker;
 								<?= Html::textinput('called_num', $called_num, ['class' => 'form-control', 'placeholder' => 'Called Number']) ?>
 							</div>
 							<!-- <div class="col-sm-2">
-								<?= Html::textinput('cld1_rate', $cld1_rate, ['class' => 'form-control', 'placeholder' => 'Cld1 Rate']) ?>
+								<?= Html::textinput('cld1_rate', $cld1_rate, ['class' => 'form-control', 'placeholder' => 'Rev. In Rate']) ?>
 							</div>
 							<div class="col-sm-2">
-								<?= Html::textinput('cld2_rate', $cld2_rate, ['class' => 'form-control', 'placeholder' => 'Cld2 Rate']) ?>
+								<?= Html::textinput('cld2_rate', $cld2_rate, ['class' => 'form-control', 'placeholder' => 'Rev. Out Rate']) ?>
 							</div>
 							-->
 							<div class="col-sm-2">
