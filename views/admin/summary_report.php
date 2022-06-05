@@ -337,8 +337,7 @@ $this->registerJs('
 										'label' => 'Rev Out',
 										'headerOptions' => ['style' => ['text-align' => 'right']],
 										'contentOptions' => ['style' => ['text-align' => 'right']],
-										'value' => function($model)
-										{
+										'value' => function ($model) {
 											return $model->currency . number_format($model->rev_out, 2);
 										}
 									],
@@ -347,8 +346,7 @@ $this->registerJs('
 										'label' => 'Profit',
 										'headerOptions' => ['style' => ['text-align' => 'right']],
 										'contentOptions' => ['style' => ['text-align' => 'right']],
-										'value' => function($model)
-										{
+										'value' => function ($model) {
 											return $model->currency . number_format($model->profit, 2);
 										}
 									],									
@@ -428,10 +426,10 @@ $this->registerJs('
 									],									
 								],
 							]); ?>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
