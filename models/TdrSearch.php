@@ -164,7 +164,6 @@ class TdrSearch extends Smscdr
             $query->andFilterWhere(['like', 'from_number', $this->from_number])
             ->andFilterWhere(['like', 'to_number', $this->to_number])
             ->andFilterWhere(['like', 'sms_message', $this->sms_message])
-            //->andFilterWhere(['like', 'delivered_time', $this->delivered_time])
             ;
 
             if(!empty($this->dr_from) && !empty($this->dr_to))
@@ -180,7 +179,7 @@ class TdrSearch extends Smscdr
 
         if(!$isAdmin){
             if(Yii::$app->user->identity->role == 4){ // reseller admin
-                //$query->andFilterWhere(['in', 'sms_cdr.admin_id', Yii::$app->user->identity->id]);
+                $query->andFilterWhere(['in', 'sms_cdr.admin_id', Yii::$app->user->identity->id]);
             } else if(Yii::$app->user->identity->role == 2) { //user
                 $query->andFilterWhere(['in', 'sms_cdr.agent_id', Yii::$app->user->identity->id]);
             } else if(Yii::$app->user->identity->role == 3) { // reseller

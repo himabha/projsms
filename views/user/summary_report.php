@@ -11,6 +11,9 @@ $search = isset($_GET['search']) ? $_GET['search'] : '';
 $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
 $totalCount = $dataProvider->getTotalCount(); 
 $today = !isset($_GET['TdrSearchSummary']) && !isset($_GET['search']) ? date('d-m-Y') . ' 00:00 AM'  . ' to ' . date('d-m-Y')  . ' 12:59 PM': '';
+$qstr = isset($_GET) ? http_build_query(\Yii::$app->request->queryParams) : '';
+$csv_url = 'tdr-summary-export/?mode=csv&' . $qstr;
+$xls_url = 'tdr-summary-export/?mode=xls&' . $qstr;
 $this->registerCss('
 	.pagination {
 		margin-left: 1em;
@@ -107,7 +110,10 @@ $this->registerJs('
         <div class="row">
             <div class="col-md-12">
                 <div class="card">
-                    <div class="card-header card-header-primary">
+                    <div class="card-header card-header-primary card-header-icon">
+                        <div class="card-icon">
+                            <i class="material-icons">account_box</i>
+                        </div>
                         <h4 class="card-title ">Summary Report</h4>
                     </div>
                     <div class="card-body">
@@ -190,9 +196,24 @@ $this->registerJs('
                                 <li>
                                     <?= Html::button('Refresh', ['id' => 'btnRefresh', 'class' => 'btn btn-success btn-sm']); ?>
                                 </li>
+                                <li>
+                                    <div class="dropdown show">
+                                        <a class="btn btn-info dropdown-toggle btn-sm" href="#" role="button"
+                                            id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true"
+                                            aria-expanded="false">
+                                            Export
+                                        </a>
+
+                                        <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                                            <a class="dropdown-item" href="<?= $csv_url; ?>">CSV</a>
+                                            <a class="dropdown-item" href="<?= $xls_url; ?>">XLS</a>
+                                        </div>
+                                    </div>
+                                </li>
                             </ul>
                         </div>
                         <div class="table-responsive">
+							<h4><b>Summary</b></h4>
                             <?= GridView::widget([
 								'dataProvider' => $dataProvider,
 								'tableOptions' => [
@@ -250,6 +271,56 @@ $this->registerJs('
 									// 		return number_format($model->profit_percentage, 2);
 									// 	}
 									// ],
+								],
+							]); ?>
+                        </div>
+                        <div class="table-responsive">
+                            <h4><b>Results</b></h4>
+                            <?= GridView::widget([
+								'dataProvider' => $dataProvider_1,
+								'tableOptions' => [
+									'id' => 'list_result_tbl',
+									'class' => 'table'
+								],
+								'columns' => [
+									[
+										'attribute' => 'billgroup_id',
+										'label' => 'Billgroup',
+										'value' => function($model)
+										{
+											return isset($model->billgroup) ? $model->billgroup->name : null;
+										}
+									],
+									[
+										'attribute' => 'msgs',
+										'label' => 'Total SMS',
+										'headerOptions' => ['style' => ['text-align' => 'right']],
+										'contentOptions' => ['style' => ['text-align' => 'right']],
+										'value' => function($model)
+										{
+											return number_format($model->msgs, 2);
+										}
+									],
+									[
+										'attribute' => 'rev_in',
+										'label' => 'Rev In',
+										'headerOptions' => ['style' => ['text-align' => 'right']],
+										'contentOptions' => ['style' => ['text-align' => 'right']],
+										'value' => function($model)
+										{
+											return $model->currency . number_format($model->rev_in, 2);
+										}
+									],
+									[
+										'attribute' => 'profit',
+										'label' => 'Profit',
+										'headerOptions' => ['style' => ['text-align' => 'right']],
+										'contentOptions' => ['style' => ['text-align' => 'right']],
+										'value' => function($model)
+										{
+											return $model->currency . number_format($model->profit, 2);
+										}
+									],									
 								],
 							]); ?>
                         </div>

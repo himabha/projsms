@@ -30,6 +30,10 @@ use app\models\TdrSearch;
 use app\models\TdrSearchSummary;
 use app\models\TdrSearchDetailed;
 
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use app\models\Smscdr;
+
 class UserController extends Controller
 {
     /**
@@ -658,15 +662,19 @@ class UserController extends Controller
             $filter = '';
         }
 
-        $searchModel = new TdrSearchSummary();
-
         $mysubusr = User::find()->select('id')->where(['agent_id' => Yii::$app->user->identity->id, 'role' => 2]);
+
+        $searchModel = new TdrSearchSummary();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $mysubusr, $search, false, false);
         $dataProvider->setPagination(['pageSize' => $filter]); 
 
+        $searchModel_1 = new TdrSearchDetailed();
+        $dataProvider_1 = $searchModel_1->search(Yii::$app->request->queryParams, $mysubusr, $search, false, false);
+        $dataProvider_1->setPagination(['pageSize' => $filter]); 
+
         return $this->render('summary_report', [
             'dataProvider' => $dataProvider, 
-            'searchModel' => $searchModel,
+            'dataProvider_1' => $dataProvider_1, 
             'search' => $search, 
             'filter' => $filter,
             'billgroups' => $this->getBillgroupItems(),
@@ -689,7 +697,7 @@ class UserController extends Controller
         $dataProvider->setPagination(['pageSize' => $filter]); 
 
         $searchModel_1 = new TdrSearchDetailed();
-        $dataProvider_1 = $searchModel_1->search(Yii::$app->request->queryParams, $mysubusr, $search, false);
+        $dataProvider_1 = $searchModel_1->search(Yii::$app->request->queryParams, $mysubusr, $search, false, true);
         $dataProvider_1->setPagination(['pageSize' => $filter]); 
 
         return $this->render('detail_report', [
@@ -700,6 +708,658 @@ class UserController extends Controller
             'billgroups' => $this->getBillgroupItems(),
         ]);
     }
+
+    public function actionTdrExport()
+    {
+        $a_z = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P','Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y'. 'Z'];
+
+        $headers = [
+            'ID',
+            'From Number',
+            'To Number',
+            'SMS Message',
+            'Bill Group',
+            'Delivered Time'
+        ];
+
+        if(isset($_SERVER['QUERY_STRING']))
+        {
+            $searchModel = new TdrSearch();
+            $mysubusr = User::find()->select('id')->where(['agent_id' => Yii::$app->user->identity->id, 'role' => 2]);
+            $query = $searchModel->search(\Yii::$app->request->queryParams, $mysubusr, '', false)->query;
+            $params = isset(\Yii::$app->request->queryParams['TdrSearch']) ? \Yii::$app->request->queryParams['TdrSearch'] : [];
+
+            $billgroup_name = 'None';
+            if(!empty(intval($params['billgroup_id'])))
+            {
+                $obj = Billgroup::findOne(intval($params['billgroup_id']));
+                if(isset($obj->name)) $billgroup_name = $obj->name;
+            }
+
+            $filters = [
+                'Bill Group' => $billgroup_name,
+                'Delivered Time' => !empty($params['delivered_time']) ? $params['delivered_time'] : 'None',
+                'From Number' => !empty($params['from_number']) ? $params['from_number'] : 'None',
+                'SMS Message' => !empty($params['sms_message']) ? $params['sms_message'] : 'None',
+                'ID' => !empty($params['id']) ? $params['id'] : 'None',
+            ];
+
+        }
+
+        $csv_cols = ["", "", "", "", "", "", "", ""];
+        $csv_arr = [];
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // title
+        $row = 1;
+        $col = 1;
+
+        $sheet->setCellValueByColumnAndRow($col, $row , "TDR REPORT");
+        $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
+        $temp = $csv_cols;
+        $temp[$col-1] = "TDR REPORT";
+        $csv_arr[] = $temp;
+        $row++; $csv_arr[] = $csv_cols;
+
+        $sheet->setCellValueByColumnAndRow($col, $row , "Created " . date('Y-m-d H:i:s'));
+        $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
+        $temp = $csv_cols;
+        $temp[$col-1] = "Created " . date('Y-m-d H:i:s');
+        $csv_arr[] = $temp;
+        $row++; $csv_arr[] = $csv_cols;
+        $row++; $csv_arr[] = $csv_cols;
+
+        $sheet->setCellValueByColumnAndRow($col, $row , "Filters");
+        $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
+        $temp = $csv_cols;
+        $temp[$col-1] = "Filters";
+        $csv_arr[] = $temp;
+        $row++; $csv_arr[] = $csv_cols;
+
+        if(is_array($filters) && count($filters) > 0)
+        {
+            $col = 1;
+            $temp1 = $csv_cols;
+            $temp2 = $csv_cols;
+            foreach($filters as $k=>$v)
+            {
+                $sheet->setCellValueByColumnAndRow($col, $row , $k);
+                $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
+                $temp1[$col-1] = $k;
+                $sheet->setCellValueByColumnAndRow($col, $row + 1 , $v);
+                $temp2[$col-1] = $v;
+                $col++;
+            }
+            $csv_arr[] = $temp1;
+            $csv_arr[] = $temp2;
+            $row++; $csv_arr[] = $csv_cols;
+            $row++; $csv_arr[] = $csv_cols;
+            $row++; $csv_arr[] = $csv_cols;
+        }
+
+        if(is_array($headers) && count($headers) > 0)
+        {
+            $col = 1;
+            $temp = $csv_cols;
+            foreach($headers as $v)
+            {
+                $sheet->setCellValueByColumnAndRow($col, $row , $v);
+                $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
+                $temp[$col-1] = $v;
+                $col++;
+            }
+            $csv_arr[] = $temp;
+            $row++;
+        }
+
+        $rows = $query->all();
+        if(is_array($rows) && count($rows) > 0)
+        {
+            foreach($rows as $v)
+            {
+                $temp = $csv_cols;
+                foreach($headers as $hk => $hv)
+                {
+                    switch($hv)
+                    {
+                        case "ID":
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->id) ? $v->id : "");
+                            $temp[$hk] = isset($v->id) ? $v->id : "";
+                            break; 
+                        case "From Number":
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->from_number) ? $v->from_number : "");
+                            $temp[$hk] = isset($v->from_number) ? $v->from_number : "";
+                            break; 
+                        case "To Number":
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->to_number) ? $v->to_number : "");
+                            $temp[$hk] = isset($v->to_number) ? $v->to_number : "";
+                            break; 
+                        case "SMS Message":
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->sms_message) ? $v->sms_message : "");
+                            $temp[$hk] = isset($v->sms_message) ? $v->sms_message : "";
+                            break; 
+                        case "Bill Group":
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->billgroup) ? $v->billgroup->name : "");
+                            $temp[$hk] = isset($v->billgroup) ? $v->billgroup->name : "";
+                            break; 
+                        case "Delivered Time":
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->delivered_time) ? date('d-m-Y H:i:s', strtotime($v->delivered_time)) : "");
+                            $temp[$hk] = isset($v->delivered_time) ? date('d-m-Y H:i:s', strtotime($v->delivered_time)) : "";
+                            break; 
+                    }
+                }
+                $csv_arr[] = $temp;
+                $row++;
+            }                
+        }
+
+        if(\Yii::$app->request->queryParams['mode'] == 'csv')
+        {
+            header('Content-Type: text/csv; charset=utf-8');
+            header('Content-Disposition: attachment; filename="tdr.csv"');
+            ob_end_clean();
+            $output = fopen('php://output', 'w');
+            foreach ($csv_arr as $row) {
+                fputcsv($output, $row);
+            }
+            fclose($output);
+            exit();
+        } else {
+            header('Content-Type: application/vnd.ms-excel');
+            header('Content-Disposition: attachment; filename="tdr.xlsx"');
+            $writer = new Xlsx($spreadsheet);
+            ob_end_clean();
+            $writer->save("php://output");
+            exit();
+        }
+        exit();
+    }
+
+    public function actionTdrSummaryExport()
+    {
+        $a_z = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P','Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y'. 'Z'];
+
+        $headers_summary = [
+            'Currency',
+            'Msgs',
+            'In',
+            'Profit',
+        ];
+
+        $headers_result = [
+            'Bill Group',
+            'Msgs',
+            'In',
+            'Profit'
+        ];
+
+        if(isset($_SERVER['QUERY_STRING']))
+        {
+            // SUMMARY
+            $searchModel = new TdrSearchSummary();
+            $mysubusr = User::find()->select('id')->where(['role' => 2]);
+            $query = $searchModel->search(\Yii::$app->request->queryParams, $mysubusr, '', false, false)->query;
+            $params = isset(\Yii::$app->request->queryParams['TdrSearchSummary']) ? \Yii::$app->request->queryParams['TdrSearchSummary'] : [];
+            // FILTERS
+            $billgroup_name = 'None';
+            if(!empty(intval($params['billgroup_id'])))
+            {
+                $obj = Billgroup::findOne(intval($params['billgroup_id']));
+                if(isset($obj->name)) $billgroup_name = $obj->name;
+            }
+            $filters = [
+                'Bill Group' => $billgroup_name,
+                'Delivered Time' => !empty($params['delivered_time']) ? $params['delivered_time'] : 'None'
+            ];
+
+            $searchModel_2 = new TdrSearchDetailed();
+            $query_2 = $searchModel_2->search(\Yii::$app->request->queryParams, $mysubusr, '', false, false)->query;
+            $rows_2 = $query_2->all();
+
+        }
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $csv_cols = ["", "", "", ""];
+        $csv_arr = [];
+
+        // title
+        $row = 1;
+        $col = 1;
+
+        $sheet->setCellValueByColumnAndRow($col, $row , "TDR SUMMARY REPORT");
+        $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
+        $temp = $csv_cols;
+        $temp[$col-1] = "TDR SUMMARY REPORT";
+        $csv_arr[] = $temp;
+        $row++; $csv_arr[] = $csv_cols;
+
+        $sheet->setCellValueByColumnAndRow($col, $row , "Created " . date('Y-m-d H:i:s'));
+        $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
+        $temp = $csv_cols;
+        $temp[$col-1] = "Created " . date('Y-m-d H:i:s');
+        $csv_arr[] = $temp;
+        $row++; $csv_arr[] = $csv_cols;
+        $row++; $csv_arr[] = $csv_cols;
+
+        $sheet->setCellValueByColumnAndRow($col, $row , "Filters");
+        $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
+        $temp = $csv_cols;
+        $temp[$col-1] = "Filters";
+        $csv_arr[] = $temp;
+        $row++; $csv_arr[] = $csv_cols;
+
+        if(is_array($filters) && count($filters) > 0)
+        {
+            $col = 1;
+            $temp1 = $csv_cols;
+            $temp2 = $csv_cols;
+            foreach($filters as $k=>$v)
+            {
+                $sheet->setCellValueByColumnAndRow($col, $row , $k);
+                $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
+                $temp1[$col-1] = $k;
+                $sheet->setCellValueByColumnAndRow($col, $row + 1 , $v);
+                $temp2[$col-1] = $v;
+                $col++;
+            }
+            $csv_arr[] = $temp1;
+            $csv_arr[] = $temp2;
+            $row++; $csv_arr[] = $csv_cols;
+            $row++; $csv_arr[] = $csv_cols;
+            $row++; $csv_arr[] = $csv_cols;
+        }
+
+        $col = 1;
+        $sheet->setCellValueByColumnAndRow($col, $row , "SUMMARY");
+        $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
+        $temp = $csv_cols;
+        $temp[$col-1] = "Summary";
+        $csv_arr[] = $temp;
+        $row++; $csv_arr[] = $csv_cols;
+        $row++; $csv_arr[] = $csv_cols;
+
+        if(is_array($headers_summary) && count($headers_summary) > 0)
+        {
+            $col = 1;
+            $temp = $csv_cols;
+            foreach($headers_summary as $v)
+            {
+                $sheet->setCellValueByColumnAndRow($col, $row , $v);
+                $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
+                $temp[$col-1] = $v;
+                $col++;
+            }
+            $csv_arr[] = $temp;
+            $row++;
+        }
+
+        $rows = $query->all();
+        if(is_array($rows) && count($rows) > 0)
+        {
+            foreach($rows as $v)
+            {
+                $temp = $csv_cols;
+                foreach($headers_summary as $hk => $hv)
+                {
+                    switch($hv)
+                    {
+                        case "Currency":
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->currency) ? $v->currency : "");
+                            $temp[$hk] = isset($v->currency) ? $v->currency : "";
+                            break; 
+                        case "Msgs":
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->msgs) ? number_format($v->msgs,0) : 0);
+                            $temp[$hk] = isset($v->msgs) ? number_format($v->msgs,0) : 0;
+                            break; 
+                        case "In":
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->rev_in) ? number_format($v->rev_in, 2) : number_format(0, 2));
+                            $temp[$hk] = isset($v->rev_in) ? number_format($v->rev_in, 2) : number_format(0, 2);
+                            break; 
+                        case "Profit":
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->profit) ? number_format($v->profit, 2) : number_format(0, 2));
+                            $temp[$hk] = isset($v->profit) ? number_format($v->profit, 2) : number_format(0, 2);
+                            break; 
+                    }
+                }
+                $csv_arr[] = $temp;
+                $row++;
+            }                
+        }
+
+        $row++; $csv_arr[] = $csv_cols;
+        $row++; $csv_arr[] = $csv_cols;
+        $col = 1;
+        $sheet->setCellValueByColumnAndRow($col, $row , "RESULTS");
+        $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
+        $temp = $csv_cols;
+        $temp[$col-1] = "RESULTS";
+        $csv_arr[] = $temp;
+        $row++; $csv_arr[] = $csv_cols;
+        $row++; $csv_arr[] = $csv_cols;
+
+        if(is_array($headers_result) && count($headers_result) > 0)
+        {
+            $col = 1;
+            $temp = $csv_cols;
+            foreach($headers_result as $v)
+            {
+                $sheet->setCellValueByColumnAndRow($col, $row , $v);
+                $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
+                $temp[$col-1] = $v;
+                $col++;
+            }
+            $csv_arr[] = $temp;
+            $row++;
+        }
+
+        if(is_array($rows_2) && count($rows_2) > 0)
+        {
+            foreach($rows_2 as $v)
+            {
+                $temp = $csv_cols;
+                foreach($headers_result as $hk => $hv)
+                {
+                    switch($hv)
+                    {
+                        case "Bill Group":
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->billgroup) ? $v->billgroup->name : "");
+                            $temp[$hk] = isset($v->billgroup) ? $v->billgroup->name : "";
+                            break; 
+                        case "Msgs":
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->msgs) ? number_format($v->msgs, 0) : 0);
+                            $temp[$hk] = isset($v->msgs) ? number_format($v->msgs, 0) : 0;
+                            break; 
+                        case "In":
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->rev_in) ? number_format($v->rev_in, 2) : number_format(0, 2));
+                            $temp[$hk] = isset($v->rev_in) ? number_format($v->rev_in, 2) : number_format(0, 2);
+                            break; 
+                        case "Profit":
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->profit) ? number_format($v->profit, 2) : number_format(0, 2));
+                            $temp[$hk] = isset($v->profit) ? number_format($v->profit, 2) : number_format(0, 2);
+                            break; 
+                    }
+                }
+                $csv_arr[] = $temp;
+                $row++; 
+            }                
+        }
+
+
+        if(\Yii::$app->request->queryParams['mode'] == 'csv')
+        {
+            header('Content-Type: text/csv; charset=utf-8');
+            header('Content-Disposition: attachment; filename="tdr_summary.csv"');
+            if(is_array($csv_arr) && count($csv_arr) > 0)
+            {
+                ob_end_clean();
+                $output = fopen('php://output', 'w');
+                foreach ($csv_arr as $row) {
+                    fputcsv($output, $row);
+                }
+                fclose($output);
+                exit();
+            }
+        } else {
+            header('Content-Type: application/vnd.ms-excel');
+            header('Content-Disposition: attachment; filename="tdr_summary.xlsx"');
+            $writer = new Xlsx($spreadsheet);
+            ob_end_clean();
+            $writer->save("php://output");
+            exit();
+        }
+        exit();
+    }
+
+    public function actionTdrDetailedExport()
+    {
+        $a_z = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P','Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y'. 'Z'];
+
+        $headers_summary = [
+            'Bill Group',
+            'Currency',
+            'Msgs',
+            'In',
+            'Profit',
+        ];
+
+        $headers_result = [
+            'Country Network',
+            'Bill Group',
+            'CLI',
+            'BNUM',
+            'Msgs'
+        ];
+
+        if(isset($_SERVER['QUERY_STRING']))
+        {
+            // SUMMARY
+            $searchModel = new TdrSearchSummary();
+            $mysubusr = User::find()->select('id')->where(['role' => 2]);
+            $query = $searchModel->search(\Yii::$app->request->queryParams, $mysubusr, '', false, true)->query;
+            $params = isset(\Yii::$app->request->queryParams['TdrSearchSummary']) ? \Yii::$app->request->queryParams['TdrSearchSummary'] : [];
+            // FILTERS
+            $billgroup_name = 'None';
+            if(!empty(intval($params['billgroup_id'])))
+            {
+                $obj = Billgroup::findOne(intval($params['billgroup_id']));
+                if(isset($obj->name)) $billgroup_name = $obj->name;
+            }
+            $filters = [
+                'Bill Group' => $billgroup_name,
+                'Delivered Time' => !empty($params['delivered_time']) ? $params['delivered_time'] : 'None'
+            ];
+
+            $searchModel_2 = new TdrSearchDetailed();
+            $query_2 = $searchModel_2->search(\Yii::$app->request->queryParams, $mysubusr, '', false, true)->query;
+            $rows_2 = $query_2->all();
+
+        }
+
+        $csv_cols = ["", "", "", "", ""];
+        $csv_arr = [];
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // title
+        $row = 1;
+        $col = 1;
+
+        $sheet->setCellValueByColumnAndRow($col, $row , "TDR DETAILED REPORT");
+        $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
+        $temp = $csv_cols;
+        $temp[$col-1] = "TDR DETAILED REPORT";
+        $csv_arr[] = $temp;
+        $row++; $csv_arr[] = $csv_cols;
+        
+        $sheet->setCellValueByColumnAndRow($col, $row , "Created " . date('Y-m-d H:i:s'));
+        $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
+        $temp = $csv_cols;
+        $temp[$col-1] = "Created " . date('Y-m-d H:i:s');
+        $csv_arr[] = $temp;
+        $row++; $csv_arr[] = $csv_cols;
+        $row++; $csv_arr[] = $csv_cols;
+
+        $sheet->setCellValueByColumnAndRow($col, $row , "Filters");
+        $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
+        $temp = $csv_cols;
+        $temp[$col-1] = "Filters";
+        $csv_arr[] = $temp;
+        $row++; $csv_arr[] = $csv_cols;
+
+        if(is_array($filters) && count($filters) > 0)
+        {
+            $col = 1;
+            $temp1 = $csv_cols;
+            $temp2 = $csv_cols;
+            foreach($filters as $k=>$v)
+            {
+                $sheet->setCellValueByColumnAndRow($col, $row , $k);
+                $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
+                $temp1[$col-1] = $k;
+                $sheet->setCellValueByColumnAndRow($col, $row + 1 , $v);
+                $temp2[$col-1] = $v;
+                $col++;
+            }
+            $csv_arr[] = $temp1;
+            $csv_arr[] = $temp2;
+            $row++; $csv_arr[] = $csv_cols;
+            $row++; $csv_arr[] = $csv_cols;
+            $row++; $csv_arr[] = $csv_cols;
+        }
+
+        $col = 1;
+        $sheet->setCellValueByColumnAndRow($col, $row , "SUMMARY");
+        $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
+        $temp = $csv_cols;
+        $temp[$col-1] = "SUMMARY";
+        $csv_arr[] = $temp;
+        $row++; $csv_arr[] = $csv_cols;
+        $row++; $csv_arr[] = $csv_cols;
+
+        if(is_array($headers_summary) && count($headers_summary) > 0)
+        {
+            $col = 1;
+            $temp = $csv_cols;
+            foreach($headers_summary as $v)
+            {
+                $sheet->setCellValueByColumnAndRow($col, $row , $v);
+                $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
+                $temp[$col-1] = $v;
+                $col++;
+            }
+            $csv_arr[] = $temp;
+            $row++; 
+        }
+
+        $rows = $query->all();
+        if(is_array($rows) && count($rows) > 0)
+        {
+            foreach($rows as $v)
+            {
+                $temp = $csv_cols;
+                foreach($headers_summary as $hk => $hv)
+                {
+                    switch($hv)
+                    {
+                        case "Bill Group":
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->billgroup) ? $v->billgroup->name : "");
+                            $temp[$hk] = isset($v->billgroup) ? $v->billgroup->name : "";
+                            break; 
+                        case "Currency":
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->currency) ? $v->currency : "");
+                            $temp[$hk] = isset($v->currency) ? $v->currency : "";
+                            break; 
+                        case "Msgs":
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->msgs) ? number_format($v->msgs, 0) : 0);
+                            $temp[$hk] = isset($v->msgs) ? number_format($v->msgs, 0) : 0;
+                            break; 
+                        case "In":
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->rev_in) ? number_format($v->rev_in, 2) : number_format(0, 2));
+                            $temp[$hk] = isset($v->rev_in) ? number_format($v->rev_in, 2) : number_format(0, 2);
+                            break; 
+                        case "Profit":
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->profit) ? number_format($v->profit, 2) : number_format(0, 2));
+                            $temp[$hk] = isset($v->profit) ? number_format($v->profit, 2) : number_format(0, 2);
+                            break; 
+                    }
+                }
+                $csv_arr[] = $temp;
+                $row++; 
+            }                
+        }
+
+        $row++; $csv_arr[] = $csv_cols;
+        $row++; $csv_arr[] = $csv_cols;
+        $col = 1;
+        $sheet->setCellValueByColumnAndRow($col, $row , "RESULTS");
+        $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
+        $temp = $csv_cols;
+        $temp[$col-1] = "Results";
+        $csv_arr[] = $temp;
+        $row++; $csv_arr[] = $csv_cols;
+        $row++; $csv_arr[] = $csv_cols;
+        if(is_array($headers_result) && count($headers_result) > 0)
+        {
+            $col = 1;
+            $temp = $csv_cols;
+            foreach($headers_result as $v)
+            {
+                $sheet->setCellValueByColumnAndRow($col, $row , $v);
+                $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
+                $temp[$col-1] = $v;
+                $col++;
+            }
+            $csv_arr[] = $temp;
+            $row++; 
+        }
+
+        if(is_array($rows_2) && count($rows_2) > 0)
+        {
+            foreach($rows_2 as $v)
+            {
+                $temp = $csv_cols;
+                foreach($headers_result as $hk => $hv)
+                {
+                    switch($hv)
+                    {
+                        case "Country Network":
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->country) ? $v->country->Country_Network : "");
+                            $temp[$hk] = isset($v->country) ? $v->country->Country_Network : "";
+                            break; 
+                        case "Bill Group":
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->billgroup) ? $v->billgroup->name : "");
+                            $temp[$hk] = isset($v->billgroup) ? $v->billgroup->name : "";
+                            break; 
+                        case "CLI":
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->from_number) ? $v->from_number : "");
+                            $temp[$hk] = isset($v->from_number) ? $v->from_number : "";
+                            break; 
+                        case "BNUM":
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->to_number) ? $v->to_number : "");
+                            $temp[$hk] = isset($v->to_number) ? $v->to_number : "";
+                            break; 
+                        case "Msgs":
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->msgs) ? number_format($v->msgs,0) : 0);
+                            $temp[$hk] = isset($v->msgs) ? number_format($v->msgs,0) : 0;
+                            break; 
+                    }
+                }
+                $csv_arr[] = $temp;
+                $row++; 
+            }                
+        }
+
+
+        if(\Yii::$app->request->queryParams['mode'] == 'csv')
+        {
+            header('Content-Type: text/csv; charset=utf-8');
+            header('Content-Disposition: attachment; filename="tdr_detailed.csv"');
+            if(is_array($csv_arr) && count($csv_arr) > 0)
+            {
+                ob_end_clean();
+                $output = fopen('php://output', 'w');
+                foreach ($csv_arr as $row) {
+                    fputcsv($output, $row);
+                }
+                fclose($output);
+                exit();
+            }
+        } else {
+            header('Content-Type: application/vnd.ms-excel');
+            header('Content-Disposition: attachment; filename="tdr_detailed.xlsx"');
+            $writer = new Xlsx($spreadsheet);
+            ob_end_clean();
+            $writer->save("php://output");
+            exit();
+        }
+        exit();
+    }
+
 
 
 

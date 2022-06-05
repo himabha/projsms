@@ -10,6 +10,9 @@ $search = isset($_GET['search']) ? $_GET['search'] : '';
 $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
 $totalCount = $dataProvider->getTotalCount();
 $today = !isset($_GET['TdrSearch']) && !isset($_GET['search']) ? date('d-m-Y') . ' 00:00 AM'  . ' to ' . date('d-m-Y')  . ' 12:59 PM': '';
+$qstr = isset($_GET) ? http_build_query(\Yii::$app->request->queryParams) : '';
+$csv_url = 'tdr-export/?mode=csv&' . $qstr;
+$xls_url = 'tdr-export/?mode=xls&' . $qstr;
 $this->registerCss('
 	.pagination {
 		margin-left: 1em;
@@ -99,7 +102,10 @@ $this->registerJs('
         <div class="row">
             <div class="col-md-12">
                 <div class="card">
-                    <div class="card-header card-header-primary">
+                    <div class="card-header card-header-primary card-header-icon">
+                        <div class="card-icon">
+                            <i class="material-icons">account_box</i>
+                        </div>
                         <h4 class="card-title ">SMS TDR</h4>
                     </div>
                     <div class="card-body">
@@ -183,6 +189,21 @@ $this->registerJs('
                                 </li>
                                 <li>
                                     <?= Html::button('Refresh', ['id' => 'btnRefresh', 'class' => 'btn btn-success btn-sm']); ?>
+                                </li>
+                                <li>
+                                    <div class="dropdown show">
+                                        <a class="btn btn-info dropdown-toggle btn-sm" href="#" role="button"
+                                            id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true"
+                                            aria-expanded="false">
+                                            Export
+                                        </a>
+
+                                        <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                                            <a class="dropdown-item" href="<?= $csv_url; ?>">CSV</a>
+                                            <a class="dropdown-item" href="<?= $xls_url; ?>">XLS</a>
+                                        </div>
+                                    </div>
+
                                 </li>
                             </ul>
                         </div>

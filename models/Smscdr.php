@@ -36,10 +36,11 @@ class Smscdr extends \yii\db\ActiveRecord
 	{
 		return [
             [['id'], 'number'],
-            [['admin_id', 'delivered_time_time', 'reseller_id', 'agent_id', 'sender_id'], 'integer'],
+            [['admin_id', 'delivered_time', 'reseller_id', 'agent_id', 'sender_id'], 'integer'],
             [['sms_message'], 'safe'],
             [['from_number', 'to_number'], 'string' , 'max' => 15],
-            [['msgs', 'billgroup_id'], 'integer'],
+            //[['msgs', 'billgroup_id'], 'integer'],
+            [['msgs'], 'integer'],
             [['rev_in', 'rev_out', 'profit', 'profit_percentage'], 'number'],
         ];
 	}
