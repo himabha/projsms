@@ -218,9 +218,6 @@ $this->registerJs('
 										],
 										'columns' => [
 											[
-												'attribute' => 'id'
-											],
-											[
 												'attribute' => 'from_number'
 											],
 											[
@@ -229,73 +226,62 @@ $this->registerJs('
 											[
 												'attribute' => 'sms_message'
 											],
-											'columns' => [
-												[
-													'attribute' => 'from_number'
+											[
+												'label' => 'Billgroup',
+												'attribute' => 'billgroup_id',
+												'filter' => $billgroups,
+												'filterInputOptions' => [
+													'id' => 'billgroup_id_search',
+													'prompt' => 'Select Billgroup',
+													'class' => 'custom_select'
 												],
-												[
-													'attribute' => 'to_number'
-												],
-												[
-													'attribute' => 'sms_message'
-												],
-												[
-													'label' => 'Billgroup',
-													'attribute' => 'billgroup_id',
-													'filter' => $billgroups,
-													'filterInputOptions' => [
-														'id' => 'billgroup_id_search',
-														'prompt' => 'Select Billgroup',
-														'class' => 'custom_select'
-													],
-													'value' => function ($model) {
-														return isset($model->billgroup) ? $model->billgroup->name : null;
-													}
-												],
-												[
-													'label' => 'Clients',
-													'attribute' => 'admin_id',
-													'filter' => $clients,
-													'filterInputOptions' => [
-														'id' => 'admin_id_search',
-														'prompt' => 'Select Client',
-														'class' => 'custom_select'
-													],
-													'value' => function ($model) {
-														return $model->resellerAdmin ? $model->resellerAdmin->username : null;
-													}
-												],
-												[
-													'label' => 'Suppliers',
-													'attribute' => 'sender_id',
-													'filter' => $suppliers,
-													'filterInputOptions' => [
-														'id' => 'sender_id_search',
-														'prompt' => 'Select Supplier',
-														'class' => 'custom_select'
-													],
-													'value' => function ($model) {
-														return isset($model->supplier) ? $model->supplier->name : null;
-													}
-												],
-												[
-													'attribute' => 'delivered_time',
-													'value' => function ($model) {
-														if (isset($model->delivered_time)) {
-															return date('d-m-Y H:i:s', strtotime($model->delivered_time));
-														} else {
-															return null;
-														}
-													},
-													'filterInputOptions' => [
-														'id' => 'delivered_time_search',
-														'class' => 'custom_select'
-													],
-													'footer' => 'Total records: ' . $totalCount,
-													'footerOptions' => ['style' => ['font-weight' => 'bold']]
-												]
+												'value' => function ($model) {
+													return isset($model->billgroup) ? $model->billgroup->name : null;
+												}
 											],
-										]
+											[
+												'label' => 'Clients',
+												'attribute' => 'admin_id',
+												'filter' => $clients,
+												'filterInputOptions' => [
+													'id' => 'admin_id_search',
+													'prompt' => 'Select Client',
+													'class' => 'custom_select'
+												],
+												'value' => function ($model) {
+													return $model->resellerAdmin ? $model->resellerAdmin->username : null;
+												}
+											],
+											[
+												'label' => 'Suppliers',
+												'attribute' => 'sender_id',
+												'filter' => $suppliers,
+												'filterInputOptions' => [
+													'id' => 'sender_id_search',
+													'prompt' => 'Select Supplier',
+													'class' => 'custom_select'
+												],
+												'value' => function ($model) {
+													return isset($model->supplier) ? $model->supplier->name : null;
+												}
+											],
+											[
+												'attribute' => 'delivered_time',
+												'value' => function ($model) {
+													if (isset($model->delivered_time)) {
+														return date('d-m-Y H:i:s', strtotime($model->delivered_time));
+													} else {
+														return null;
+													}
+												},
+												'filterInputOptions' => [
+													'id' => 'delivered_time_search',
+													'class' => 'custom_select'
+												],
+												'footer' => 'Total records: ' . $totalCount,
+												'footerOptions' => ['style' => ['font-weight' => 'bold']]
+											]
+										],
 									]); ?>
 								</div>
 							</div>
