@@ -15,7 +15,6 @@ class TdrSearchSummary extends Smscdr
     public $dr;
     public $dr_from;
     public $dr_to;
-    //public $msgs;
 
     /**
      * @inheritdoc
@@ -24,7 +23,7 @@ class TdrSearchSummary extends Smscdr
     {
         $return = [
             [['currency'], 'safe'],
-            [['msgs', 'billgroup_id'], 'integer'],
+            [['id', 'msgs', 'billgroup_id'], 'integer'],
             [['rev_in', 'rev_out', 'profit', 'profit_percentage'], 'number'],
             [['admin_id', 'reseller_id', 'agent_id', 'sender_id'], 'integer'],
             [['delivered_time'], 'safe'],
@@ -50,49 +49,42 @@ class TdrSearchSummary extends Smscdr
      *
      * @return ActiveDataProvider
      */
-    public function search($params, $users, $search=null, $isAdmin = false, $detail = false)
+    public function search($params, $users, $search=null, $isAdmin = false, $detail_report = false)
     {
+        $query = Smscdr::find();
+
         if($isAdmin)
         {
-            if($detail)
+            if($detail_report)
             {
-                $query = Smscdr::find()->select("billgroup_id, currency, count(*) as msgs, sum(cost_rate) as rev_in, sum(cld1rate) as rev_out, sum(cost_rate - cld1rate) as profit, ((sum(cost_rate) / sum(cld1rate)) * 100) as profit_percentage");
+                $query->select("billgroup_id, currency, count(*) as msgs, sum(cost_rate) as rev_in, sum(cld1rate) as rev_out, sum(cost_rate - cld1rate) as profit, ((sum(cost_rate) / sum(cld1rate)) * 100) as profit_percentage");
             } else {
-                $query = Smscdr::find()->select("currency, count(*) as msgs, sum(cost_rate) as rev_in, sum(cld1rate) as rev_out, sum(cost_rate - cld1rate) as profit, ((sum(cost_rate) / sum(cld1rate)) * 100) as profit_percentage");
+                $query->select("currency, count(*) as msgs, sum(cost_rate) as rev_in, sum(cld1rate) as rev_out, sum(cost_rate - cld1rate) as profit, ((sum(cost_rate) / sum(cld1rate)) * 100) as profit_percentage");
             }
         } else {
             if(\Yii::$app->user->identity->role == 2) { // user
-                if($detail)
+                if($detail_report)
                 {
-                    $query = Smscdr::find()->select("billgroup_id, currency, count(*) as msgs, sum(cld3rate) as rev_in, sum(cld3rate) as profit");
+                    $query->select("billgroup_id, currency, count(*) as msgs, sum(cld3rate) as rev_in, sum(cld3rate) as profit");
                 } else {
-                    $query = Smscdr::find()->select("currency, count(*) as msgs, sum(cld3rate) as rev_in, sum(cld3rate) as profit");
+                    $query->select("currency, count(*) as msgs, sum(cld3rate) as rev_in, sum(cld3rate) as profit");
                 }
             } else if(\Yii::$app->user->identity->role == 3) { // reseller
-                if($detail)
+                if($detail_report)
                 {
-                    $query = Smscdr::find()->select("billgroup_id, currency, count(*) as msgs, sum(cld2rate) as rev_in, sum(cld3rate) as rev_out, sum(cld2rate - cld3rate) as profit, ((sum(cld2rate) / sum(cld3rate)) * 100) as profit_percentage");
+                    $query->select("billgroup_id, currency, count(*) as msgs, sum(cld2rate) as rev_in, sum(cld3rate) as rev_out, sum(cld2rate - cld3rate) as profit, ((sum(cld2rate) / sum(cld3rate)) * 100) as profit_percentage");
                 } else {
-                    $query = Smscdr::find()->select("currency, count(*) as msgs, sum(cld2rate) as rev_in, sum(cld3rate) as rev_out, sum(cld2rate - cld3rate) as profit, ((sum(cld2rate) / sum(cld3rate)) * 100) as profit_percentage");
+                    $query->select("currency, count(*) as msgs, sum(cld2rate) as rev_in, sum(cld3rate) as rev_out, sum(cld2rate - cld3rate) as profit, ((sum(cld2rate) / sum(cld3rate)) * 100) as profit_percentage");
                 }
             } else if(\Yii::$app->user->identity->role == 4) { // reseller admin
-                if($detail)
+                if($detail_report)
                 {
-                    $query = Smscdr::find()->select("billgroup_id, currency, count(*) as msgs, sum(cld1rate) as rev_in, sum(cld2rate) as rev_out, sum(cld1rate - cld2rate) as profit, ((sum(cld1rate) / sum(cld2rate)) * 100) as profit_percentage");
+                    $query->select("billgroup_id, currency, count(*) as msgs, sum(cld1rate) as rev_in, sum(cld2rate) as rev_out, sum(cld1rate - cld2rate) as profit, ((sum(cld1rate) / sum(cld2rate)) * 100) as profit_percentage");
                 } else {
-                    $query = Smscdr::find()->select("currency, count(*) as msgs, sum(cld1rate) as rev_in, sum(cld2rate) as rev_out, sum(cld1rate - cld2rate) as profit, ((sum(cld1rate) / sum(cld2rate)) * 100) as profit_percentage");
+                    $query->select("currency, count(*) as msgs, sum(cld1rate) as rev_in, sum(cld2rate) as rev_out, sum(cld1rate - cld2rate) as profit, ((sum(cld1rate) / sum(cld2rate)) * 100) as profit_percentage");
                 }
             }
         }
-
-        // if(!$isAdmin)  => NOT SURE WHAT THIS BLOCK FOR
-        // {
-        //     if(Yii::$app->user->identity->role == 4){
-        //         //$query->joinWith(['resellers']);
-        //     } else {
-        //         $query->joinWith(['users']);
-        //     }
-        // }
 
         $this->load($params);
 
@@ -134,9 +126,9 @@ class TdrSearchSummary extends Smscdr
             $query->orFilterWhere([
                 'id' => $search
             ]);
-            $query->orFilterWhere([
-                'billgroup_id' => $this->billgroup_id,
-            ]);
+            // $query->orFilterWhere([
+            //     'billgroup_id' => $this->billgroup_id,
+            // ]);
             // if($isAdmin){
             //     $query->orFilterWhere([
             //         'admin_id' => $search,
@@ -203,7 +195,6 @@ class TdrSearchSummary extends Smscdr
             $query->andFilterWhere(['like', 'from_number', $this->from_number])
             ->andFilterWhere(['like', 'to_number', $this->to_number])
             ->andFilterWhere(['like', 'sms_message', $this->sms_message])
-            //->andFilterWhere(['like', 'delivered_time', $this->delivered_time])
             ;
 
             if(!empty($this->dr_from) && !empty($this->dr_to))
@@ -219,7 +210,7 @@ class TdrSearchSummary extends Smscdr
 
         if(!$isAdmin){
             if(Yii::$app->user->identity->role == 4){ // reseller admin
-                //$query->andFilterWhere(['in', 'sms_cdr.admin_id', Yii::$app->user->identity->id]);
+                $query->andFilterWhere(['in', 'sms_cdr.admin_id', Yii::$app->user->identity->id]);
             } else if(Yii::$app->user->identity->role == 2) { //user
                 $query->andFilterWhere(['in', 'sms_cdr.agent_id', Yii::$app->user->identity->id]);
             } else if(Yii::$app->user->identity->role == 3) { // reseller
@@ -227,7 +218,7 @@ class TdrSearchSummary extends Smscdr
             }
         }
         
-        if($detail)
+        if($detail_report)
         {
             $query->groupBy('billgroup_id, currency');
         } else {
