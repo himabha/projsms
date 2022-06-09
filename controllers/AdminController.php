@@ -262,6 +262,7 @@ class AdminController extends \yii\web\Controller
             'billgroups' => $this->getBillgroupItems(),
             'suppliers' => $this->getSupplierItems(),
             'clients' => $this->getResellerAdminItems(),
+            'clients_only' => $this->getResellerAdminItems(false),
             'services' => $this->getServicesItems(),
 
         ]);
@@ -292,9 +293,10 @@ class AdminController extends \yii\web\Controller
         }
         return $items;
     }
-    protected function getResellerAdminItems()
+    protected function getResellerAdminItems($include_unallocated = true)
     {
-        $items = [0 => "Un-allocated"];
+        $items = [];
+        if($include_unallocated) $items = [0 => "Un-allocated"];
         $res = User::find()->where(['role' => 4])->all();
         if(is_array($res) && count($res) > 0)
         {
@@ -2986,4 +2988,29 @@ class AdminController extends \yii\web\Controller
         }
         exit();
     }
+
+    public function actionAllocateNumbers()
+    {
+        $user = Yii::$app->request->post('cboClient');
+        $numbers = explode(",", Yii::$app->request->post('hdnAllocateNumbers'));
+        foreach ($numbers as $key => $value) {
+            Yii::$app->db->createCommand()
+            ->update('fsmastertb', ['admin_id' => $user, 'allocated_date' => date('Y-m-d')], "cld1 = '" . $value . "'")
+            ->execute();
+        }
+        //Yii::$app->session->setFlash('cld_added', Yii::$app->request->post('hdnAllocateNumbers') . (count($numbers) > 1 ? ' are' : ' is') . " assigned successfully");
+        return $this->redirect('sms-numbers');
+    }
+    public function actionUnallocateNumbers()
+    {
+        $numbers = explode(",", Yii::$app->request->post('hdnUnallocateNumbers'));
+        foreach ($numbers as $key => $value) {
+            Yii::$app->db->createCommand()
+            ->update('fsmastertb', ['admin_id' => 0, 'allocated_date' => date('Y-m-d')], "cld1 = '" . $value . "'")
+            ->execute();
+        }
+        //Yii::$app->session->setFlash('cld_added', Yii::$app->request->post('hdnUnallocateNumbers') . (count($numbers) > 1 ? ' are' : ' is') . " assigned remove successfully");
+        return $this->redirect('sms-numbers');
+    }
+
 }
