@@ -862,6 +862,7 @@ class UserController extends Controller
             ob_end_clean();
             $output = fopen('php://output', 'w');
             foreach ($csv_arr as $row) {
+                fwrite($output, chr(0xEF) . chr(0xBB) . chr(0xBF));
                 fputcsv($output, $row);
             }
             fclose($output);
@@ -1098,6 +1099,7 @@ class UserController extends Controller
                 ob_end_clean();
                 $output = fopen('php://output', 'w');
                 foreach ($csv_arr as $row) {
+                    fwrite($output, chr(0xEF) . chr(0xBB) . chr(0xBF));
                     fputcsv($output, $row);
                 }
                 fclose($output);
@@ -1344,6 +1346,7 @@ class UserController extends Controller
                 ob_end_clean();
                 $output = fopen('php://output', 'w');
                 foreach ($csv_arr as $row) {
+                    fwrite($output, chr(0xEF) . chr(0xBB) . chr(0xBF));
                     fputcsv($output, $row);
                 }
                 fclose($output);

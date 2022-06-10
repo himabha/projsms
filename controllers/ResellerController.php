@@ -776,6 +776,7 @@ class ResellerController extends \yii\web\Controller
             'countries' => $this->getCountryItems(),
             'billgroups' => $this->getBillgroupItems(),
             'agents' => $this->getAgentItems(),
+            'clients_only' => $this->getAgentItems(false),
             'services' => $this->getServicesItems()
         ]);
     }
@@ -793,9 +794,10 @@ class ResellerController extends \yii\web\Controller
         }
         return $items;
     }
-    protected function getAgentItems()
+    protected function getAgentItems($include_unallocated = true)
     {
-        $items = [0 => "Un-allocated"];
+        $items = [];
+        if($include_unallocated) $items = [0 => "Un-allocated"];
         $res = User::find()->where(['role' => 2, 'reseller_id' => \Yii::$app->user->id])->all();
         if(is_array($res) && count($res) > 0)
         {
@@ -1296,6 +1298,7 @@ class ResellerController extends \yii\web\Controller
             ob_end_clean();
             $output = fopen('php://output', 'w');
             foreach ($csv_arr as $row) {
+                fwrite($output, chr(0xEF) . chr(0xBB) . chr(0xBF));
                 fputcsv($output, $row);
             }
             fclose($output);
@@ -1567,6 +1570,7 @@ class ResellerController extends \yii\web\Controller
                 ob_end_clean();
                 $output = fopen('php://output', 'w');
                 foreach ($csv_arr as $row) {
+                    fwrite($output, chr(0xEF) . chr(0xBB) . chr(0xBF));
                     fputcsv($output, $row);
                 }
                 fclose($output);
@@ -1840,6 +1844,7 @@ class ResellerController extends \yii\web\Controller
                 ob_end_clean();
                 $output = fopen('php://output', 'w');
                 foreach ($csv_arr as $row) {
+                    fwrite($output, chr(0xEF) . chr(0xBB) . chr(0xBF));
                     fputcsv($output, $row);
                 }
                 fclose($output);
@@ -1855,6 +1860,31 @@ class ResellerController extends \yii\web\Controller
         }
         exit();
     }
+
+    public function actionAllocateNumbers()
+    {
+        $user = Yii::$app->request->post('cboClient');
+        $numbers = explode(",", Yii::$app->request->post('hdnAllocateNumbers'));
+        foreach ($numbers as $key => $value) {
+            Yii::$app->db->createCommand()
+            ->update('fsmastertb', ['agent_id' => $user, 'allocated_date' => date('Y-m-d')], "cld1 = '" . $value . "'")
+            ->execute();
+        }
+        //Yii::$app->session->setFlash('cld_added', Yii::$app->request->post('hdnAllocateNumbers') . (count($numbers) > 1 ? ' are' : ' is') . " assigned successfully");
+        return $this->redirect('sms-numbers');
+    }
+    public function actionUnallocateNumbers()
+    {
+        $numbers = explode(",", Yii::$app->request->post('hdnUnallocateNumbers'));
+        foreach ($numbers as $key => $value) {
+            Yii::$app->db->createCommand()
+            ->update('fsmastertb', ['agent_id' => 0, 'allocated_date' => date('Y-m-d')], "cld1 = '" . $value . "'")
+            ->execute();
+        }
+        //Yii::$app->session->setFlash('cld_added', Yii::$app->request->post('hdnUnallocateNumbers') . (count($numbers) > 1 ? ' are' : ' is') . " assigned remove successfully");
+        return $this->redirect('sms-numbers');
+    }
+
 
 
 
