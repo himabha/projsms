@@ -117,7 +117,7 @@ $this->registerJs('
                 <div class="card">
                     <div class="card-header card-header-primary card-header-icon">
                         <div class="card-icon">
-                            <i class="material-icons">account_box</i>
+                            <i class="material-icons">summarize</i>
                         </div>
                         <h4 class="card-title ">Summary Report</h4>
                     </div>

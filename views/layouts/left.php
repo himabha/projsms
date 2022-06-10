@@ -236,7 +236,7 @@ use yii\helpers\Url;
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="<?= Url::to(['/user/sms-numbers']); ?>">
-                            <i class="material-icons">receipt</i>
+                            <i class="material-icons">library_books</i>
                             <p>SMS Numbers</p>
                         </a>
                     </li>
