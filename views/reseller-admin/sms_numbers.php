@@ -21,6 +21,21 @@ $this->registerCss('
 		border:none;
 		margin-right:2em;
 	}
+	.form_select{
+		line-height:2em;
+		padding-left: 0.5em;
+		padding-right: 0.5em;
+		border-color:#cccccc;
+	}
+	.label_select{
+		color:black;
+		font-weight:bold;
+		font-size:larger;
+	}
+	.form_control{
+		padding-left: 0.5em;
+		padding-right: 0.5em;
+	},	
 	input.custom_search{
 		margin-bottom:6px;
 		line-height:2.5em;
@@ -44,19 +59,32 @@ $this->registerCss('
 		margin-bottom:0.5em;
 	}');
 $this->registerJs('
+	document.getElementById("allocate_revOutRate").addEventListener("change", function (e) {
+		if(this.value < 0.01){
+			this.value = "";
+		} else {
+		  	this.value = Math.round(+this.value * 100)/100;
+		}
+	});
 	$(document).ready(function(){
 		$("#btnAllocate").click(function(){
-			var numbers = $("#manage_num_grid").yiiGridView("getSelectedRows");
+			$("#allocated_message").empty().hide();
+			let numbers = $("#manage_num_grid").yiiGridView("getSelectedRows");
 			if (numbers.length > 0) {
-				var strvalue = "";
+				let strvalue = "";
+				let allocated = false;
 				$("input[name=\'selection[]\']:checked").each(function() {
-					if($(this).attr("data-cld1") != "" && $(this).attr("data-reseller_id") == 0)
+					if($(this).attr("data-cld1") != "")
 					{
 						if (strvalue != "") strvalue = strvalue + "," + $(this).attr("data-cld1");
 						else strvalue = $(this).attr("data-cld1");
 					}
+					if($(this).attr("data-reseller_id") != 0) allocated = true;
 				});
 				$("#hdnAllocateNumbers").val(strvalue);
+				if(allocated) {
+					$("#allocated_message").html("Some of these numbers are allocated already.<br/>Continuing with this allocation will move all the numbers to the selected client").show();
+				}
 				if(strvalue != "") $("#allocate_numbers").modal("show");
 				else BootstrapDialog.show({title:"Allocate Numbers", message:"Please select at least one unallocated item!"});
 			} else {
@@ -64,16 +92,22 @@ $this->registerJs('
 			}
 		});
 		$("#btnUnallocate").click(function(){
-			var numbers = $("#manage_num_grid").yiiGridView("getSelectedRows");
+			let numbers = $("#manage_num_grid").yiiGridView("getSelectedRows");
+			$("#unallocated_message").empty().hide();
 			if (numbers.length > 0) {
-				var strvalue = "";
+				let strvalue = "";
+				let unallocated = false;
 				$("input[name=\'selection[]\']:checked").each(function() {
 					if($(this).attr("data-cld1") != "" && $(this).attr("data-reseller_id") != 0)
 					{
 						if (strvalue != "") strvalue = strvalue + "," + $(this).attr("data-cld1");
 						else strvalue = $(this).attr("data-cld1");
 					}
+					if($(this).attr("data-reseller_id") == 0) unallocated = true;
 				});
+				if(unallocated) {
+					$("#unallocated_message").html("Some of these numbers are not allocated yet and will be ignored.").show();
+				}
 				$("#hdnUnallocateNumbers").val(strvalue);
 				if(strvalue != "") $("#unallocate_numbers").modal("show");
 				else BootstrapDialog.show({title:"Unallocate Numbers", message:"Please select at least one allocated item!"});
@@ -177,7 +211,6 @@ $this->registerJs('
 											[
 												'class' => 'yii\grid\CheckboxColumn',
 												'checkboxOptions' => function ($model, $key, $index, $column) {
-													//return ['value' => $model->fsmid];
 													return ['value' => $model->fsmid, 'data-cld1' => $model->cld1, 'data-reseller_id' => $model->reseller_id];
 												}
 											],
@@ -233,53 +266,6 @@ $this->registerJs('
 												'footer' => 'Total records: ' . $totalCount,
 												'footerOptions' => ['style' => ['font-size' => 'larger', 'font-weight' => 'bold', 'min-width' => '10em']],
 											],
-											/*
-											[
-												'class' => 'yii\grid\ActionColumn',
-												'header' => 'Action',
-												'footer' => 'Total records: ' . $totalCount,
-												'footerOptions' => ['style' => ['font-size' => 'larger', 'font-weight' => 'bold', 'min-width' => '10em']],
-												'template' => ' {update-cld}, {show-number-routes} ,  {delete-cld}',
-												'buttons' => [
-													'show-number-routes' => function ($url, $model, $key) {
-														return Html::a(
-															'<i class="fa fa-eye"></i>',
-															$url,
-															[
-																'data-original-title' => 'Show list of all resellers who hold this number',
-																'data-placement' => 'top',
-																'style' => 'margin-right: 10px'
-															]
-														);
-													},
-													'update-cld' => function ($url, $model, $key) {
-														return Html::a(
-															'<i class="fa fa-edit"></i>',
-															$url,
-															[
-																'data-original-title' => 'Edit this number',
-																'data-placement' => 'top',
-																'style' => 'margin-right: 10px'
-															]
-														);
-													},
-													'delete-cld' => function ($url, $model, $key) {
-														return Html::a(
-															'<i class="fa fa-trash-o"></i>',
-															$url,
-															[
-																'data-original-title' => 'Delete this number?',
-																'data-placement' => 'top',
-																'data-pjax' => '0',
-																'data-confirm' => 'Are you sure you want to delete this item?',
-																'data-method' => 'post',
-																'style' => 'margin-right: 10px'
-															]
-														);
-													}
-												],
-											]
-											*/
 										],
 									]); ?>
                                 </div>
@@ -327,15 +313,28 @@ $this->registerJs('
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
             </div>
             <div class="modal-body">
-                <div id="allocate_message"></div>
-				<?= Html::beginForm(['/reseller-admin/allocate-numbers'], 'post', []) ?>
-				<input type="hidden" name="hdnAllocateNumbers" id="hdnAllocateNumbers">
-				<div style="margin-bottom:2em;"><?= Html::dropDownList('cboClient', '', $clients_only, ['prompt' => 'Select Client', 'class' => 'form-select custom_select', 'required' => 'required']) ?></div>
-                <div class="media form-group">
-					<button type="submit" class="btn btn-primary">Submit</button>
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-					<?= Html::endForm() ?>
+                <div id="allocated_message"
+                    style="font-size:smaller; color:red; border:1px solid #ccc; padding:0.5em; margin-bottom:3em;">
                 </div>
+                <?= Html::beginForm(['/reseller-admin/allocate-numbers'], 'post', ['class' => 'form']) ?>
+                <input type="hidden" name="hdnAllocateNumbers" id="hdnAllocateNumbers">
+                <div class="form-group">
+                    <label for="cboClient" class="label_select col-md-4 text-right">Client:</label>
+                    <?= Html::dropDownList('cboClient', '', $clients_only, ['prompt' => 'Select Client', 'class' => 'form-select form_select', 'required' => 'required']) ?>
+                </div>
+                <div class="form-group">
+                    <label for="cboClient" class="label_select col-md-4 text-right">Service:</label>
+                    <?= Html::dropDownList('cboService', '', $services, ['prompt' => 'Select Service', 'id' => 'allocate_service_id', 'class' => 'form-select form_select', 'required' => 'required']) ?>
+                </div>
+                <div class="form-group">
+                    <label for="revOutRate" class="label_select col-md-4 text-right">Rev Out Rate:</label>
+                    <?= Html::textInput('revOutRate', '0', ['class' => 'form-control-inline form_control', 'id' => 'allocate_revOutRate', 'type' => 'number', 'required' => 'required', 'step' => '0.01', 'min' => '0.01']) ?>
+                </div>
+                <div class="form-group" style="text-align:center;">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                </div>
+                <?= Html::endForm() ?>
             </div>
         </div>
     </div>
@@ -349,14 +348,16 @@ $this->registerJs('
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
             </div>
             <div class="modal-body">
-                <div id="unallocate_message"></div>
-				<?= Html::beginForm(['/reseller-admin/unallocate-numbers'], 'post', []) ?>
-				<input type="hidden" name="hdnUnallocateNumbers" id="hdnUnallocateNumbers">
-                <div class="media form-group">
-					<button type="submit" class="btn btn-primary">Submit</button>
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-					<?= Html::endForm() ?>
+                <div id="unallocated_message"
+                    style="font-size:smaller; color:red; border:1px solid #ccc; padding:0.5em; margin-bottom:3em;">
                 </div>
+                <?= Html::beginForm(['/reseller-admin/unallocate-numbers'], 'post', []) ?>
+                <input type="hidden" name="hdnUnallocateNumbers" id="hdnUnallocateNumbers">
+                <div class="form-group" style="text-align:center;">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                </div>
+                <?= Html::endForm() ?>
             </div>
         </div>
     </div>

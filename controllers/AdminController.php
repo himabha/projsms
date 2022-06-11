@@ -263,7 +263,7 @@ class AdminController extends \yii\web\Controller
             'suppliers' => $this->getSupplierItems(),
             'clients' => $this->getResellerAdminItems(),
             'clients_only' => $this->getResellerAdminItems(false),
-            'services' => $this->getServicesItems(),
+            'services' => $this->getServicesItems()
 
         ]);
     }
@@ -2992,10 +2992,22 @@ class AdminController extends \yii\web\Controller
     public function actionAllocateNumbers()
     {
         $user = Yii::$app->request->post('cboClient');
+        $service = Yii::$app->request->post('cboService');
+        $rev_out_rate = Yii::$app->request->post('revOutRate');
         $numbers = explode(",", Yii::$app->request->post('hdnAllocateNumbers'));
         foreach ($numbers as $key => $value) {
             Yii::$app->db->createCommand()
-            ->update('fsmastertb', ['admin_id' => $user, 'allocated_date' => date('Y-m-d')], "cld1 = '" . $value . "'")
+            ->update('fsmastertb', [
+                    'admin_id' => $user, 
+                    'reseller_id' => 0, 
+                    'agent_id' => 0, 
+                    'service_id' => $service,
+                    'cld1rate' => $rev_out_rate,
+                    'cld2rate' => 0,
+                    'cld3rate' => 0,
+                    'allocated_date' => date('Y-m-d')
+                ], 
+                "cld1 = '" . $value . "'")
             ->execute();
         }
         //Yii::$app->session->setFlash('cld_added', Yii::$app->request->post('hdnAllocateNumbers') . (count($numbers) > 1 ? ' are' : ' is') . " assigned successfully");
@@ -3006,7 +3018,17 @@ class AdminController extends \yii\web\Controller
         $numbers = explode(",", Yii::$app->request->post('hdnUnallocateNumbers'));
         foreach ($numbers as $key => $value) {
             Yii::$app->db->createCommand()
-            ->update('fsmastertb', ['admin_id' => 0, 'allocated_date' => date('Y-m-d')], "cld1 = '" . $value . "'")
+            ->update('fsmastertb', [
+                    'admin_id' => 0, 
+                    'reseller_id' => 0, 
+                    'agent_id' => 0, 
+                    'service_id' => 0,
+                    'cld1rate' => 0,
+                    'cld2rate' => 0,
+                    'cld3rate' => 0,
+                    'allocated_date' => date('Y-m-d')
+                ], 
+                "cld1 = '" . $value . "'")
             ->execute();
         }
         //Yii::$app->session->setFlash('cld_added', Yii::$app->request->post('hdnUnallocateNumbers') . (count($numbers) > 1 ? ' are' : ' is') . " assigned remove successfully");
