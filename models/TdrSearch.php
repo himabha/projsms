@@ -48,9 +48,10 @@ class TdrSearch extends Smscdr
      *
      * @return ActiveDataProvider
      */
-    public function search($params, $users, $search=null, $isAdmin = false)
+    public function search($params, $users, $search=null, $isAdmin = false, $isTestPanel = false)
     {
         $query = Smscdr::find();
+        if($isTestPanel) $query->andFilterWhere(['admin_id' => \Yii::$app->params['test_panel_id']]);
 
         // if(!$isAdmin)  => NOT SURE WHAT THIS BLOCK FOR
         // {

@@ -18,7 +18,7 @@ class FsmastertbSearch extends Fsmastertb
     public function rules()
     {
         $return = [
-            [['fsmid'], 'integer'],
+            [['fsmid', 'admin_id'], 'integer'],
             [['inboundip', 'cld1', 'cld2', 'outboundip', 'cld1description', 'cld2description', 'country_id'], 'safe'],
             [['cld1rate', 'cld2rate', 'cld3rate', 'billgroup_id'], 'number']
         ];
@@ -64,9 +64,11 @@ class FsmastertbSearch extends Fsmastertb
      *
      * @return ActiveDataProvider
      */
-    public function search($params, $users, $search=null, $isAdmin = false)
+    public function search($params, $users, $search=null, $isAdmin = false, $isTestPanel = false)
     {
         $query = Fsmastertb::find();
+        if($isTestPanel) $query->andFilterWhere(['admin_id' => \Yii::$app->params['test_panel_id']]);
+
         if(!$isAdmin)
         {
             if(Yii::$app->user->identity->role == 4){

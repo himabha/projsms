@@ -1363,6 +1363,57 @@ class UserController extends Controller
         exit();
     }
 
+    public function actionTestNumbers()
+    {
+        $model = new Fsusertb();
+        $search = isset($_GET['search']) ? $_GET['search'] : '';
+        $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
+
+        if ($filter == 'all') {
+            $filter = '';
+        }
+
+        $searchModel = new FsmastertbSearch();
+        $mysubusr = User::find()->select('id')->where(['agent_id' => Yii::$app->user->identity->id, 'role' => 2]);
+        $summary = $model->getSummary($mysubusr, false, false, true);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $mysubusr, $search);
+        $dataProvider->pagination->pageSize = $filter;
+
+        return $this->render('test_numbers', [
+            'dataProvider' => $dataProvider, 
+            'searchModel' => $searchModel,
+            'summary' => $summary,
+            'countries' => $this->getCountryItems(),
+            'billgroups' => $this->getBillgroupItems(),
+        ]);
+    }
+
+    public function actionTestTdr()
+    {
+        $model = new Fsusertb();
+        $search = isset($_GET['search']) ? $_GET['search'] : '';
+        $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
+        $mysubusr = User::find()->select('id')->where(['role' => 2]);
+
+        if ($filter == 'all') {
+            $filter = '';
+        }
+
+        $searchModel = new TdrSearch();
+
+        $mysubusr = User::find()->select('id')->where(['agent_id' => Yii::$app->user->identity->id, 'role' => 2]);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $mysubusr, $search, false);
+        $dataProvider->setPagination(['pageSize' => $filter]); 
+
+        return $this->render('test_tdr', [
+            'dataProvider' => $dataProvider, 
+            'searchModel' => $searchModel,
+            'search' => $search, 
+            'filter' => $filter,
+            'billgroups' => $this->getBillgroupItems(),
+        ]);
+    }
+
 
 
 
