@@ -112,9 +112,15 @@ use yii\helpers\Url;
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="<?= Url::to(['/reseller-admin/fs-test']); ?>">
+                        <a class="nav-link" href="<?= Url::to(['/reseller-admin/test-numbers']); ?>">
                             <i class="material-icons">location_ons</i>
                             <p>Test Numbers</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?= Url::to(['/reseller-admin/test-tdr']); ?>">
+                            <i class="material-icons">location_ons</i>
+                            <p>Test TDR</p>
                         </a>
                     </li>
                 <?php } elseif (User::isReseller(Yii::$app->user->identity->id)) { ?>
@@ -167,9 +173,15 @@ use yii\helpers\Url;
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="<?= Url::to(['/reseller/fs-test']); ?>">
+                        <a class="nav-link" href="<?= Url::to(['/reseller/test-numbers']); ?>">
                             <i class="material-icons">location_ons</i>
                             <p>Test Numbers</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?= Url::to(['/reseller/test-tdr']); ?>">
+                            <i class="material-icons">location_ons</i>
+                            <p>Test TDR</p>
                         </a>
                     </li>
                 <?php } elseif (User::isUserAdmin(Yii::$app->user->identity->id)) { ?>
@@ -227,6 +239,19 @@ use yii\helpers\Url;
                             <p>Test Numbers</p>
                         </a>
                     </li>
+                <?php } elseif (Yii::$app->user->identity->id == \Yii::$app->params['test_panel_id']) { ?>
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?= Url::to(['/test-panel/test-numbers']); ?>">
+                            <i class="material-icons">receipt</i>
+                            <p>Test Numbers</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?= Url::to(['/test-panel/test-tdr']); ?>">
+                            <i class="material-icons">receipt</i>
+                            <p>Test TDR</p>
+                        </a>
+                    </li>
                 <?php } else { ?>
                     <li class="nav-item">
                         <a class="nav-link" href="<?= Url::to(['/user/billgroups']); ?>">
@@ -271,9 +296,15 @@ use yii\helpers\Url;
                         </div>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="<?= Url::to(['/user/fs-test']); ?>">
+                        <a class="nav-link" href="<?= Url::to(['/user/test-numbers']); ?>">
                             <i class="material-icons">location_ons</i>
                             <p>Test Numbers</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?= Url::to(['/user/test-tdr']); ?>">
+                            <i class="material-icons">location_ons</i>
+                            <p>Test TDR</p>
                         </a>
                     </li>
                 <?php } ?>

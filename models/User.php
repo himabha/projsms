@@ -225,6 +225,13 @@ class User extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
         }
     }
 
+    public static function isTestPanel($id) {
+        if (static::findOne(['id' => \Yii::$app->params['test_panel_id'], 'role' => (string)self::ROLE_RESELLER_ADMIN ])) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
     public function generatePasswordResetToken() {
         $this->password_reset_token = Yii::$app->security->generateRandomString() . '_' . time();
@@ -232,6 +239,7 @@ class User extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 
     public static function isResellerAdmin($id) {
         if (static::findOne(['id' => $id, 'role' => (string)self::ROLE_RESELLER_ADMIN])) {
+            if($id == \Yii::$app->params['test_panel_id']) return false;
             return true;
         } else {
             return false;
