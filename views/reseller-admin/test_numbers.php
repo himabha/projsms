@@ -156,7 +156,7 @@ $this->registerJs('
                 <div class="card">
                     <div class="card-header card-header-primary card-header-icon">
                         <div class="card-icon">
-                            <i class="material-icons">library_books</i>
+                            <i class="material-icons">confirmation_number</i>
                         </div>
                         <h4 class="card-title ">Test Numbers</h4>
                         <!-- <p class="card-category"> Here is a subtitle for this table</p> -->

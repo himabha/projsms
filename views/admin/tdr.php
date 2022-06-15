@@ -109,19 +109,6 @@ $this->registerJs('
 					</div>
 					<div class="card-body">
 						<div>
-							<?php $form = ActiveForm::begin(['id' => 'searchForm', 'method' => 'get']); ?>
-							<ul class="gv_top">
-								<li>
-									<?= Html::textInput('search', $search, ['id' => 'search_box', 'class' => 'search_box custom_search pull-left', 'placeholder' => 'Search....']); ?>
-								</li>
-								<li>
-									<?= Html::dropdownlist('filter', $filter, ['10' => '10', '20' => '20', '50' => '50', '100' => '100', '1000' => '1000'], ['id' => 'filter_box', 'class' => 'filter_box custom_filter pull-left']); ?>
-								</li>
-							</ul>
-							<?php ActiveForm::end(); ?>
-
-						</div>
-						<div>
 							<div class="row">
 								<div class="col-md-4">
 									<?php
@@ -206,6 +193,18 @@ $this->registerJs('
 							</div>
 							<div>
 								<div class="table-responsive">
+									<div class="pull-right">
+										<ul class="gv_top">
+											<?php $form = ActiveForm::begin(['id' => 'searchForm', 'method' => 'get']); ?>
+											<li>
+												<?= Html::textInput('search', $search, ['id' => 'search_box', 'class' => 'search_box custom_search pull-left', 'placeholder' => 'Search....']); ?>
+											</li>
+											<li>
+												<?= Html::dropdownlist('filter', $filter, ['10' => '10', '20' => '20', '50' => '50', '100' => '100', '1000' => '1000'], ['id' => 'filter_box', 'class' => 'filter_box custom_filter pull-left']); ?>
+											</li>
+											<?php ActiveForm::end(); ?>
+										</ul>
+									</div>
 									<?= GridView::widget([
 										'id' => 'manage_num_grid',
 										'dataProvider' => $dataProvider,

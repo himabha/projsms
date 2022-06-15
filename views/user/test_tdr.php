@@ -97,7 +97,7 @@ $this->registerJs('
                 <div class="card">
                     <div class="card-header card-header-primary card-header-icon">
                         <div class="card-icon">
-                            <i class="material-icons">account_box</i>
+                            <i class="material-icons">report</i>
                         </div>
                         <h4 class="card-title ">Test TDR</h4>
                     </div>

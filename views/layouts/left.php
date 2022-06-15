@@ -36,19 +36,19 @@ use yii\helpers\Url;
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="<?= Url::to(['/site/test-numbers']); ?>">
-                        <i class="material-icons">library_books</i>
+                        <i class="material-icons">confirmation_number</i>
                         <p>Test Numbers</p>
                     </a>
                 </li>
-                <li class="nav-item">
+                <!-- <li class="nav-item">
                     <a class="nav-link" href="<?= Url::to(['/site/access']); ?>">
                         <i class="material-icons">bubble_chart</i>
                         <p>Access</p>
                     </a>
-                </li>
+                </li> -->
                 <li class="nav-item">
                     <a class="nav-link" href="<?= Url::to(['/site/login']); ?>">
-                        <i class="material-icons">location_ons</i>
+                        <i class="material-icons">login</i>
                         <p>Login</p>
                     </a>
                 </li>
@@ -113,13 +113,13 @@ use yii\helpers\Url;
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="<?= Url::to(['/reseller-admin/test-numbers']); ?>">
-                            <i class="material-icons">location_ons</i>
+                            <i class="material-icons">confirmation_number</i>
                             <p>Test Numbers</p>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="<?= Url::to(['/reseller-admin/test-tdr']); ?>">
-                            <i class="material-icons">location_ons</i>
+                            <i class="material-icons">report</i>
                             <p>Test TDR</p>
                         </a>
                     </li>
@@ -174,13 +174,13 @@ use yii\helpers\Url;
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="<?= Url::to(['/reseller/test-numbers']); ?>">
-                            <i class="material-icons">location_ons</i>
+                            <i class="material-icons">confirmation_number</i>
                             <p>Test Numbers</p>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="<?= Url::to(['/reseller/test-tdr']); ?>">
-                            <i class="material-icons">location_ons</i>
+                            <i class="material-icons">report</i>
                             <p>Test TDR</p>
                         </a>
                     </li>
@@ -233,22 +233,22 @@ use yii\helpers\Url;
                             <p>Reseller Admin</p>
                         </a>
                     </li>
-                    <li class="nav-item">
+                    <!-- <li class="nav-item">
                         <a class="nav-link" href="<?= Url::to(['/admin/fs-test']); ?>">
-                            <i class="material-icons">location_ons</i>
+                            <i class="material-icons">confirmation_number</i>
                             <p>Test Numbers</p>
                         </a>
-                    </li>
+                    </li> -->
                 <?php } elseif (Yii::$app->user->identity->id == \Yii::$app->params['test_panel_id']) { ?>
                     <li class="nav-item">
                         <a class="nav-link" href="<?= Url::to(['/test-panel/test-numbers']); ?>">
-                            <i class="material-icons">receipt</i>
+                            <i class="material-icons">confirmation_number</i>
                             <p>Test Numbers</p>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="<?= Url::to(['/test-panel/test-tdr']); ?>">
-                            <i class="material-icons">receipt</i>
+                            <i class="material-icons">report</i>
                             <p>Test TDR</p>
                         </a>
                     </li>
@@ -297,23 +297,23 @@ use yii\helpers\Url;
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="<?= Url::to(['/user/test-numbers']); ?>">
-                            <i class="material-icons">location_ons</i>
+                            <i class="material-icons">confirmation_number</i>
                             <p>Test Numbers</p>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="<?= Url::to(['/user/test-tdr']); ?>">
-                            <i class="material-icons">location_ons</i>
+                            <i class="material-icons">report</i>
                             <p>Test TDR</p>
                         </a>
                     </li>
                 <?php } ?>
-                <li class="nav-item">
+                <!-- <li class="nav-item">
                     <a class="nav-link" href="<?= Url::to(['/site/access']); ?>">
                         <i class="material-icons">location_ons</i>
                         <p>Access</p>
                     </a>
-                </li>
+                </li> -->
                 <li class="nav-item">
                     <a class="nav-link" data-toggle="collapse" href="#account" aria-expanded="true">
                         <i><img style="width:25px" src="<?= \Yii::getAlias('@web/img/yii-logo.svg'); ?>"></i>
@@ -325,14 +325,16 @@ use yii\helpers\Url;
                         <ul class="nav">
                             <li class="nav-item">
                                 <a class="nav-link" href="<?= Url::to(['/site/change-password']); ?>">
-                                    <span class="sidebar-mini"> CP </span>
-                                    <span class="sidebar-normal"> Change Password </span>
+                                    <i class="material-icons">lock</i>
+                                    <p>Change Password</p>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="<?= Url::to(['/site/logout']); ?>">
-                                    <span class="sidebar-mini"> L </span>
-                                    <span class="sidebar-normal"> Logout </span>
+                                    <!-- <span class="sidebar-mini"> L </span>
+                                    <span class="sidebar-normal"> Logout </span> -->
+                                    <i class="material-icons">logout</i>
+                                    <p>Logout</p>
                                 </a>
                             </li>
                         </ul>

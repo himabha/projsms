@@ -9,8 +9,8 @@ use kartik\daterange\DateRangePicker;
 
 $search = isset($_GET['search']) ? $_GET['search'] : '';
 $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
-$totalCount = $dataProvider->getTotalCount(); 
-$today = !isset($_GET['TdrSearchSummary']) && !isset($_GET['search']) ? date('d-m-Y') . ' 00:00 AM'  . ' to ' . date('d-m-Y')  . ' 12:59 PM': '';
+$totalCount = $dataProvider->getTotalCount();
+$today = !isset($_GET['TdrSearchSummary']) && !isset($_GET['search']) ? date('d-m-Y') . ' 00:00 AM'  . ' to ' . date('d-m-Y')  . ' 12:59 PM' : '';
 $qstr = isset($_GET) ? http_build_query(\Yii::$app->request->queryParams) : '';
 $csv_url = 'tdr-summary-export/?mode=csv&' . $qstr;
 $xls_url = 'tdr-summary-export/?mode=xls&' . $qstr;
@@ -103,34 +103,21 @@ $this->registerJs('
 ');
 ?>
 <div class="content">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header card-header-primary card-header-icon">
-                        <div class="card-icon">
-                            <i class="material-icons">account_box</i>
-                        </div>
-                        <h4 class="card-title ">Summary Report</h4>
-                    </div>
-                    <div class="card-body">
-
-                        <div>
-                            <?php $form = ActiveForm::begin(['id' => 'searchForm', 'method' => 'get']); ?>
-                            <ul class="gv_top">
-                                <li>
-                                    <?= Html::textInput('search', $search, ['id' => 'search_box', 'class' => 'search_box custom_search pull-left', 'placeholder' => 'Search....']); ?>
-                                </li>
-                                <li>
-                                    <?= Html::dropdownlist('filter', $filter, ['10' => '10', '20' => '20', '50' => '50', '100' => '100', '1000' => '1000'], ['id' => 'filter_box', 'class' => 'filter_box custom_filter pull-left']); ?>
-                                </li>
-                            </ul>
-                            <?php ActiveForm::end(); ?>
-                        </div>
-                        <div>
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <?php
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-md-12">
+				<div class="card">
+					<div class="card-header card-header-primary card-header-icon">
+						<div class="card-icon">
+							<i class="material-icons">summarize</i>
+						</div>
+						<h4 class="card-title ">Summary Report</h4>
+					</div>
+					<div class="card-body">
+						<div>
+							<div class="row">
+								<div class="col-md-4">
+									<?php
 									echo '<label>Select date</label>';
 									echo '<div class="input-group">';
 									echo DateRangePicker::widget([
@@ -182,36 +169,46 @@ $this->registerJs('
 									]);
 									echo '</div>';
 									?>
-                                </div>
-                            </div>
-                        </div>
-                        <div id="dropdown_top" style="margin-top:1em;">
-                            <ul class="gv_top">
-                                <li>
-                                    <?= Html::dropdownlist('dd_billgroup_id',  isset($_GET['TdrSearchSummary']['billgroup_id']) ?  $_GET['TdrSearchSummary']['billgroup_id'] : ""  , $billgroups, ['id' => 'dd_billgroup_id', 'class' => 'btn btn-dark btn-sm', 'prompt' => 'Select Billgroup']); ?>
-                                </li>
-                                <li>
-                                    <?= Html::button('Refresh', ['id' => 'btnRefresh', 'class' => 'btn btn-success btn-sm']); ?>
-                                </li>
-                                <li>
-                                    <div class="dropdown show">
-                                        <a class="btn btn-info dropdown-toggle btn-sm" href="#" role="button"
-                                            id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true"
-                                            aria-expanded="false">
-                                            Export
-                                        </a>
+								</div>
+							</div>
+						</div>
+						<div id="dropdown_top" style="margin-top:1em;">
+							<ul class="gv_top">
+								<li>
+									<?= Html::dropdownlist('dd_billgroup_id',  isset($_GET['TdrSearchSummary']['billgroup_id']) ?  $_GET['TdrSearchSummary']['billgroup_id'] : "", $billgroups, ['id' => 'dd_billgroup_id', 'class' => 'btn btn-dark btn-sm', 'prompt' => 'Select Billgroup']); ?>
+								</li>
+								<li>
+									<?= Html::button('Refresh', ['id' => 'btnRefresh', 'class' => 'btn btn-success btn-sm']); ?>
+								</li>
+								<li>
+									<div class="dropdown show">
+										<a class="btn btn-info dropdown-toggle btn-sm" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+											Export
+										</a>
 
-                                        <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                                            <a class="dropdown-item" href="<?= $csv_url; ?>">CSV</a>
-                                            <a class="dropdown-item" href="<?= $xls_url; ?>">XLS</a>
-                                        </div>
-                                    </div>
-                                </li>
-                            </ul>
-                        </div>
-                        <div class="table-responsive">
+										<div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+											<a class="dropdown-item" href="<?= $csv_url; ?>">CSV</a>
+											<a class="dropdown-item" href="<?= $xls_url; ?>">XLS</a>
+										</div>
+									</div>
+								</li>
+							</ul>
+						</div>
+						<div class="pull-right">
+							<ul class="gv_top">
+								<?php $form = ActiveForm::begin(['id' => 'searchForm', 'method' => 'get']); ?>
+								<li>
+									<?= Html::textInput('search', $search, ['id' => 'search_box', 'class' => 'search_box custom_search pull-left', 'placeholder' => 'Search....']); ?>
+								</li>
+								<li>
+									<?= Html::dropdownlist('filter', $filter, ['10' => '10', '20' => '20', '50' => '50', '100' => '100', '1000' => '1000'], ['id' => 'filter_box', 'class' => 'filter_box custom_filter pull-left']); ?>
+								</li>
+								<?php ActiveForm::end(); ?>
+							</ul>
+						</div>
+						<div class="table-responsive">
 							<h4><b>Summary</b></h4>
-                            <?= GridView::widget([
+							<?= GridView::widget([
 								'dataProvider' => $dataProvider,
 								'tableOptions' => [
 									'id' => 'list_cld_tbl',
@@ -268,10 +265,10 @@ $this->registerJs('
 									// ],
 								],
 							]); ?>
-                        </div>
-                        <div class="table-responsive">
-                            <h4><b>Results</b></h4>
-                            <?= GridView::widget([
+						</div>
+						<div class="table-responsive">
+							<h4><b>Results</b></h4>
+							<?= GridView::widget([
 								'dataProvider' => $dataProvider_1,
 								'tableOptions' => [
 									'id' => 'list_result_tbl',
@@ -281,8 +278,7 @@ $this->registerJs('
 									[
 										'attribute' => 'billgroup_id',
 										'label' => 'Billgroup',
-										'value' => function($model)
-										{
+										'value' => function ($model) {
 											return isset($model->billgroup) ? $model->billgroup->name : null;
 										}
 									],
@@ -291,8 +287,7 @@ $this->registerJs('
 										'label' => 'Total SMS',
 										'headerOptions' => ['style' => ['text-align' => 'right']],
 										'contentOptions' => ['style' => ['text-align' => 'right']],
-										'value' => function($model)
-										{
+										'value' => function ($model) {
 											return number_format($model->msgs, 2);
 										}
 									],
@@ -301,8 +296,7 @@ $this->registerJs('
 										'label' => 'Rev In',
 										'headerOptions' => ['style' => ['text-align' => 'right']],
 										'contentOptions' => ['style' => ['text-align' => 'right']],
-										'value' => function($model)
-										{
+										'value' => function ($model) {
 											return $model->currency . number_format($model->rev_in, 2);
 										}
 									],
@@ -311,17 +305,16 @@ $this->registerJs('
 										'label' => 'Profit',
 										'headerOptions' => ['style' => ['text-align' => 'right']],
 										'contentOptions' => ['style' => ['text-align' => 'right']],
-										'value' => function($model)
-										{
+										'value' => function ($model) {
 											return $model->currency . number_format($model->profit, 2);
 										}
-									],									
+									],
 								],
 							]); ?>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
