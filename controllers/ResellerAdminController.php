@@ -765,6 +765,31 @@ class ResellerAdminController extends \yii\web\Controller
         $searchModel = new FsmastertbSearch();
         $mysubusr = User::find()->select('id')->where(['reseller_id' => Yii::$app->user->identity->id, 'role' => 3]);
         $summary = $model->getSummary($mysubusr, false, true);
+
+        $billgroups = $this->getBillgroupItems();    
+        if(is_array($billgroups) && count($billgroups) > 0)
+        {
+            $bg_id = array_key_first($billgroups);
+            $bg = Billgroup::findOne($bg_id);
+            if(empty(Yii::$app->request->queryParams))
+            {
+                $billgroups = $this->getBillgroupItems();    
+                if(is_array($billgroups) && count($billgroups) > 0)
+                {
+                    $selected_billgroup_id = array_key_first($billgroups);
+                    Yii::$app->request->queryParams = [
+                        'FsmastertbSearch' => [
+                            'billgroup_id' => $bg_id
+                        ]
+                    ];
+                }
+            }
+            if(!isset(Yii::$app->request->queryParams['FsmastertbSearch']['billgroup_id']))
+            {
+                Yii::$app->request->queryParams['FsmastertbSearch']['billgroup_id'] = $bg_id;
+            }
+        }
+
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $mysubusr, $search);
         $dataProvider->pagination->pageSize = $filter;
 
@@ -776,7 +801,8 @@ class ResellerAdminController extends \yii\web\Controller
             'billgroups' => $this->getBillgroupItems(),
             'resellers' => $this->getResellerItems(),
             'clients_only' => $this->getResellerItems(false),
-            'services' => $this->getServicesItems()
+            'services' => $this->getServicesItems(),
+            'bg' => $bg
         ]);
     }
 

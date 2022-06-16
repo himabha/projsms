@@ -177,9 +177,9 @@ $this->registerJs('
                                 <li>
                                     <?= Html::dropdownlist('dd_billgroup_id',  isset($_GET['TdrSearch']['billgroup_id']) ?  $_GET['TdrSearch']['billgroup_id'] : ""  , $billgroups, ['id' => 'dd_billgroup_id', 'class' => 'btn btn-dark btn-sm', 'prompt' => 'Select Billgroup']); ?>
                                 </li>
-                                <li>
-                                    <?= Html::button('Refresh', ['id' => 'btnRefresh', 'class' => 'btn btn-success btn-sm']); ?>
-                                </li>
+                                <!-- <li>
+                                    <?php //= Html::button('Refresh', ['id' => 'btnRefresh', 'class' => 'btn btn-success btn-sm']); ?>
+                                </li> -->
                                 <!-- <li>
                                     <div class="dropdown show">
                                         <a class="btn btn-info dropdown-toggle btn-sm" href="#" role="button"

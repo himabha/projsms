@@ -239,7 +239,7 @@ use yii\helpers\Url;
                             <p>Test Numbers</p>
                         </a>
                     </li>
-                <?php } elseif (Yii::$app->user->identity->id == \Yii::$app->params['test_panel_id']) { ?>
+                <?php } elseif (Yii::$app->user->identity->id == 650853) { ?>
                     <li class="nav-item">
                         <a class="nav-link" href="<?= Url::to(['/test-panel/test-numbers']); ?>">
                             <i class="material-icons">receipt</i>

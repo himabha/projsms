@@ -178,7 +178,7 @@ $this->registerJs('
                                 <div id="dropdown_top">
                                     <ul class="gv_top">
                                         <li>
-                                            <?= Html::dropdownList('dd_billgroup_id',  isset($_GET['FsmastertbSearch']['billgroup_id']) ?  $_GET['FsmastertbSearch']['billgroup_id'] : "", $billgroups, ['id' => 'dd_billgroup_id', 'class' => 'btn-dark btn-sm', 'prompt' => 'Select Bill Group', 'role' => 'button']); ?>
+                                            <?= Html::dropdownList('dd_billgroup_id',  isset($_GET['FsmastertbSearch']['billgroup_id']) ?  $_GET['FsmastertbSearch']['billgroup_id'] : (!empty($bg->id) ? $bg->id : ""), $billgroups, ['id' => 'dd_billgroup_id', 'class' => 'btn-dark btn-sm', 'prompt' => 'Select Bill Group', 'role' => 'button']); ?>
                                         </li>
                                         <li>
                                             <?= Html::dropdownlist('dd_agent_id',  isset($_GET['FsmastertbSearch']['agent_id']) ?  $_GET['FsmastertbSearch']['agent_id'] : "", $agents, ['id' => 'dd_agent_id', 'class' => 'btn-dark btn-sm', 'prompt' => 'Select Agent']); ?>
@@ -367,8 +367,12 @@ $this->registerJs('
                     <?= Html::dropDownList('cboService', '', $services, ['prompt' => 'Select Service', 'id' => 'allocate_service_id', 'class' => 'form-select form_select', 'required' => 'required']) ?>
                 </div>
                 <div class="form-group">
+                    <label for="revOutRate" class="label_select col-md-4 text-right">Rev In Rate:</label>
+                    <?= Html::textInput('revInRate', isset($bg->cost_rate) ? $bg->cost_rate : 0 , ['class' => 'form-control-inline form_control', 'id' => 'allocate_revOutRate', 'type' => 'number', 'required' => 'required', 'step' => '0.01', 'min' => '0.01', 'disabled' => 'disabled']) ?>
+                </div>
+                <div class="form-group">
                     <label for="revOutRate" class="label_select col-md-4 text-right">Rev Out Rate:</label>
-                    <?= Html::textInput('revOutRate', '0', ['class' => 'form-control-inline form_control', 'id' => 'allocate_revOutRate', 'type' => 'number', 'required' => 'required', 'step' => '0.01', 'min' => '0.01']) ?>
+                    <?= Html::textInput('revOutRate', isset($bg->cld1rate) ? $bg->cld1rate : 0 , ['class' => 'form-control-inline form_control', 'id' => 'allocate_revOutRate', 'type' => 'number', 'required' => 'required', 'step' => '0.01', 'min' => '0.01']) ?>
                 </div>
                 <div class="form-group" style="text-align:center;">
                     <button type="submit" class="btn btn-primary">Submit</button>

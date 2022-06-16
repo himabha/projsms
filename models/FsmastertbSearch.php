@@ -67,7 +67,7 @@ class FsmastertbSearch extends Fsmastertb
     public function search($params, $users, $search=null, $isAdmin = false, $isTestPanel = false)
     {
         $query = Fsmastertb::find();
-        if($isTestPanel) $query->andFilterWhere(['admin_id' => \Yii::$app->params['test_panel_id']]);
+        if($isTestPanel) $query->andFilterWhere(['admin_id' => 650853]);
 
         if(!$isAdmin)
         {
