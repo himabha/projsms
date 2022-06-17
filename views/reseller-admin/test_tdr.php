@@ -164,18 +164,31 @@ $this->registerJs('
 							</div>
 						</div>
 						<div id="dropdown_top" style="margin-top:1em;">
-							<ul class="gv_top">
-								<li>
-									<?= Html::dropdownlist('dd_billgroup_id',  isset($_GET['TdrSearch']['billgroup_id']) ?  $_GET['TdrSearch']['billgroup_id'] : "", $billgroups, ['id' => 'dd_billgroup_id', 'class' => 'btn btn-dark btn-sm', 'prompt' => 'Select Billgroup']); ?>
-								</li>
-								<li>
-									<?= Html::dropdownlist('dd_reseller_id',  isset($_GET['TdrSearch']['reseller_id']) ?  $_GET['TdrSearch']['reseller_id'] : "", $resellers, ['id' => 'dd_reseller_id', 'class' => 'btn btn-dark btn-sm', 'prompt' => 'Select Client']); ?>
-								</li>
-								<li>
-									<?= Html::button('Refresh', ['id' => 'btnRefresh', 'class' => 'btn btn-success btn-sm']); ?>
-								</li>
-							</ul>
-						</div>
+                            <ul class="gv_top">
+                                <li>
+                                    <?= Html::dropdownlist('dd_billgroup_id',  isset($_GET['TdrSearch']['billgroup_id']) ?  $_GET['TdrSearch']['billgroup_id'] : ""  , $billgroups, ['id' => 'dd_billgroup_id', 'class' => 'btn btn-dark btn-sm', 'prompt' => 'Select Billgroup']); ?>
+                                </li>
+                                <!-- <li>
+                                    <?php //= Html::dropdownlist('dd_reseller_id',  isset($_GET['TdrSearch']['reseller_id']) ?  $_GET['TdrSearch']['reseller_id'] : ""  , $resellers, ['id' => 'dd_reseller_id', 'class' => 'btn btn-dark btn-sm', 'prompt' => 'Select Client']); ?>
+                                </li> -->
+                                <!-- <li>
+                                    <?php //= Html::button('Refresh', ['id' => 'btnRefresh', 'class' => 'btn btn-success btn-sm']); ?>
+                                </li> -->
+                                <!-- <li>
+                                    <div class="dropdown show">
+                                        <a class="btn btn-info dropdown-toggle btn-sm" href="#" role="button"
+                                            id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true"
+                                            aria-expanded="false">
+                                            Export
+                                        </a>
+                                        <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                                            <a class="dropdown-item" href="<?php //= $csv_url; ?>">CSV</a>
+                                            <a class="dropdown-item" href="<?php //= $xls_url; ?>">XLS</a>
+                                        </div>
+                                    </div>
+                                </li> -->
+                            </ul>
+                        </div>
 						<div>
 							<div class="table-responsive">
 								<div class="pull-right">
@@ -225,19 +238,19 @@ $this->registerJs('
 												return isset($model->billgroup) ? $model->billgroup->name : null;
 											}
 										],
-										[
-											'label' => 'Client',
-											'attribute' => 'reseller_id',
-											'filter' => $resellers,
-											'filterInputOptions' => [
-												'id' => 'reseller_id_search',
-												'prompt' => 'Select Client',
-												'class' => 'custom_select'
-											],
-											'value' => function ($model) {
-												return isset($model->resellers) ? $model->resellers->username : null;
-											}
-										],
+										// [
+										// 	'label' => 'Client',
+										// 	'attribute' => 'reseller_id',
+										// 	'filter' => $resellers,
+										// 	'filterInputOptions' => [
+										// 		'id' => 'reseller_id_search',
+										// 		'prompt' => 'Select Client',
+										// 		'class' => 'custom_select'
+										// 	],
+										// 	'value' => function ($model) {
+										// 		return isset($model->resellers) ? $model->resellers->username : null;
+										// 	}
+										// ],
 										[
 											'attribute' => 'delivered_time',
 											'value' => function ($model) {

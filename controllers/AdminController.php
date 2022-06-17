@@ -249,6 +249,31 @@ class AdminController extends \yii\web\Controller
         $searchModel = new FsmastertbSearch();
 
         $summary = $model->getSummary($mysubusr, true);
+
+        $billgroups = $this->getBillgroupItems();    
+        if(is_array($billgroups) && count($billgroups) > 0)
+        {
+            $bg_id = array_key_first($billgroups);
+            $bg = Billgroup::findOne($bg_id);
+            if(empty(Yii::$app->request->queryParams))
+            {
+                $billgroups = $this->getBillgroupItems();    
+                if(is_array($billgroups) && count($billgroups) > 0)
+                {
+                    $selected_billgroup_id = array_key_first($billgroups);
+                    Yii::$app->request->queryParams = [
+                        'FsmastertbSearch' => [
+                            'billgroup_id' => $bg_id
+                        ]
+                    ];
+                }
+            }
+            if(!isset(Yii::$app->request->queryParams['FsmastertbSearch']['billgroup_id']))
+            {
+                Yii::$app->request->queryParams['FsmastertbSearch']['billgroup_id'] = $bg_id;
+            }
+        }
+
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $mysubusr, $search, true);
         $dataProvider->setPagination(['pageSize' => $filter]); 
 
@@ -263,7 +288,8 @@ class AdminController extends \yii\web\Controller
             'suppliers' => $this->getSupplierItems(),
             'clients' => $this->getResellerAdminItems(),
             'clients_only' => $this->getResellerAdminItems(false),
-            'services' => $this->getServicesItems()
+            'services' => $this->getServicesItems(),
+            'bg' => $bg
 
         ]);
     }

@@ -172,22 +172,27 @@ $this->registerJs('
 								<li>
 									<?= Html::dropdownlist('dd_agent_id',  isset($_GET['TdrSearch']['agent_id']) ?  $_GET['TdrSearch']['agent_id'] : "", $agents, ['id' => 'dd_agent_id', 'class' => 'btn btn-dark btn-sm', 'prompt' => 'Select Agent']); ?>
 								</li>
-								<li>
-									<?= Html::button('Refresh', ['id' => 'btnRefresh', 'class' => 'btn btn-success btn-sm']); ?>
-								</li>
-								<li>
-									<div class="dropdown show">
-										<a class="btn btn-info dropdown-toggle btn-sm" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-											Export
-										</a>
+								<!-- <li>
+                                    <?php //= Html::button('Refresh', ['id' => 'btnRefresh', 'class' => 'btn btn-success btn-sm']); 
+									?>
+                                </li> -->
+								<!-- <li>
+                                    <div class="dropdown show">
+                                        <a class="btn btn-info dropdown-toggle btn-sm" href="#" role="button"
+                                            id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true"
+                                            aria-expanded="false">
+                                            Export
+                                        </a>
 
-										<div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-											<a class="dropdown-item" href="<?= $csv_url; ?>">CSV</a>
-											<a class="dropdown-item" href="<?= $xls_url; ?>">XLS</a>
-										</div>
-									</div>
+                                        <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                                            <a class="dropdown-item" href="<?php //= $csv_url; 
+																			?>">CSV</a>
+                                            <a class="dropdown-item" href="<?php //= $xls_url; 
+																			?>">XLS</a>
+                                        </div>
+                                    </div>
 
-								</li>
+                                </li> -->
 							</ul>
 						</div>
 						<div>

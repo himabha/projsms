@@ -121,8 +121,8 @@ class TdrSearch extends Smscdr
             //         ]);
             //     }
             // }
-            $query->orFilterWhere(['like', 'from_number', $search])
-            ->orFilterWhere(['like', 'to_number', $search])
+            $query->orFilterWhere(['from_number' => $search])
+            ->orFilterWhere(['to_number' => $search])
             ->orFilterWhere(['like', 'sms_message', $search])
             ;
 
@@ -162,8 +162,8 @@ class TdrSearch extends Smscdr
             }
 
             // for all roles
-            $query->andFilterWhere(['like', 'from_number', $this->from_number])
-            ->andFilterWhere(['like', 'to_number', $this->to_number])
+            $query->andFilterWhere(['from_number' => $this->from_number])
+            ->andFilterWhere(['to_number' => $this->to_number])
             ->andFilterWhere(['like', 'sms_message', $this->sms_message])
             ;
 

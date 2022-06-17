@@ -180,9 +180,9 @@ $this->registerJs('
                                         <li>
                                             <?= Html::dropdownList('dd_billgroup_id',  isset($_GET['FsmastertbSearch']['billgroup_id']) ?  $_GET['FsmastertbSearch']['billgroup_id'] : "", $billgroups, ['id' => 'dd_billgroup_id', 'class' => 'btn-dark btn-sm', 'prompt' => 'Select Bill Group', 'role' => 'button']); ?>
                                         </li>
-                                        <li>
-                                            <?= Html::dropdownlist('dd_reseller_id',  isset($_GET['FsmastertbSearch']['reseller_id']) ?  $_GET['FsmastertbSearch']['reseller_id'] : "", $resellers, ['id' => 'dd_reseller_id', 'class' => 'btn-dark btn-sm', 'prompt' => 'Select Reseller']); ?>
-                                        </li>
+                                        <!-- <li>
+                                            <?php //= Html::dropdownlist('dd_reseller_id',  isset($_GET['FsmastertbSearch']['reseller_id']) ?  $_GET['FsmastertbSearch']['reseller_id'] : "", $resellers, ['id' => 'dd_reseller_id', 'class' => 'btn-dark btn-sm', 'prompt' => 'Select Reseller']); ?>
+                                        </li> -->
                                     </ul>
                                 </div>
                                 <div class="table-responsive">
@@ -231,19 +231,19 @@ $this->registerJs('
 													return isset($model->billgroup) ? $model->billgroup->name : null;
 												}
 											],
-											[
-												'label' => 'Reseller',
-												'attribute' => 'reseller_id',
-												'filter' => $resellers,
-												'filterInputOptions' => [
-													'id' => 'reseller_id_search',
-													'prompt' => 'Select Reseller',
-													'class' => 'custom_select'
-												],
-												'value' => function ($model) {
-													return isset($model->resellers) ? $model->resellers->username : null;
-												}
-											],
+											// [
+											// 	'label' => 'Reseller',
+											// 	'attribute' => 'reseller_id',
+											// 	'filter' => $resellers,
+											// 	'filterInputOptions' => [
+											// 		'id' => 'reseller_id_search',
+											// 		'prompt' => 'Select Reseller',
+											// 		'class' => 'custom_select'
+											// 	],
+											// 	'value' => function ($model) {
+											// 		return isset($model->resellers) ? $model->resellers->username : null;
+											// 	}
+											// ],
 											[
 												'label' => 'Country',
 												'attribute' => 'country_id',
@@ -260,12 +260,12 @@ $this->registerJs('
 												'label' => 'Rev. In Rate',
 												'attribute' => 'cld1rate',
 											],
-											[
-												'label' => 'Rev. Out Rate',
-												'attribute' => 'cld2rate',
-												'footer' => 'Total records: ' . $totalCount,
-												'footerOptions' => ['style' => ['font-size' => 'larger', 'font-weight' => 'bold', 'min-width' => '10em']],
-											],
+											// [
+											// 	'label' => 'Rev. Out Rate',
+											// 	'attribute' => 'cld2rate',
+											// 	'footer' => 'Total records: ' . $totalCount,
+											// 	'footerOptions' => ['style' => ['font-size' => 'larger', 'font-weight' => 'bold', 'min-width' => '10em']],
+											// ],
 										],
 									]); ?>
                                 </div>
