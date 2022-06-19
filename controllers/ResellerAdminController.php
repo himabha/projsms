@@ -756,7 +756,7 @@ class ResellerAdminController extends \yii\web\Controller
     {
         $model = new Fsusertb();
         $search = isset($_GET['search']) ? $_GET['search'] : '';
-        $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
+        $filter = isset($_GET['filter']) ? $_GET['filter'] : 10;
 
         if ($filter == 'all') {
             $filter = '';
@@ -784,13 +784,15 @@ class ResellerAdminController extends \yii\web\Controller
                     ];
                 }
             }
-            if(!isset(Yii::$app->request->queryParams['FsmastertbSearch']['billgroup_id']))
+            if(!isset(Yii::$app->request->queryParams['FsmastertbSearch']['billgroup_id']) || empty(Yii::$app->request->queryParams['FsmastertbSearch']['billgroup_id']))
             {
-                Yii::$app->request->queryParams['FsmastertbSearch']['billgroup_id'] = $bg_id;
+                $temp_arr = Yii::$app->request->queryParams;
+                $temp_arr['FsmastertbSearch']['billgroup_id'] = $bg_id;
+                Yii::$app->request->queryParams = $temp_arr;
             }
         }
 
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $mysubusr, $search);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $mysubusr, $search, User::isUserAdmin(\Yii::$app->user->id), User::isTestPanel(\Yii::$app->user->id));
         $dataProvider->pagination->pageSize = $filter;
 
         return $this->render('sms_numbers', [
@@ -1069,7 +1071,7 @@ class ResellerAdminController extends \yii\web\Controller
     {
         $model = new Fsusertb();
         $search = isset($_GET['search']) ? $_GET['search'] : '';
-        $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
+        $filter = isset($_GET['filter']) ? $_GET['filter'] : 10;
         $mysubusr = User::find()->select('id')->where(['role' => 2]);
 
         if ($filter == 'all') {
@@ -1097,7 +1099,7 @@ class ResellerAdminController extends \yii\web\Controller
     {
         $model = new Fsusertb();
         $search = isset($_GET['search']) ? $_GET['search'] : '';
-        $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
+        $filter = isset($_GET['filter']) ? $_GET['filter'] : 10;
 
         if ($filter == 'all') {
             $filter = '';
@@ -1127,7 +1129,7 @@ class ResellerAdminController extends \yii\web\Controller
     {
         $model = new Fsusertb();
         $search = isset($_GET['search']) ? $_GET['search'] : '';
-        $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
+        $filter = isset($_GET['filter']) ? $_GET['filter'] : 10;
 
         if ($filter == 'all') {
             $filter = '';
@@ -1932,7 +1934,7 @@ class ResellerAdminController extends \yii\web\Controller
     {
         $model = new Fsusertb();
         $search = isset($_GET['search']) ? $_GET['search'] : '';
-        $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
+        $filter = isset($_GET['filter']) ? $_GET['filter'] : 10;
 
         if ($filter == 'all') {
             $filter = '';
@@ -1960,7 +1962,7 @@ class ResellerAdminController extends \yii\web\Controller
     {
         $model = new Fsusertb();
         $search = isset($_GET['search']) ? $_GET['search'] : '';
-        $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
+        $filter = isset($_GET['filter']) ? $_GET['filter'] : 10;
         $mysubusr = User::find()->select('id')->where(['role' => 2]);
 
         if ($filter == 'all') {

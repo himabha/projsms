@@ -76,7 +76,7 @@ class TestPanelController extends \yii\web\Controller
     {
         $model = new Fsusertb();
         $search = isset($_GET['search']) ? $_GET['search'] : '';
-        $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
+        $filter = isset($_GET['filter']) ? $_GET['filter'] : 10;
 
         if ($filter == 'all') {
             $filter = '';
@@ -104,7 +104,7 @@ class TestPanelController extends \yii\web\Controller
     {
         $model = new Fsusertb();
         $search = isset($_GET['search']) ? $_GET['search'] : '';
-        $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
+        $filter = isset($_GET['filter']) ? $_GET['filter'] : 10;
         $mysubusr = User::find()->select('id')->where(['role' => 2]);
 
         if ($filter == 'all') {
@@ -117,7 +117,7 @@ class TestPanelController extends \yii\web\Controller
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $mysubusr, $search, User::isUserAdmin(\Yii::$app->user->id), User::isTestPanel(\Yii::$app->user->id));
         $dataProvider->setPagination(['pageSize' => $filter]); 
 
-        return $this->render('tdr', [
+        return $this->render('test_tdr', [
             'dataProvider' => $dataProvider, 
             'searchModel' => $searchModel,
             'search' => $search, 

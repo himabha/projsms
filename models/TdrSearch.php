@@ -51,7 +51,7 @@ class TdrSearch extends Smscdr
     public function search($params, $users, $search=null, $isAdmin = false, $isTestPanel = false)
     {
         $query = Smscdr::find();
-        if($isTestPanel) $query->andFilterWhere(['admin_id' => \Yii::$app->params['test_panel_id']]);
+        if($isTestPanel) $query->andFilterWhere(['admin_id' => \Yii::$app->user->id]);
 
         // if(!$isAdmin)  => NOT SURE WHAT THIS BLOCK FOR
         // {

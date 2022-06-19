@@ -7,7 +7,7 @@ use yii\widgets\ActiveForm;
 use kartik\dialog\Dialog;
 
 $search = isset($_GET['search']) ? $_GET['search'] : '';
-$filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
+$filter = isset($_GET['filter']) ? $_GET['filter'] : 10;
 $totalCount = $dataProvider->getTotalCount();
 echo Dialog::widget();
 $this->registerCss('
@@ -123,15 +123,36 @@ $this->registerJs('
 		$("#dd_agent_id").change(function(){
 			$("#agent_id_search").val(jQuery(this).val()).trigger("change");
 		});
-		$("#search_box").keyup(function() {
+
+		$("#search_box").focusout(function() {
 			if ($(this).val().length > 2 || !$(this).val().length) {
 				$("#searchForm").submit();
 			}
 		});
-		$(document).on("change", "#filter_box", function() {
-			$("#searchForm").submit();
-			$("input[name=\'per-page\']").val($(this).val());
+		$("#search_box").keypress(function(e) {
+			if(e.which == 13)
+			{
+				if ($(this).val().length > 2 || !$(this).val().length) {
+					$("#searchForm").submit();
+				}
+			}
 		});
+		$("#filter_box").focusout(function() {
+			if ($(this).val() >= 10 && $(this).val() <= 1000) {
+				$("input[name=\'per-page\']").val($(this).val());
+				$("#searchForm").submit();
+			}
+		})
+		$("#filter_box").keypress(function(e) {
+			if(e.which == 13)
+			{
+				if ($(this).val() >= 10 && $(this).val() <= 1000) {
+					$("input[name=\'per-page\']").val($(this).val());
+					$("#searchForm").submit();
+				}
+			}
+		});
+
 		$("#edit_selected_number").on("click", function() {
 			var numbers = $("#manage_num_grid").yiiGridView("getSelectedRows");
 			if (numbers.length > 0) {
@@ -193,7 +214,8 @@ $this->registerJs('
                                                 <?= Html::textInput('search', $search, ['id' => 'search_box', 'class' => 'search_box custom_search pull-left', 'placeholder' => 'Search....']); ?>
                                             </li>
                                             <li>
-                                                <?= Html::dropdownlist('filter', $filter, ['10' => '10', '20' => '20', '50' => '50', '100' => '100', '1000' => '1000'], ['id' => 'filter_box', 'class' => 'filter_box custom_filter pull-left']); ?>
+												<?= Html::textInput('filter', $filter, ['id' => 'filter_box', 'class' => 'filter_box custom_filter pull-left', 'type' => 'number', 'min' => '10', 'max' => '1000', 'required' => 'required', 'style' => ['width' => '10em', 'text-align' => 'center']]); ?>
+    	                                        <?php //= Html::dropdownlist('filter', $filter, ['10' => '10', '20' => '20', '50' => '50', '100' => '100', '1000' => '1000'], ['id' => 'filter_box', 'class' => 'filter_box custom_filter pull-left']); ?>
                                             </li>
                                             <?php ActiveForm::end(); ?>
                                         </ul>

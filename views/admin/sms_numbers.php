@@ -7,7 +7,7 @@ use yii\widgets\ActiveForm;
 use kartik\dialog\Dialog;
 
 $search = isset($_GET['search']) ? $_GET['search'] : '';
-$filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
+$filter = isset($_GET['filter']) ? $_GET['filter'] : 10;
 $totalCount = $dataProvider->getTotalCount();
 echo Dialog::widget();
 $this->registerCss('
@@ -39,18 +39,6 @@ $this->registerCss('
 		padding-left: 0.5em;
 		padding-right: 0.5em;
 	},
-	input.custom_search{
-		margin-bottom:6px;
-		line-height:2.5em;
-		padding-left:0.5em;
-		padding-right:0.5em;
-	}
-	select.custom_filter{
-		margin-bottom:6px;
-		line-height:2.8em;
-		padding-left:0.5em;
-		padding-right:0.5em;
-	}
 	ul.gv_top{
 		list-style-type:none;
 		padding-left:0;
@@ -131,15 +119,36 @@ $this->registerJs('
 		$("#dd_service_id").change(function(){
 			$("#service_id_search").val(jQuery(this).val()).trigger("change");
 		});
-		$("#search_box").keyup(function() {
+
+		$("#search_box").focusout(function() {
 			if ($(this).val().length > 2 || !$(this).val().length) {
 				$("#searchForm").submit();
 			}
 		});
-		$(document).on("change", "#filter_box", function() {
-			$("#searchForm").submit();
-			$("input[name=\'per-page\']").val($(this).val());
+		$("#search_box").keypress(function(e) {
+			if(e.which == 13)
+			{
+				if ($(this).val().length > 2 || !$(this).val().length) {
+					$("#searchForm").submit();
+				}
+			}
 		});
+		$("#filter_box").focusout(function() {
+			if ($(this).val() >= 10 && $(this).val() <= 1000) {
+				$("input[name=\'per-page\']").val($(this).val());
+				$("#searchForm").submit();
+			}
+		})
+		$("#filter_box").keypress(function(e) {
+			if(e.which == 13)
+			{
+				if ($(this).val() >= 10 && $(this).val() <= 1000) {
+					$("input[name=\'per-page\']").val($(this).val());
+					$("#searchForm").submit();
+				}
+			}
+		});
+		
 		$("#edit_selected_number").on("click", function() {
 			var numbers = $("#manage_num_grid").yiiGridView("getSelectedRows");
 			if (numbers.length > 0) {
@@ -176,7 +185,6 @@ $this->registerJs('
                                 <li>
                                     <?= Html::button('Allocate Numbers', ['id' => 'btnAllocate','class' => 'btn btn-success pull-left']) ?>
                                     <?= Html::button('Unallocate Numbers', ['id' => 'btnUnallocate','class' => 'btn btn-danger pull-left']) ?>
-                                    <?php //= Html::a('Allocate Numbers', ['assign-cld-reseller-admin'], ['class' => 'btn btn-success pull-left']) ?>
                                 </li>
                                 <li>
                                     <button type="button" class="btn btn-danger pull-left" id="edit_selected_number"
@@ -200,21 +208,21 @@ $this->registerJs('
                                 </li>
                             </ul>
                         </div>
-                        <div>
-                            <div class="table-responsive">
-                                <div class="pull-right">
-                                    <ul class="gv_top">
-                                        <?php $form = ActiveForm::begin(['id' => 'searchForm', 'method' => 'get']); ?>
-                                        <li>
-                                            <?= Html::textInput('search', $search, ['id' => 'search_box', 'class' => 'search_box custom_search pull-left', 'placeholder' => 'Search....']); ?>
-                                        </li>
-                                        <li>
-                                            <?= Html::dropdownlist('filter', $filter, ['10' => '10', '20' => '20', '50' => '50', '100' => '100', '1000' => '1000'], ['id' => 'filter_box', 'class' => 'filter_box custom_filter pull-left']); ?>
-                                        </li>
-                                        <?php ActiveForm::end(); ?>
-                                    </ul>
-                                </div>
-                                <?= GridView::widget([
+                        <div class="table-responsive">
+                            <div class="pull-right">
+                                <?php $form = ActiveForm::begin(['id' => 'searchForm', 'method' => 'get']); ?>
+                                <ul class="gv_top">
+                                    <li>
+                                        <?= Html::textInput('search', $search, ['id' => 'search_box', 'class' => 'search_box custom_search pull-left', 'placeholder' => 'Search....']); ?>
+                                    </li>
+                                    <li>
+                                        <?= Html::textInput('filter', $filter, ['id' => 'filter_box', 'class' => 'filter_box custom_filter pull-left', 'type' => 'number', 'min' => '10', 'max' => '1000', 'required' => 'required', 'style' => ['width' => '10em', 'text-align' => 'center']]); ?>
+                                        <?php //= Html::dropdownlist('filter', $filter, ['10' => '10', '20' => '20', '50' => '50', '100' => '100', '1000' => '1000'], ['id' => 'filter_box', 'class' => 'filter_box custom_filter pull-left']); ?>
+                                    </li>
+                                </ul>
+                                <?php ActiveForm::end(); ?>
+                            </div>
+                            <?= GridView::widget([
 									'id' => 'manage_num_grid',
 									'dataProvider' => $dataProvider,
 									'filterModel' => $searchModel,
@@ -371,13 +379,12 @@ $this->registerJs('
 
 									],
 								]); ?>
-                            </div>
-                            <?php $form = ActiveForm::begin(['id' => 'exportForm', 'method' => 'get', 'action' => ['export-ddi']]); ?>
-                            <?= Html::hiddenInput('search', $search, ['id' => 'search']); ?>
-                            <?= Html::hiddenInput('filter', $filter, ['id' => 'filter']); ?>
-                            <?= Html::submitButton('Export to Excel', ['class' => 'btn btn-success exprt_btn']) ?>
-                            <?php ActiveForm::end(); ?>
                         </div>
+                        <?php $form = ActiveForm::begin(['id' => 'exportForm', 'method' => 'get', 'action' => ['export-ddi']]); ?>
+                        <?= Html::hiddenInput('search', $search, ['id' => 'search']); ?>
+                        <?= Html::hiddenInput('filter', $filter, ['id' => 'filter']); ?>
+                        <?= Html::submitButton('Export to Excel', ['class' => 'btn btn-success exprt_btn']) ?>
+                        <?php ActiveForm::end(); ?>
                     </div>
                 </div>
             </div>
