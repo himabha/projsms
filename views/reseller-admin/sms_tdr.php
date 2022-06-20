@@ -6,11 +6,10 @@ use kartik\select2\Select2;
 use yii\widgets\ActiveForm;
 use kartik\daterange\DateRangePicker;
 
-
 $search = isset($_GET['search']) ? $_GET['search'] : '';
 $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
 $totalCount = $dataProvider->getTotalCount();
-$today = !isset($_GET['TdrSearch']) && !isset($_GET['search']) ? date('d-m-Y') . ' 00:00 AM'  . ' to ' . date('d-m-Y')  . ' 12:59 PM' : '';
+$today = !isset($_GET['TdrSearch']) && !isset($_GET['search']) ? date('d-m-Y') . ' 00:00 AM'  . ' to ' . date('d-m-Y')  . ' 11:59 PM' : '';
 $qstr = isset($_GET) ? http_build_query(\Yii::$app->request->queryParams) : '';
 $csv_url = 'tdr-export/?mode=csv&' . $qstr;
 $xls_url = 'tdr-export/?mode=xls&' . $qstr;
@@ -84,6 +83,9 @@ $this->registerJs('
 
 		$("#dd_billgroup_id").change(function(){
 			$("#billgroup_id_search").val(jQuery(this).val()).trigger("change");
+		});
+		$("#dd_reseller_id").change(function(){
+			$("#reseller_id_search").val(jQuery(this).val()).trigger("change");
 		});
 		$("#btnRefresh").click(function(){
 			$("#delivered_time_search").trigger("change");
@@ -164,7 +166,10 @@ $this->registerJs('
 						<div id="dropdown_top" style="margin-top:1em;">
 							<ul class="gv_top">
 								<li>
-									<?= Html::dropdownlist('dd_billgroup_id',  isset($_GET['TdrSearch']['billgroup_id']) ?  $_GET['TdrSearch']['billgroup_id'] : "", $billgroups, ['id' => 'dd_billgroup_id', 'class' => 'btn btn-dark btn-sm', 'prompt' => 'Select Billgroup']); ?>
+									<?= Html::dropdownlist('dd_billgroup_id',  isset($_GET['TdrSearch']['billgroup_id']) ?  $_GET['TdrSearch']['billgroup_id'] : "", $billgroups, ['id' => 'dd_billgroup_id', 'class' => 'btn-dark btn-sm', 'prompt' => 'Select Billgroup']); ?>
+								</li>
+								<li>
+									<?= Html::dropdownlist('dd_reseller_id',  isset($_GET['TdrSearch']['reseller_id']) ?  $_GET['TdrSearch']['reseller_id'] : "", $resellers, ['id' => 'dd_reseller_id', 'class' => 'btn-dark btn-sm', 'prompt' => 'Select Client']); ?>
 								</li>
 								<li>
 									<?= Html::button('Refresh', ['id' => 'btnRefresh', 'class' => 'btn btn-success btn-sm']); ?>
@@ -188,10 +193,10 @@ $this->registerJs('
 									<ul class="gv_top">
 										<?php $form = ActiveForm::begin(['id' => 'searchForm', 'method' => 'get']); ?>
 										<li>
-											<?= Html::textInput('search', $search, ['id' => 'search_box', 'class' => 'search_box custom_search pull-left', 'placeholder' => 'Search....']); ?>
+											<?= Html::textInput('search', $search, ['id' => 'search_box', 'class' => 'search_box custom_search', 'placeholder' => 'Search....']); ?>
 										</li>
 										<li>
-											<?= Html::dropdownlist('filter', $filter, ['10' => '10', '20' => '20', '50' => '50', '100' => '100', '1000' => '1000'], ['id' => 'filter_box', 'class' => 'filter_box custom_filter pull-left']); ?>
+											<?= Html::dropdownlist('filter', $filter, ['10' => '10', '20' => '20', '50' => '50', '100' => '100', '1000' => '1000'], ['id' => 'filter_box', 'class' => 'filter_box custom_filter']); ?>
 										</li>
 										<?php ActiveForm::end(); ?>
 									</ul>
@@ -229,6 +234,19 @@ $this->registerJs('
 											],
 											'value' => function ($model) {
 												return isset($model->billgroup) ? $model->billgroup->name : null;
+											}
+										],
+										[
+											'label' => 'Client',
+											'attribute' => 'reseller_id',
+											'filter' => $resellers,
+											'filterInputOptions' => [
+												'id' => 'reseller_id_search',
+												'prompt' => 'Select Client',
+												'class' => 'custom_select'
+											],
+											'value' => function ($model) {
+												return isset($model->resellers) ? $model->resellers->username : null;
 											}
 										],
 										[

@@ -240,6 +240,7 @@ class AdminController extends \yii\web\Controller
         $model = new Fsusertb();
         $search = isset($_GET['search']) ? $_GET['search'] : '';
         $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
+        $queryParams = Yii::$app->request->queryParams;
         $mysubusr = User::find()->select('id')->where(['role' => 2]);
 
         if ($filter == 'all') {
@@ -250,41 +251,33 @@ class AdminController extends \yii\web\Controller
 
         $summary = $model->getSummary($mysubusr, true);
 
-        $billgroups = $this->getBillgroupItems();    
-        if(is_array($billgroups) && count($billgroups) > 0)
-        {
+        $bg = null;
+        $billgroups = Billgroup::getBillgroupItems();
+        if (is_array($billgroups) && count($billgroups) > 0) {
             $bg_id = array_key_first($billgroups);
             $bg = Billgroup::findOne($bg_id);
-            if(empty(Yii::$app->request->queryParams))
-            {
-                $billgroups = $this->getBillgroupItems();    
-                if(is_array($billgroups) && count($billgroups) > 0)
-                {
-                    $selected_billgroup_id = array_key_first($billgroups);
-                    Yii::$app->request->queryParams = [
-                        'FsmastertbSearch' => [
-                            'billgroup_id' => $bg_id
-                        ]
-                    ];
-                }
-            }
-            if(!isset(Yii::$app->request->queryParams['FsmastertbSearch']['billgroup_id']))
-            {
-                Yii::$app->request->queryParams['FsmastertbSearch']['billgroup_id'] = $bg_id;
+            if (!isset($queryParams['FsmastertbSearch'])) {
+                $queryParams = [
+                    'FsmastertbSearch' => [
+                        'billgroup_id' => $bg_id
+                    ]
+                ];
+            } else if (!isset($queryParams['FsmastertbSearch']['billgroup_id'])) {
+                $queryParams['FsmastertbSearch']['billgroup_id'] = $bg_id;
             }
         }
 
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $mysubusr, $search, true);
-        $dataProvider->setPagination(['pageSize' => $filter]); 
+        $dataProvider = $searchModel->search($queryParams, $mysubusr, $search, true);
+        $dataProvider->setPagination(['pageSize' => $filter]);
 
         return $this->render('sms_numbers', [
-            'dataProvider' => $dataProvider, 
+            'dataProvider' => $dataProvider,
             'searchModel' => $searchModel,
-            'summary' => $summary, 
-            'search' => $search, 
+            'summary' => $summary,
+            'search' => $search,
             'filter' => $filter,
             'countries' => $this->getCountryItems(),
-            'billgroups' => $this->getBillgroupItems(),
+            'billgroups' => $billgroups,
             'suppliers' => $this->getSupplierItems(),
             'clients' => $this->getResellerAdminItems(),
             'clients_only' => $this->getResellerAdminItems(false),
@@ -293,27 +286,13 @@ class AdminController extends \yii\web\Controller
 
         ]);
     }
-    protected function getBillgroupItems()
-    {
-        $items = [];
-        $res = Billgroup::find()->all();
-        if(is_array($res) && count($res) > 0)
-        {
-            foreach($res as $v)
-            {
-                $items[$v->id] = $v->name;
-            }
-        }
-        return $items;
-    }
+
     protected function getSupplierItems()
     {
         $items = [];
         $res = Supplier::find()->all();
-        if(is_array($res) && count($res) > 0)
-        {
-            foreach($res as $v)
-            {
+        if (is_array($res) && count($res) > 0) {
+            foreach ($res as $v) {
                 $items[$v->id] = $v->name;
             }
         }
@@ -322,12 +301,10 @@ class AdminController extends \yii\web\Controller
     protected function getResellerAdminItems($include_unallocated = true)
     {
         $items = [];
-        if($include_unallocated) $items = [0 => "Un-allocated"];
+        if ($include_unallocated) $items = [0 => "Un-allocated"];
         $res = User::find()->where(['role' => 4])->all();
-        if(is_array($res) && count($res) > 0)
-        {
-            foreach($res as $v)
-            {
+        if (is_array($res) && count($res) > 0) {
+            foreach ($res as $v) {
                 $items[$v->id] = $v->username;
             }
         }
@@ -337,10 +314,8 @@ class AdminController extends \yii\web\Controller
     {
         $items = [];
         $res = \Yii::$app->params['services'];
-        if(is_array($res) && count($res) > 0)
-        {
-            foreach($res as $k=>$v)
-            {
+        if (is_array($res) && count($res) > 0) {
+            foreach ($res as $k => $v) {
                 $items[$k] = $v;
             }
         }
@@ -1575,13 +1550,14 @@ class AdminController extends \yii\web\Controller
         $searchModel = new BillgroupSearch();
         $dataProvider = $searchModel->search(\Yii::$app->getRequest()->queryParams);
         $dataProvider->pagination->pageSize = 10;
+        $billgroups = Billgroup::getBillgroupItems();
 
         \Yii::$app->view->title = \Yii::t('app', 'Billgroups');
 
         return $this->render('billgroups', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
-            'billgroups' => $this->getBillgroupItems(),
+            'billgroups' => $billgroups,
             'countries' => $this->getCountryItems(),
             'country_networks' => $this->getCountryNetworkItems(),
             'currencies' => $this->getCurrencyItems(),
@@ -1661,311 +1637,294 @@ class AdminController extends \yii\web\Controller
      * @return string|\yii\web\Response
      * @throws NotFoundHttpException
      */
-    
-     public function actionUploadNumbers()
+
+    public function actionUploadNumbers()
     {
         \Yii::$app->view->title = \Yii::t('app', 'Upload Numbers');
         $model = new Numbers(['scenario' => 'create']);
         $post = \Yii::$app->getRequest()->post();
-        $data= [];
-        if ($post) {    
-            if(!empty($upload_type)) $upload_type = '#range';
-            if($model->load($post) && $model->validate())
-            {
+        $data = [];
+        if ($post) {
+            if (!empty($upload_type)) $upload_type = '#range';
+            if ($model->load($post) && $model->validate()) {
                 //if($model->validate())
                 //{
-                    // detect upload type  
-                    switch($model->upload_type)
-                    {
-                        case '#range': 
-                            $model->number_list = "";
-                            $model->single_number = "";
-    
-                            $model->start_number = rtrim($model->start_number);
-                            
-                            if(empty($model->start_number)) { // empty
-                                $model->addError('start_number', 'Please enter a number. Min. 7 digits.');
+                // detect upload type  
+                switch ($model->upload_type) {
+                    case '#range':
+                        $model->number_list = "";
+                        $model->single_number = "";
+
+                        $model->start_number = rtrim($model->start_number);
+
+                        if (empty($model->start_number)) { // empty
+                            $model->addError('start_number', 'Please enter a number. Min. 7 digits.');
+                        } else {
+                            if (!is_numeric($model->start_number)) // non numeric
+                            {
+                                $model->addError('start_number', 'Not a valid number (positive number only).');
                             } else {
-                                if(!is_numeric($model->start_number)) // non numeric
+                                if ($model->start_number < 1) // negative
                                 {
                                     $model->addError('start_number', 'Not a valid number (positive number only).');
                                 } else {
-                                    if($model->start_number < 1) // negative
+                                    $str = strval($model->start_number);
+                                    if (strlen($str) < 7) // min 7 digits
                                     {
-                                        $model->addError('start_number', 'Not a valid number (positive number only).');
-                                    } else {
-                                        $str = strval($model->start_number); 
-                                        if(strlen($str) < 7) // min 7 digits
-                                        {
-                                            $model->addError('start_number', 'Please enter a number (min. 7 digits).');
-                                        }
+                                        $model->addError('start_number', 'Please enter a number (min. 7 digits).');
                                     }
                                 }
                             }
-    
-                            if(empty($model->number_qty)) { // empty
+                        }
+
+                        if (empty($model->number_qty)) { // empty
+                            $model->addError('number_qty', 'Please enter qty (1 - 1000).');
+                        } else {
+                            if ($model->number_qty < 1) // negative
+                            {
                                 $model->addError('number_qty', 'Please enter qty (1 - 1000).');
                             } else {
-                                if($model->number_qty < 1) // negative
+                                if ($model->number_qty > 1000) // max 1000
                                 {
                                     $model->addError('number_qty', 'Please enter qty (1 - 1000).');
-                                } else {
-                                    if($model->number_qty > 1000) // max 1000
-                                    {
-                                        $model->addError('number_qty', 'Please enter qty (1 - 1000).');
-                                    }
                                 }
                             }
-                            break;
-                        case '#manual': 
-                            $model->start_number = "";
-                            $model->number_qty = "";
-                            $model->single_number = "";
-    
-                            $model->number_list = rtrim($model->number_list);
-    
-                            if(empty($model->number_list))
-                            {
-                                $model->addError('number_list', 'At least 1 number required');
-                            } else {
-                                $number_list_arr = explode("\r\n", $model->number_list);
-                                $numbers = [];
-                                foreach($number_list_arr as $v)
-                                {
-                                    if(!empty($v) && is_numeric($v) && strlen(strval($v)) > 6 && $v > 0)
-                                    {
-                                        $numbers[] = $v;
-                                    } 
-                                }
-    
-                                if(count($numbers) != count($number_list_arr)){
-                                    $model->addError('number_list', 'One or more numbers is not a valid number');
-                                } else {
-                                    array_unique($numbers);
-                                    if(count($numbers) != count($number_list_arr)){
-                                        $model->addError('number_list', 'One or more numbers is duplicate');
-                                    }
+                        }
+                        break;
+                    case '#manual':
+                        $model->start_number = "";
+                        $model->number_qty = "";
+                        $model->single_number = "";
+
+                        $model->number_list = rtrim($model->number_list);
+
+                        if (empty($model->number_list)) {
+                            $model->addError('number_list', 'At least 1 number required');
+                        } else {
+                            $number_list_arr = explode("\r\n", $model->number_list);
+                            $numbers = [];
+                            foreach ($number_list_arr as $v) {
+                                if (!empty($v) && is_numeric($v) && strlen(strval($v)) > 6 && $v > 0) {
+                                    $numbers[] = $v;
                                 }
                             }
-                            break;
-                        case '#single': 
-                            $model->start_number = "";
-                            $model->number_qty = "";
-                            $model->number_list = ""; 
-    
-                            $model->single_number = rtrim($model->single_number);                        
-                            
-                            if(empty($model->single_number))
-                            {
-                                $model->addError('single_number', 'Please enter a number. Min. 7 digits.');
+
+                            if (count($numbers) != count($number_list_arr)) {
+                                $model->addError('number_list', 'One or more numbers is not a valid number');
                             } else {
-                                if(!is_numeric($model->single_number)) // non numeric
+                                array_unique($numbers);
+                                if (count($numbers) != count($number_list_arr)) {
+                                    $model->addError('number_list', 'One or more numbers is duplicate');
+                                }
+                            }
+                        }
+                        break;
+                    case '#single':
+                        $model->start_number = "";
+                        $model->number_qty = "";
+                        $model->number_list = "";
+
+                        $model->single_number = rtrim($model->single_number);
+
+                        if (empty($model->single_number)) {
+                            $model->addError('single_number', 'Please enter a number. Min. 7 digits.');
+                        } else {
+                            if (!is_numeric($model->single_number)) // non numeric
+                            {
+                                $model->addError('single_number', 'Not a valid number (positive number only).');
+                            } else {
+                                if ($model->single_number < 1) // negative
                                 {
                                     $model->addError('single_number', 'Not a valid number (positive number only).');
                                 } else {
-                                    if($model->single_number < 1) // negative
+                                    $str = strval($model->single_number);
+                                    if (strlen($str) < 7) // min 7 digits
                                     {
-                                        $model->addError('single_number', 'Not a valid number (positive number only).');
-                                    } else {
-                                        $str = strval($model->single_number); 
-                                        if(strlen($str) < 7) // min 7 digits
-                                        {
-                                            $model->addError('single_number', 'Please enter a number (min. 7 digits).');
-                                        }
+                                        $model->addError('single_number', 'Please enter a number (min. 7 digits).');
                                     }
                                 }
                             }
-                            break;
-                    }
-                    if(!$model->errors)
-                    {
-                        $bg_id = $model->billgroup_id;
-                        $bg = Billgroup::findOne($bg_id);
-                        if(!empty($bg))
-                        {
-                            switch($model->upload_type)
-                            {
-                                case '#range': 
-                                    $range_arr = [];
-                                    for ($i = 1; $i <= $model->number_qty; $i++) {
-                                        $range_arr[] = $model->start_number + $i;
-                                    }
-    
-                                    shuffle($range_arr);
-    
-                                    foreach($range_arr as $v)
-                                    {
-                                        $new_number = new Numbers();
-                                        //$new_number->scenario =  Numbers::SCENARIO_CREATE;
-                                        $new_number->status = 1; // default
-                                        $new_number->cld1 = $v;
-                                        $new_number->cld2 = $v;
-                                        $new_number->cost_rate = $bg->cost_rate; 
-                                        $new_number->cld1rate = $bg->cld1rate; // default - leave blank
-                                        $new_number->cld2rate = 0; // default - leave blank, billgroup has this though
-                                        $new_number->cld3rate = 0; // default - leave blank, billgroup has this though
-                                        $new_number->cld1description = ''; // leave blank
-                                        $new_number->cld2description = ''; // leave blank
-                                        $new_number->maxduration = $bg->maxperday; // from billgroup
-                                        $new_number->admin_id = 0; // default
-                                        $new_number->reseller_id = 0; //default
-                                        $new_number->agent_id = 0; //default
-                                        $new_number->billcycle_id = $bg->billcycle_id; 
-                                        $new_number->currency_id = $bg->currency_id; 
-                                        $new_number->billgroup_id = $model->billgroup_id; // $_POST
-                                        $new_number->country_id = $bg->country_id; 
-                                        $new_number->countrynetwork_id = $bg->countrynetwork_id; 
-                                        $new_number->service_id = $model->service_id; // $_POST
-                                        $new_number->sender_id = $model->sender_id; // $_POST
-                                        $new_number->receiver_id = 0; // default - leave blank
-                                        $new_number->allocated_date = null; // default - leave blank
-                                        $data[] = $new_number;
-                                    }
-                                    break;
-                                case '#manual': 
-                                    $number_list_arr = explode("\n", $model->number_list);
-                                    foreach($number_list_arr as $v)
-                                    {
-                                        $new_number = new Numbers();
-                                        //$new_number->scenario =  Numbers::SCENARIO_CREATE;
-                                        $new_number->status = 1; // default
-                                        $new_number->cld1 = $v;
-                                        $new_number->cld2 = $v;
-                                        $new_number->cost_rate = $bg->cost_rate; 
-                                        $new_number->cld1rate = $bg->cld1rate; // default - leave blank
-                                        $new_number->cld2rate = 0; // default - leave blank, billgroup has this though
-                                        $new_number->cld3rate = 0; // default - leave blank, billgroup has this though
-                                        $new_number->cld1description = ''; // leave blank
-                                        $new_number->cld2description = ''; // leave blank
-                                        $new_number->maxduration = $bg->maxperday; // from billgroup
-                                        $new_number->admin_id = 0; // default
-                                        $new_number->reseller_id = 0; //default
-                                        $new_number->agent_id = 0; //default
-                                        $new_number->billcycle_id = $bg->billcycle_id; 
-                                        $new_number->currency_id = $bg->currency_id; 
-                                        $new_number->billgroup_id = $model->billgroup_id; // $_POST
-                                        $new_number->country_id = $bg->country_id; 
-                                        $new_number->countrynetwork_id = $bg->countrynetwork_id; 
-                                        $new_number->service_id = $model->service_id; // $_POST
-                                        $new_number->sender_id = $model->sender_id; // $_POST
-                                        $new_number->receiver_id = 0; // default - leave blank
-                                        $new_number->allocated_date = null; // default - leave blank
-                                        $data[] = $new_number;
-                                    }
-                                    break;
-                                case '#single': 
-                                    if(!empty($model->single_number))
-                                    {
-                                        // status = 1 - default
-                                        // cld1 , cld2 => number , both similar
-                                        // cld1rate fetch from billgroup
-                                        // admin_id, reseller_id, agent_id keep 0
-                                        // maxduration -> maxperday from billgroup
-                                        // cld2rate, cld3rate , cld1description and cld2description , receiver_id, allocated_date -> leave blank
-                                        // sender_id => supplier id from billgroup table
-            
-                                        $new_number = new Numbers();
-                                        //$new_number->scenario =  Numbers::SCENARIO_CREATE;
-                                        $new_number->status = 1; // default
-                                        $new_number->cld1 = $model->single_number;
-                                        $new_number->cld2 = $model->single_number;
-                                        $new_number->cost_rate = $bg->cost_rate; 
-                                        $new_number->cld1rate = $bg->cld1rate; // default - leave blank
-                                        $new_number->cld2rate = 0; // default - leave blank, billgroup has this though
-                                        $new_number->cld3rate = 0; // default - leave blank, billgroup has this though
-                                        $new_number->cld1description = ''; // leave blank
-                                        $new_number->cld2description = ''; // leave blank
-                                        $new_number->maxduration = $bg->maxperday; // from billgroup
-                                        $new_number->admin_id = 0; // default
-                                        $new_number->reseller_id = 0; //default
-                                        $new_number->agent_id = 0; //default
-                                        $new_number->billcycle_id = $bg->billcycle_id; 
-                                        $new_number->currency_id = $bg->currency_id; 
-                                        $new_number->billgroup_id = $model->billgroup_id; // $_POST
-                                        $new_number->country_id = $bg->country_id; 
-                                        $new_number->countrynetwork_id = $bg->countrynetwork_id; 
-                                        $new_number->service_id = $model->service_id; // $_POST
-                                        $new_number->sender_id = $model->sender_id; // $_POST
-                                        $new_number->receiver_id = 0; // default - leave blank
-                                        $new_number->allocated_date = null; // default - leave blank
-                                        $data[] = $new_number;
-                                    }
-                                    break;
-                            }
-                            if(is_array($data) && count($data) > 0)
-                            {
-                                $all_validated = \yii\base\Model::validateMultiple($data); 
-                                if($all_validated) 
-                                {
-                                    $rows = [];
-                                    foreach($data as $v)
-                                    {
-                                        $rows[] = [
-                                            'status' => $v->status,
-                                            'cld1' => $v->cld1,
-                                            'cld2' => $v->cld2,
-                                            'cost_rate' => $v->cost_rate,
-                                            'cld1rate' => $v->cld1rate,
-                                            'cld2rate' => $v->cld2rate,
-                                            'cld3rate' => $v->cld3rate,
-                                            'cld1description' => $v->cld1description,
-                                            'cld2description' => $v->cld2description,
-                                            'maxduration' => $v->maxduration,
-                                            'admin_id' => $v->admin_id,
-                                            'reseller_id' => $v->reseller_id,
-                                            'agent_id' => $v->agent_id,
-                                            'billcycle_id' => $v->billcycle_id,
-                                            'currency_id' => $v->currency_id,
-                                            'billgroup_id' => $v->billgroup_id,
-                                            'country_id' => $v->country_id,
-                                            'countrynetwork_id' => $v->countrynetwork_id,
-                                            'service_id' => $v->service_id,
-                                            'sender_id' => $v->sender_id,
-                                            'receiver_id' => $v->receiver_id,
-                                            'allocated_date' => $v->allocated_date
-                                       ];
-                                    }
-                                    $postModel = new Fsmastertb;
-                                    $batch = \Yii::$app->db->createCommand()->batchInsert(Fsmastertb::tableName(), [
-                                        'status',
-                                        'cld1',
-                                        'cld2',
-                                        'cost_rate',
-                                        'cld1rate',
-                                        'cld2rate',
-                                        'cld3rate',
-                                        'cld1description',
-                                        'cld2description',
-                                        'maxduration',
-                                        'admin_id',
-                                        'reseller_id',
-                                        'agent_id',
-                                        'billcycle_id',
-                                        'currency_id',
-                                        'billgroup_id',
-                                        'country_id',
-                                        'countrynetwork_id',
-                                        'service_id',
-                                        'sender_id',
-                                        'receiver_id',
-                                        'allocated_date'
-                                    ], $rows)->execute();
-                                    if($batch)
-                                    {
-                                        \Yii::$app->session->setFlash('success', "Uplaoded");
-                                        return $this->redirect('billgroups');
-                                    } else {
-                                        \Yii::$app->session->setFlash('error', "Upload failed");
-                                    }
+                        }
+                        break;
+                }
+                if (!$model->errors) {
+                    $bg_id = $model->billgroup_id;
+                    $bg = Billgroup::findOne($bg_id);
+                    if (!empty($bg)) {
+                        switch ($model->upload_type) {
+                            case '#range':
+                                $range_arr = [];
+                                for ($i = 1; $i <= $model->number_qty; $i++) {
+                                    $range_arr[] = $model->start_number + $i;
                                 }
-                            } else {
-                                \Yii::$app->session->setFlash('error', "At least one number is required");
+
+                                shuffle($range_arr);
+
+                                foreach ($range_arr as $v) {
+                                    $new_number = new Numbers();
+                                    //$new_number->scenario =  Numbers::SCENARIO_CREATE;
+                                    $new_number->status = 1; // default
+                                    $new_number->cld1 = $v;
+                                    $new_number->cld2 = $v;
+                                    $new_number->cost_rate = $bg->cost_rate;
+                                    $new_number->cld1rate = $bg->cld1rate; // default - leave blank
+                                    $new_number->cld2rate = 0; // default - leave blank, billgroup has this though
+                                    $new_number->cld3rate = 0; // default - leave blank, billgroup has this though
+                                    $new_number->cld1description = ''; // leave blank
+                                    $new_number->cld2description = ''; // leave blank
+                                    $new_number->maxduration = $bg->maxperday; // from billgroup
+                                    $new_number->admin_id = 0; // default
+                                    $new_number->reseller_id = 0; //default
+                                    $new_number->agent_id = 0; //default
+                                    $new_number->billcycle_id = $bg->billcycle_id;
+                                    $new_number->currency_id = $bg->currency_id;
+                                    $new_number->billgroup_id = $model->billgroup_id; // $_POST
+                                    $new_number->country_id = $bg->country_id;
+                                    $new_number->countrynetwork_id = $bg->countrynetwork_id;
+                                    $new_number->service_id = $model->service_id; // $_POST
+                                    $new_number->sender_id = $model->sender_id; // $_POST
+                                    $new_number->receiver_id = 0; // default - leave blank
+                                    $new_number->allocated_date = null; // default - leave blank
+                                    $data[] = $new_number;
+                                }
+                                break;
+                            case '#manual':
+                                $number_list_arr = explode("\n", $model->number_list);
+                                foreach ($number_list_arr as $v) {
+                                    $new_number = new Numbers();
+                                    //$new_number->scenario =  Numbers::SCENARIO_CREATE;
+                                    $new_number->status = 1; // default
+                                    $new_number->cld1 = $v;
+                                    $new_number->cld2 = $v;
+                                    $new_number->cost_rate = $bg->cost_rate;
+                                    $new_number->cld1rate = $bg->cld1rate; // default - leave blank
+                                    $new_number->cld2rate = 0; // default - leave blank, billgroup has this though
+                                    $new_number->cld3rate = 0; // default - leave blank, billgroup has this though
+                                    $new_number->cld1description = ''; // leave blank
+                                    $new_number->cld2description = ''; // leave blank
+                                    $new_number->maxduration = $bg->maxperday; // from billgroup
+                                    $new_number->admin_id = 0; // default
+                                    $new_number->reseller_id = 0; //default
+                                    $new_number->agent_id = 0; //default
+                                    $new_number->billcycle_id = $bg->billcycle_id;
+                                    $new_number->currency_id = $bg->currency_id;
+                                    $new_number->billgroup_id = $model->billgroup_id; // $_POST
+                                    $new_number->country_id = $bg->country_id;
+                                    $new_number->countrynetwork_id = $bg->countrynetwork_id;
+                                    $new_number->service_id = $model->service_id; // $_POST
+                                    $new_number->sender_id = $model->sender_id; // $_POST
+                                    $new_number->receiver_id = 0; // default - leave blank
+                                    $new_number->allocated_date = null; // default - leave blank
+                                    $data[] = $new_number;
+                                }
+                                break;
+                            case '#single':
+                                if (!empty($model->single_number)) {
+                                    // status = 1 - default
+                                    // cld1 , cld2 => number , both similar
+                                    // cld1rate fetch from billgroup
+                                    // admin_id, reseller_id, agent_id keep 0
+                                    // maxduration -> maxperday from billgroup
+                                    // cld2rate, cld3rate , cld1description and cld2description , receiver_id, allocated_date -> leave blank
+                                    // sender_id => supplier id from billgroup table
+
+                                    $new_number = new Numbers();
+                                    //$new_number->scenario =  Numbers::SCENARIO_CREATE;
+                                    $new_number->status = 1; // default
+                                    $new_number->cld1 = $model->single_number;
+                                    $new_number->cld2 = $model->single_number;
+                                    $new_number->cost_rate = $bg->cost_rate;
+                                    $new_number->cld1rate = $bg->cld1rate; // default - leave blank
+                                    $new_number->cld2rate = 0; // default - leave blank, billgroup has this though
+                                    $new_number->cld3rate = 0; // default - leave blank, billgroup has this though
+                                    $new_number->cld1description = ''; // leave blank
+                                    $new_number->cld2description = ''; // leave blank
+                                    $new_number->maxduration = $bg->maxperday; // from billgroup
+                                    $new_number->admin_id = 0; // default
+                                    $new_number->reseller_id = 0; //default
+                                    $new_number->agent_id = 0; //default
+                                    $new_number->billcycle_id = $bg->billcycle_id;
+                                    $new_number->currency_id = $bg->currency_id;
+                                    $new_number->billgroup_id = $model->billgroup_id; // $_POST
+                                    $new_number->country_id = $bg->country_id;
+                                    $new_number->countrynetwork_id = $bg->countrynetwork_id;
+                                    $new_number->service_id = $model->service_id; // $_POST
+                                    $new_number->sender_id = $model->sender_id; // $_POST
+                                    $new_number->receiver_id = 0; // default - leave blank
+                                    $new_number->allocated_date = null; // default - leave blank
+                                    $data[] = $new_number;
+                                }
+                                break;
+                        }
+                        if (is_array($data) && count($data) > 0) {
+                            $all_validated = \yii\base\Model::validateMultiple($data);
+                            if ($all_validated) {
+                                $rows = [];
+                                foreach ($data as $v) {
+                                    $rows[] = [
+                                        'status' => $v->status,
+                                        'cld1' => $v->cld1,
+                                        'cld2' => $v->cld2,
+                                        'cost_rate' => $v->cost_rate,
+                                        'cld1rate' => $v->cld1rate,
+                                        'cld2rate' => $v->cld2rate,
+                                        'cld3rate' => $v->cld3rate,
+                                        'cld1description' => $v->cld1description,
+                                        'cld2description' => $v->cld2description,
+                                        'maxduration' => $v->maxduration,
+                                        'admin_id' => $v->admin_id,
+                                        'reseller_id' => $v->reseller_id,
+                                        'agent_id' => $v->agent_id,
+                                        'billcycle_id' => $v->billcycle_id,
+                                        'currency_id' => $v->currency_id,
+                                        'billgroup_id' => $v->billgroup_id,
+                                        'country_id' => $v->country_id,
+                                        'countrynetwork_id' => $v->countrynetwork_id,
+                                        'service_id' => $v->service_id,
+                                        'sender_id' => $v->sender_id,
+                                        'receiver_id' => $v->receiver_id,
+                                        'allocated_date' => $v->allocated_date
+                                    ];
+                                }
+                                $postModel = new Fsmastertb;
+                                $batch = \Yii::$app->db->createCommand()->batchInsert(Fsmastertb::tableName(), [
+                                    'status',
+                                    'cld1',
+                                    'cld2',
+                                    'cost_rate',
+                                    'cld1rate',
+                                    'cld2rate',
+                                    'cld3rate',
+                                    'cld1description',
+                                    'cld2description',
+                                    'maxduration',
+                                    'admin_id',
+                                    'reseller_id',
+                                    'agent_id',
+                                    'billcycle_id',
+                                    'currency_id',
+                                    'billgroup_id',
+                                    'country_id',
+                                    'countrynetwork_id',
+                                    'service_id',
+                                    'sender_id',
+                                    'receiver_id',
+                                    'allocated_date'
+                                ], $rows)->execute();
+                                if ($batch) {
+                                    \Yii::$app->session->setFlash('success', "Uplaoded");
+                                    return $this->redirect('billgroups');
+                                } else {
+                                    \Yii::$app->session->setFlash('error', "Upload failed");
+                                }
                             }
                         } else {
-                            $model->addError('billgroup_id', 'not a valid billgroup');
+                            \Yii::$app->session->setFlash('error', "At least one number is required");
                         }
-                        
+                    } else {
+                        $model->addError('billgroup_id', 'not a valid billgroup');
                     }
+                }
                 //}
             }
         }
@@ -1976,7 +1935,7 @@ class AdminController extends \yii\web\Controller
             'billgroups' => $deps['billgroups'],
             'suppliers' => $deps['suppliers'],
             'services' => $deps['services'],
-            'upload_type' => !empty($model->upload_type) ? $model->upload_type : "#range" 
+            'upload_type' => !empty($model->upload_type) ? $model->upload_type : "#range"
         ]);
     }
 
@@ -1986,16 +1945,14 @@ class AdminController extends \yii\web\Controller
         $response = [
             'success' => false
         ];
-        if(isset($_POST))
-        {
+        if (isset($_POST)) {
             $post = $_POST;
             $billgroup_id = !empty($post['bg']) ? intval($post['bg']) : "";
             $supplier_id = !empty($post['sup']) ? intval($post['sup']) : "";
             $service_id = !empty($post['ser']) ? intval($post['ser']) : "";
             $initiator = !empty($post['initiator']) ? $post['initiator'] : "";
             $deps = $this->uploadNumbersDeps($billgroup_id, $supplier_id, $service_id, $initiator);
-            if(is_array($deps) && count($deps) > 0)
-            {
+            if (is_array($deps) && count($deps) > 0) {
                 $response = [
                     'success' => true,
                     'data' => $deps
@@ -2005,7 +1962,7 @@ class AdminController extends \yii\web\Controller
         return json_encode($response);
     }
     // dropdownlist values
-    protected function uploadNumbersDeps($billgroup_id = null, $supplier_id = null , $service_id = null, $initiator = null)
+    protected function uploadNumbersDeps($billgroup_id = null, $supplier_id = null, $service_id = null, $initiator = null)
     {
         $response = [
             'billgroups' => [],
@@ -2014,55 +1971,50 @@ class AdminController extends \yii\web\Controller
             'defaults' => [
                 'bill' => $billgroup_id,
                 'sup' => $supplier_id,
-                'ser' => $service_id 
+                'ser' => $service_id
             ]
         ];
-        if(empty($billgroup_id) && empty($supplier_id) && empty($service_id))
-        {
+        if (empty($billgroup_id) && empty($supplier_id) && empty($service_id)) {
             $billgroups = Billgroup::find()->asArray()->all();
             $response['billgroups'] = \yii\helpers\ArrayHelper::map($billgroups, 'id', 'name');
             $suppliers = Supplier::find()->asArray()->all();
             $response['suppliers'] = \yii\helpers\ArrayHelper::map($suppliers, 'id', 'name');
             $response['services'] = \Yii::$app->params['services'];
         } else {
-            if(!empty($billgroup_id) || !empty($supplier_id) || !empty($service_id))
-            {
+            if (!empty($billgroup_id) || !empty($supplier_id) || !empty($service_id)) {
                 $bgs_bill = Billgroup::find();
                 $bgs_bill->select('id, name, sender_id, service');
 
                 $where = false;
-                if(!empty($billgroup_id)) {
+                if (!empty($billgroup_id)) {
                     $bgs_bill->where(['id' => $billgroup_id]);
                     $where = true;
-                }  
+                }
 
-                if(!empty($supplier_id)) {
-                    if($where) $bgs_bill->andWhere(['sender_id' => $supplier_id]);
+                if (!empty($supplier_id)) {
+                    if ($where) $bgs_bill->andWhere(['sender_id' => $supplier_id]);
                     else $bgs_bill->where(['sender_id' => $supplier_id]);
                     $where = true;
-                }  
-                if(!empty($service_id)) {
-                    if($where) $bgs_bill->andWhere(['service' => $service_id]);  
-                    else $bgs_bill->where(['service' => $service_id]);  
+                }
+                if (!empty($service_id)) {
+                    if ($where) $bgs_bill->andWhere(['service' => $service_id]);
+                    else $bgs_bill->where(['service' => $service_id]);
                     $where = true;
                 }
 
                 $res = $bgs_bill->all();
                 $response['billgroups'] = \yii\helpers\ArrayHelper::map($res, 'id', 'name');
-                if($initiator == 'numbers-billgroup_id')
-                {
-                    if(is_array($res) && count($res) == 1)
-                    {
+                if ($initiator == 'numbers-billgroup_id') {
+                    if (is_array($res) && count($res) == 1) {
                         $response['defaults']['sup'] = $res[0]['sender_id'];
                         $response['defaults']['ser'] = $res[0]['service'];
                     }
-                }                
+                }
                 $sup_ids = \yii\helpers\ArrayHelper::getColumn($res, 'sender_id');
                 $ser_ids = \yii\helpers\ArrayHelper::getColumn($res, 'service');
 
 
-                if(is_array($sup_ids) && count($sup_ids) > 0)
-                {
+                if (is_array($sup_ids) && count($sup_ids) > 0) {
                     $sup_ids = array_unique($sup_ids, SORT_NUMERIC);
                     $suppliers = Supplier::find()->where(['IN', 'id', $sup_ids])->all();
                     $response['suppliers'] = \yii\helpers\ArrayHelper::map($suppliers, 'id', 'name');
@@ -2071,13 +2023,10 @@ class AdminController extends \yii\web\Controller
                     $response['suppliers'] = \yii\helpers\ArrayHelper::map($suppliers, 'id', 'name');
                 }
 
-                if(is_array($ser_ids) && count($ser_ids) > 0)
-                {
+                if (is_array($ser_ids) && count($ser_ids) > 0) {
                     $ser_ids = array_unique($ser_ids, SORT_NUMERIC);
-                    foreach(\Yii::$app->params['services'] as $k=>$v)
-                    {
-                        if(in_array($k, $ser_ids))
-                        {
+                    foreach (\Yii::$app->params['services'] as $k => $v) {
+                        if (in_array($k, $ser_ids)) {
                             $response['services'][$k] = $v;
                         }
                     }
@@ -2171,14 +2120,14 @@ class AdminController extends \yii\web\Controller
         $searchModel = new TdrSearch();
 
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $mysubusr, $search, true);
-        $dataProvider->setPagination(['pageSize' => $filter]); 
-
-        return $this->render('tdr', [
-            'dataProvider' => $dataProvider, 
+        $dataProvider->setPagination(['pageSize' => $filter]);
+        $billgroups = Billgroup::getBillgroupItems();
+        return $this->render('sms_tdr', [
+            'dataProvider' => $dataProvider,
             'searchModel' => $searchModel,
-            'search' => $search, 
+            'search' => $search,
             'filter' => $filter,
-            'billgroups' => $this->getBillgroupItems(),
+            'billgroups' => $billgroups,
             'clients' => $this->getResellerAdminItems(),
             'suppliers' => $this->getSupplierItems(),
         ]);
@@ -2197,20 +2146,20 @@ class AdminController extends \yii\web\Controller
 
         $searchModel = new TdrSearchSummary();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $mysubusr, $search, true, false);
-        $dataProvider->setPagination(['pageSize' => $filter]); 
+        $dataProvider->setPagination(['pageSize' => $filter]);
 
         $searchModel_1 = new TdrSearchDetailed();
         $dataProvider_1 = $searchModel_1->search(Yii::$app->request->queryParams, $mysubusr, $search, true, false);
-        $dataProvider_1->setPagination(['pageSize' => $filter]); 
-
+        $dataProvider_1->setPagination(['pageSize' => $filter]);
+        $billgroups = Billgroup::getBillgroupItems();
         return $this->render('summary_report', [
-            'dataProvider' => $dataProvider, 
-            'dataProvider_1' => $dataProvider_1, 
-            'search' => $search, 
+            'dataProvider' => $dataProvider,
+            'dataProvider_1' => $dataProvider_1,
+            'search' => $search,
             'filter' => $filter,
             'clients' => $this->getResellerAdminItems(),
             'suppliers' => $this->getSupplierItems(),
-            'billgroups' => $this->getBillgroupItems(),
+            'billgroups' => $billgroups,
         ]);
     }
 
@@ -2227,26 +2176,26 @@ class AdminController extends \yii\web\Controller
 
         $searchModel = new TdrSearchSummary();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $mysubusr, $search, true, true);
-        $dataProvider->setPagination(['pageSize' => $filter]); 
+        $dataProvider->setPagination(['pageSize' => $filter]);
 
         $searchModel_1 = new TdrSearchDetailed();
         $dataProvider_1 = $searchModel_1->search(Yii::$app->request->queryParams, $mysubusr, $search, true, true);
-        $dataProvider_1->setPagination(['pageSize' => $filter]); 
-
+        $dataProvider_1->setPagination(['pageSize' => $filter]);
+        $billgroups = Billgroup::getBillgroupItems();
         return $this->render('detail_report', [
-            'dataProvider' => $dataProvider, 
-            'dataProvider_1' => $dataProvider_1, 
-            'search' => $search, 
+            'dataProvider' => $dataProvider,
+            'dataProvider_1' => $dataProvider_1,
+            'search' => $search,
             'filter' => $filter,
             'clients' => $this->getResellerAdminItems(),
             'suppliers' => $this->getSupplierItems(),
-            'billgroups' => $this->getBillgroupItems(),
+            'billgroups' => $billgroups,
         ]);
     }
 
     public function actionTdrExport()
     {
-        $a_z = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P','Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y'. 'Z'];
+        $a_z = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y' . 'Z'];
 
         $headers = [
             'ID',
@@ -2259,37 +2208,32 @@ class AdminController extends \yii\web\Controller
             'Delivered Time'
         ];
 
-        if(isset($_SERVER['QUERY_STRING']))
-        {
+        if (isset($_SERVER['QUERY_STRING'])) {
             $searchModel = new TdrSearch();
             $mysubusr = User::find()->select('id')->where(['role' => 2]);
             $query = $searchModel->search(\Yii::$app->request->queryParams, $mysubusr, '', true)->query;
             $params = isset(\Yii::$app->request->queryParams['TdrSearch']) ? \Yii::$app->request->queryParams['TdrSearch'] : [];
 
             $billgroup_name = 'None';
-            if(!empty(intval($params['billgroup_id'])))
-            {
+            if (!empty(intval($params['billgroup_id']))) {
                 $obj = Billgroup::findOne(intval($params['billgroup_id']));
-                if(isset($obj->name)) $billgroup_name = $obj->name;
+                if (isset($obj->name)) $billgroup_name = $obj->name;
             }
 
             $client_name = 'None';
-            if(isset($params['admin_id']) && trim($params['admin_id']) != "")
-            {
-                if($params['admin_id'] == 0)
-                {
+            if (isset($params['admin_id']) && trim($params['admin_id']) != "") {
+                if ($params['admin_id'] == 0) {
                     $client_name = 'Un-located';
                 } else {
                     $obj = User::findOne(intval($params['admin_id']));
-                    if(isset($obj->username)) $client_name = $obj->username;
+                    if (isset($obj->username)) $client_name = $obj->username;
                 }
             }
 
             $supplier_name = 'None';
-            if(!empty(intval($params['sender_id'])))
-            {
+            if (!empty(intval($params['sender_id']))) {
                 $obj = Supplier::findOne(intval($params['sender_id']));
-                if(isset($obj->name)) $supplier_name = $obj->name;
+                if (isset($obj->name)) $supplier_name = $obj->name;
             }
 
             $filters = [
@@ -2301,7 +2245,6 @@ class AdminController extends \yii\web\Controller
                 'SMS Message' => !empty($params['sms_message']) ? $params['sms_message'] : 'None',
                 'ID' => !empty($params['id']) ? $params['id'] : 'None',
             ];
-
         }
 
         $csv_cols = ["", "", "", "", "", "", "", ""];
@@ -2314,58 +2257,61 @@ class AdminController extends \yii\web\Controller
         $row = 1;
         $col = 1;
 
-        $sheet->setCellValueByColumnAndRow($col, $row , "TDR REPORT");
+        $sheet->setCellValueByColumnAndRow($col, $row, "TDR REPORT");
         $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
         $temp = $csv_cols;
-        $temp[$col-1] = "TDR REPORT";
+        $temp[$col - 1] = "TDR REPORT";
         $csv_arr[] = $temp;
-        $row++; $csv_arr[] = $csv_cols;
+        $row++;
+        $csv_arr[] = $csv_cols;
 
-        $sheet->setCellValueByColumnAndRow($col, $row , "Created " . date('Y-m-d H:i:s'));
+        $sheet->setCellValueByColumnAndRow($col, $row, "Created " . date('Y-m-d H:i:s'));
         $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
         $temp = $csv_cols;
-        $temp[$col-1] = "Created " . date('Y-m-d H:i:s');
+        $temp[$col - 1] = "Created " . date('Y-m-d H:i:s');
         $csv_arr[] = $temp;
-        $row++; $csv_arr[] = $csv_cols;
-        $row++; $csv_arr[] = $csv_cols;
+        $row++;
+        $csv_arr[] = $csv_cols;
+        $row++;
+        $csv_arr[] = $csv_cols;
 
-        $sheet->setCellValueByColumnAndRow($col, $row , "Filters");
+        $sheet->setCellValueByColumnAndRow($col, $row, "Filters");
         $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
         $temp = $csv_cols;
-        $temp[$col-1] = "Filters";
+        $temp[$col - 1] = "Filters";
         $csv_arr[] = $temp;
-        $row++; $csv_arr[] = $csv_cols;
+        $row++;
+        $csv_arr[] = $csv_cols;
 
-        if(is_array($filters) && count($filters) > 0)
-        {
+        if (is_array($filters) && count($filters) > 0) {
             $col = 1;
             $temp1 = $csv_cols;
             $temp2 = $csv_cols;
-            foreach($filters as $k=>$v)
-            {
-                $sheet->setCellValueByColumnAndRow($col, $row , $k);
+            foreach ($filters as $k => $v) {
+                $sheet->setCellValueByColumnAndRow($col, $row, $k);
                 $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
-                $temp1[$col-1] = $k;
-                $sheet->setCellValueByColumnAndRow($col, $row + 1 , $v);
-                $temp2[$col-1] = $v;
+                $temp1[$col - 1] = $k;
+                $sheet->setCellValueByColumnAndRow($col, $row + 1, $v);
+                $temp2[$col - 1] = $v;
                 $col++;
             }
             $csv_arr[] = $temp1;
             $csv_arr[] = $temp2;
-            $row++; $csv_arr[] = $csv_cols;
-            $row++; $csv_arr[] = $csv_cols;
-            $row++; $csv_arr[] = $csv_cols;
+            $row++;
+            $csv_arr[] = $csv_cols;
+            $row++;
+            $csv_arr[] = $csv_cols;
+            $row++;
+            $csv_arr[] = $csv_cols;
         }
 
-        if(is_array($headers) && count($headers) > 0)
-        {
+        if (is_array($headers) && count($headers) > 0) {
             $col = 1;
             $temp = $csv_cols;
-            foreach($headers as $v)
-            {
-                $sheet->setCellValueByColumnAndRow($col, $row , $v);
+            foreach ($headers as $v) {
+                $sheet->setCellValueByColumnAndRow($col, $row, $v);
                 $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
-                $temp[$col-1] = $v;
+                $temp[$col - 1] = $v;
                 $col++;
             }
             $csv_arr[] = $temp;
@@ -2373,56 +2319,51 @@ class AdminController extends \yii\web\Controller
         }
 
         $rows = $query->all();
-        if(is_array($rows) && count($rows) > 0)
-        {
-            foreach($rows as $v)
-            {
+        if (is_array($rows) && count($rows) > 0) {
+            foreach ($rows as $v) {
                 $temp = $csv_cols;
-                foreach($headers as $hk => $hv)
-                {
-                    switch($hv)
-                    {
+                foreach ($headers as $hk => $hv) {
+                    switch ($hv) {
                         case "ID":
-                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->id) ? $v->id : "");
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row, isset($v->id) ? $v->id : "");
                             $temp[$hk] = isset($v->id) ? $v->id : "";
-                            break; 
+                            break;
                         case "From Number":
-                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->from_number) ? $v->from_number : "");
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row, isset($v->from_number) ? $v->from_number : "");
                             $temp[$hk] = isset($v->from_number) ? $v->from_number : "";
-                            break; 
+                            break;
                         case "To Number":
-                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->to_number) ? $v->to_number : "");
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row, isset($v->to_number) ? $v->to_number : "");
                             $temp[$hk] = isset($v->to_number) ? $v->to_number : "";
-                            break; 
+                            break;
                         case "SMS Message":
-                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->sms_message) ? $v->sms_message : "");
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row, isset($v->sms_message) ? $v->sms_message : "");
                             $temp[$hk] = isset($v->sms_message) ? $v->sms_message : "";
-                            break; 
+                            break;
                         case "Bill Group":
-                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->billgroup) ? $v->billgroup->name : "");
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row, isset($v->billgroup) ? $v->billgroup->name : "");
                             $temp[$hk] = isset($v->billgroup) ? $v->billgroup->name : "";
-                            break; 
+                            break;
                         case "Client":
-                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->resellerAdmin) ? $v->resellerAdmin->username : "");
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row, isset($v->resellerAdmin) ? $v->resellerAdmin->username : "");
                             $temp[$hk] = isset($v->resellerAdmin) ? $v->resellerAdmin->username : "";
-                            break; 
+                            break;
                         case "Supplier":
-                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->supplier) ? $v->supplier->name : "");
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row, isset($v->supplier) ? $v->supplier->name : "");
                             $temp[$hk] = isset($v->supplier) ? $v->supplier->name : "";
-                            break; 
+                            break;
                         case "Delivered Time":
-                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->delivered_time) ? date('d-m-Y H:i:s', strtotime($v->delivered_time)) : "");
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row, isset($v->delivered_time) ? date('d-m-Y H:i:s', strtotime($v->delivered_time)) : "");
                             $temp[$hk] = isset($v->delivered_time) ? date('d-m-Y H:i:s', strtotime($v->delivered_time)) : "";
-                            break; 
+                            break;
                     }
                 }
                 $csv_arr[] = $temp;
                 $row++;
-            }                
+            }
         }
 
-        if(\Yii::$app->request->queryParams['mode'] == 'csv')
-        {
+        if (\Yii::$app->request->queryParams['mode'] == 'csv') {
             header('Content-Type: text/csv; charset=utf-8');
             header('Content-Disposition: attachment; filename="tdr.csv"');
             ob_end_clean();
@@ -2446,7 +2387,7 @@ class AdminController extends \yii\web\Controller
 
     public function actionTdrSummaryExport()
     {
-        $a_z = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P','Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y'. 'Z'];
+        $a_z = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y' . 'Z'];
 
         $headers_summary = [
             'Currency',
@@ -2467,8 +2408,7 @@ class AdminController extends \yii\web\Controller
             'Profit'
         ];
 
-        if(isset($_SERVER['QUERY_STRING']))
-        {
+        if (isset($_SERVER['QUERY_STRING'])) {
             // SUMMARY
             $searchModel = new TdrSearchSummary();
             $mysubusr = User::find()->select('id')->where(['role' => 2]);
@@ -2476,27 +2416,23 @@ class AdminController extends \yii\web\Controller
             $params = isset(\Yii::$app->request->queryParams['TdrSearchSummary']) ? \Yii::$app->request->queryParams['TdrSearchSummary'] : [];
             // FILTERS
             $billgroup_name = 'None';
-            if(!empty(intval($params['billgroup_id'])))
-            {
+            if (!empty(intval($params['billgroup_id']))) {
                 $obj = Billgroup::findOne(intval($params['billgroup_id']));
-                if(isset($obj->name)) $billgroup_name = $obj->name;
+                if (isset($obj->name)) $billgroup_name = $obj->name;
             }
             $client_name = 'None';
-            if(isset($params['admin_id']) && trim($params['admin_id']) != "")
-            {
-                if($params['admin_id'] == 0)
-                {
+            if (isset($params['admin_id']) && trim($params['admin_id']) != "") {
+                if ($params['admin_id'] == 0) {
                     $client_name = 'Un-located';
                 } else {
                     $obj = User::findOne(intval($params['admin_id']));
-                    if(isset($obj->username)) $client_name = $obj->username;
+                    if (isset($obj->username)) $client_name = $obj->username;
                 }
             }
             $supplier_name = 'None';
-            if(!empty(intval($params['sender_id'])))
-            {
+            if (!empty(intval($params['sender_id']))) {
                 $obj = Supplier::findOne(intval($params['sender_id']));
-                if(isset($obj->name)) $supplier_name = $obj->name;
+                if (isset($obj->name)) $supplier_name = $obj->name;
             }
             $filters = [
                 'Bill Group' => $billgroup_name,
@@ -2508,7 +2444,6 @@ class AdminController extends \yii\web\Controller
             $searchModel_2 = new TdrSearchDetailed();
             $query_2 = $searchModel_2->search(\Yii::$app->request->queryParams, $mysubusr, '', true, false)->query;
             $rows_2 = $query_2->all();
-
         }
 
         $spreadsheet = new Spreadsheet();
@@ -2521,67 +2456,72 @@ class AdminController extends \yii\web\Controller
         $row = 1;
         $col = 1;
 
-        $sheet->setCellValueByColumnAndRow($col, $row , "TDR SUMMARY REPORT");
+        $sheet->setCellValueByColumnAndRow($col, $row, "TDR SUMMARY REPORT");
         $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
         $temp = $csv_cols;
-        $temp[$col-1] = "TDR SUMMARY REPORT";
+        $temp[$col - 1] = "TDR SUMMARY REPORT";
         $csv_arr[] = $temp;
-        $row++; $csv_arr[] = $csv_cols;
+        $row++;
+        $csv_arr[] = $csv_cols;
 
-        $sheet->setCellValueByColumnAndRow($col, $row , "Created " . date('Y-m-d H:i:s'));
+        $sheet->setCellValueByColumnAndRow($col, $row, "Created " . date('Y-m-d H:i:s'));
         $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
         $temp = $csv_cols;
-        $temp[$col-1] = "Created " . date('Y-m-d H:i:s');
+        $temp[$col - 1] = "Created " . date('Y-m-d H:i:s');
         $csv_arr[] = $temp;
-        $row++; $csv_arr[] = $csv_cols;
-        $row++; $csv_arr[] = $csv_cols;
+        $row++;
+        $csv_arr[] = $csv_cols;
+        $row++;
+        $csv_arr[] = $csv_cols;
 
-        $sheet->setCellValueByColumnAndRow($col, $row , "Filters");
+        $sheet->setCellValueByColumnAndRow($col, $row, "Filters");
         $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
         $temp = $csv_cols;
-        $temp[$col-1] = "Filters";
+        $temp[$col - 1] = "Filters";
         $csv_arr[] = $temp;
-        $row++; $csv_arr[] = $csv_cols;
+        $row++;
+        $csv_arr[] = $csv_cols;
 
-        if(is_array($filters) && count($filters) > 0)
-        {
+        if (is_array($filters) && count($filters) > 0) {
             $col = 1;
             $temp1 = $csv_cols;
             $temp2 = $csv_cols;
-            foreach($filters as $k=>$v)
-            {
-                $sheet->setCellValueByColumnAndRow($col, $row , $k);
+            foreach ($filters as $k => $v) {
+                $sheet->setCellValueByColumnAndRow($col, $row, $k);
                 $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
-                $temp1[$col-1] = $k;
-                $sheet->setCellValueByColumnAndRow($col, $row + 1 , $v);
-                $temp2[$col-1] = $v;
+                $temp1[$col - 1] = $k;
+                $sheet->setCellValueByColumnAndRow($col, $row + 1, $v);
+                $temp2[$col - 1] = $v;
                 $col++;
             }
             $csv_arr[] = $temp1;
             $csv_arr[] = $temp2;
-            $row++; $csv_arr[] = $csv_cols;
-            $row++; $csv_arr[] = $csv_cols;
-            $row++; $csv_arr[] = $csv_cols;
+            $row++;
+            $csv_arr[] = $csv_cols;
+            $row++;
+            $csv_arr[] = $csv_cols;
+            $row++;
+            $csv_arr[] = $csv_cols;
         }
 
         $col = 1;
-        $sheet->setCellValueByColumnAndRow($col, $row , "SUMMARY");
+        $sheet->setCellValueByColumnAndRow($col, $row, "SUMMARY");
         $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
         $temp = $csv_cols;
-        $temp[$col-1] = "Summary";
+        $temp[$col - 1] = "Summary";
         $csv_arr[] = $temp;
-        $row++; $csv_arr[] = $csv_cols;
-        $row++; $csv_arr[] = $csv_cols;
+        $row++;
+        $csv_arr[] = $csv_cols;
+        $row++;
+        $csv_arr[] = $csv_cols;
 
-        if(is_array($headers_summary) && count($headers_summary) > 0)
-        {
+        if (is_array($headers_summary) && count($headers_summary) > 0) {
             $col = 1;
             $temp = $csv_cols;
-            foreach($headers_summary as $v)
-            {
-                $sheet->setCellValueByColumnAndRow($col, $row , $v);
+            foreach ($headers_summary as $v) {
+                $sheet->setCellValueByColumnAndRow($col, $row, $v);
                 $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
-                $temp[$col-1] = $v;
+                $temp[$col - 1] = $v;
                 $col++;
             }
             $csv_arr[] = $temp;
@@ -2589,126 +2529,118 @@ class AdminController extends \yii\web\Controller
         }
 
         $rows = $query->all();
-        if(is_array($rows) && count($rows) > 0)
-        {
-            foreach($rows as $v)
-            {
+        if (is_array($rows) && count($rows) > 0) {
+            foreach ($rows as $v) {
                 $temp = $csv_cols;
-                foreach($headers_summary as $hk => $hv)
-                {
-                    switch($hv)
-                    {
+                foreach ($headers_summary as $hk => $hv) {
+                    switch ($hv) {
                         case "Currency":
-                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->currency) ? $v->currency : "");
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row, isset($v->currency) ? $v->currency : "");
                             $temp[$hk] = isset($v->currency) ? $v->currency : "";
-                            break; 
+                            break;
                         case "Msgs":
-                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->msgs) ? number_format($v->msgs,0) : 0);
-                            $temp[$hk] = isset($v->msgs) ? number_format($v->msgs,0) : 0;
-                            break; 
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row, isset($v->msgs) ? number_format($v->msgs, 0) : 0);
+                            $temp[$hk] = isset($v->msgs) ? number_format($v->msgs, 0) : 0;
+                            break;
                         case "In":
-                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->rev_in) ? number_format($v->rev_in, 2) : number_format(0, 2));
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row, isset($v->rev_in) ? number_format($v->rev_in, 2) : number_format(0, 2));
                             $temp[$hk] = isset($v->rev_in) ? number_format($v->rev_in, 2) : number_format(0, 2);
-                            break; 
+                            break;
                         case "Out":
-                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->rev_out) ? number_format($v->rev_out, 2) : number_format(0, 2));
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row, isset($v->rev_out) ? number_format($v->rev_out, 2) : number_format(0, 2));
                             $temp[$hk] = isset($v->rev_out) ? number_format($v->rev_out, 2) : number_format(0, 2);
-                            break; 
+                            break;
                         case "Profit":
-                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->profit) ? number_format($v->profit, 2) : number_format(0, 2));
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row, isset($v->profit) ? number_format($v->profit, 2) : number_format(0, 2));
                             $temp[$hk] = isset($v->profit) ? number_format($v->profit, 2) : number_format(0, 2);
-                            break; 
+                            break;
                         case "% Profit":
-                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->profit_percentage) ? number_format($v->profit_percentage, 2) : number_format(0, 2));
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row, isset($v->profit_percentage) ? number_format($v->profit_percentage, 2) : number_format(0, 2));
                             $temp[$hk] = isset($v->profit_percentage) ? number_format($v->profit_percentage, 2) : number_format(0, 2);
-                            break; 
+                            break;
                     }
                 }
                 $csv_arr[] = $temp;
                 $row++;
-            }                
+            }
         }
 
-        $row++; $csv_arr[] = $csv_cols;
-        $row++; $csv_arr[] = $csv_cols;
+        $row++;
+        $csv_arr[] = $csv_cols;
+        $row++;
+        $csv_arr[] = $csv_cols;
         $col = 1;
-        $sheet->setCellValueByColumnAndRow($col, $row , "RESULTS");
+        $sheet->setCellValueByColumnAndRow($col, $row, "RESULTS");
         $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
         $temp = $csv_cols;
-        $temp[$col-1] = "RESULTS";
+        $temp[$col - 1] = "RESULTS";
         $csv_arr[] = $temp;
-        $row++; $csv_arr[] = $csv_cols;
-        $row++; $csv_arr[] = $csv_cols;
+        $row++;
+        $csv_arr[] = $csv_cols;
+        $row++;
+        $csv_arr[] = $csv_cols;
 
-        if(is_array($headers_result) && count($headers_result) > 0)
-        {
+        if (is_array($headers_result) && count($headers_result) > 0) {
             $col = 1;
             $temp = $csv_cols;
-            foreach($headers_result as $v)
-            {
-                $sheet->setCellValueByColumnAndRow($col, $row , $v);
+            foreach ($headers_result as $v) {
+                $sheet->setCellValueByColumnAndRow($col, $row, $v);
                 $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
-                $temp[$col-1] = $v;
+                $temp[$col - 1] = $v;
                 $col++;
             }
             $csv_arr[] = $temp;
             $row++;
         }
 
-        if(is_array($rows_2) && count($rows_2) > 0)
-        {
-            foreach($rows_2 as $v)
-            {
+        if (is_array($rows_2) && count($rows_2) > 0) {
+            foreach ($rows_2 as $v) {
                 $temp = $csv_cols;
-                foreach($headers_result as $hk => $hv)
-                {
-                    switch($hv)
-                    {
+                foreach ($headers_result as $hk => $hv) {
+                    switch ($hv) {
                         case "Client":
-                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->resellerAdmin) ? $v->resellerAdmin->username : "");
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row, isset($v->resellerAdmin) ? $v->resellerAdmin->username : "");
                             $temp[$hk] =  isset($v->resellerAdmin) ? $v->resellerAdmin->username : "";
-                            break; 
+                            break;
                         case "Supplier":
-                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->supplier) ? $v->supplier->name : "");
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row, isset($v->supplier) ? $v->supplier->name : "");
                             $temp[$hk] = isset($v->supplier) ? $v->supplier->name : "";
-                            break; 
+                            break;
                         case "Bill Group":
-                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->billgroup) ? $v->billgroup->name : "");
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row, isset($v->billgroup) ? $v->billgroup->name : "");
                             $temp[$hk] = isset($v->billgroup) ? $v->billgroup->name : "";
-                            break; 
+                            break;
                         case "Msgs":
-                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->msgs) ? number_format($v->msgs, 0) : 0);
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row, isset($v->msgs) ? number_format($v->msgs, 0) : 0);
                             $temp[$hk] = isset($v->msgs) ? number_format($v->msgs, 0) : 0;
-                            break; 
+                            break;
                         case "In":
-                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->rev_in) ? number_format($v->rev_in, 2) : number_format(0, 2));
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row, isset($v->rev_in) ? number_format($v->rev_in, 2) : number_format(0, 2));
                             $temp[$hk] = isset($v->rev_in) ? number_format($v->rev_in, 2) : number_format(0, 2);
-                            break; 
+                            break;
                         case "Out":
-                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->rev_out) ? number_format($v->rev_out, 2) : number_format(0, 2));
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row, isset($v->rev_out) ? number_format($v->rev_out, 2) : number_format(0, 2));
                             $temp[$hk] = isset($v->rev_out) ? number_format($v->rev_out, 2) : number_format(0, 2);
-                            break; 
+                            break;
                         case "Profit":
-                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->profit) ? number_format($v->profit, 2) : number_format(0, 2));
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row, isset($v->profit) ? number_format($v->profit, 2) : number_format(0, 2));
                             $temp[$hk] = isset($v->profit) ? number_format($v->profit, 2) : number_format(0, 2);
-                            break; 
-                        // case "% Profit":
-                        //     $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->profit_percentage) ? number_format($v->profit_percentage, 2) : number_format(0, 2));
-                        //     break; 
+                            break;
+                            // case "% Profit":
+                            //     $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->profit_percentage) ? number_format($v->profit_percentage, 2) : number_format(0, 2));
+                            //     break; 
                     }
                 }
                 $csv_arr[] = $temp;
-                $row++; 
-            }                
+                $row++;
+            }
         }
 
 
-        if(\Yii::$app->request->queryParams['mode'] == 'csv')
-        {
+        if (\Yii::$app->request->queryParams['mode'] == 'csv') {
             header('Content-Type: text/csv; charset=utf-8');
             header('Content-Disposition: attachment; filename="tdr_summary.csv"');
-            if(is_array($csv_arr) && count($csv_arr) > 0)
-            {
+            if (is_array($csv_arr) && count($csv_arr) > 0) {
                 ob_end_clean();
                 $output = fopen('php://output', 'w');
                 foreach ($csv_arr as $row) {
@@ -2731,7 +2663,7 @@ class AdminController extends \yii\web\Controller
 
     public function actionTdrDetailedExport()
     {
-        $a_z = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P','Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y'. 'Z'];
+        $a_z = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y' . 'Z'];
 
         $headers_summary = [
             'Bill Group',
@@ -2753,8 +2685,7 @@ class AdminController extends \yii\web\Controller
             'Msgs'
         ];
 
-        if(isset($_SERVER['QUERY_STRING']))
-        {
+        if (isset($_SERVER['QUERY_STRING'])) {
             // SUMMARY
             $searchModel = new TdrSearchSummary();
             $mysubusr = User::find()->select('id')->where(['role' => 2]);
@@ -2762,27 +2693,23 @@ class AdminController extends \yii\web\Controller
             $params = isset(\Yii::$app->request->queryParams['TdrSearchSummary']) ? \Yii::$app->request->queryParams['TdrSearchSummary'] : [];
             // FILTERS
             $billgroup_name = 'None';
-            if(!empty(intval($params['billgroup_id'])))
-            {
+            if (!empty(intval($params['billgroup_id']))) {
                 $obj = Billgroup::findOne(intval($params['billgroup_id']));
-                if(isset($obj->name)) $billgroup_name = $obj->name;
+                if (isset($obj->name)) $billgroup_name = $obj->name;
             }
             $client_name = 'None';
-            if(isset($params['admin_id']) && trim($params['admin_id']) != "")
-            {
-                if($params['admin_id'] == 0)
-                {
+            if (isset($params['admin_id']) && trim($params['admin_id']) != "") {
+                if ($params['admin_id'] == 0) {
                     $client_name = 'Un-located';
                 } else {
                     $obj = User::findOne(intval($params['admin_id']));
-                    if(isset($obj->username)) $client_name = $obj->username;
+                    if (isset($obj->username)) $client_name = $obj->username;
                 }
             }
             $supplier_name = 'None';
-            if(!empty(intval($params['sender_id'])))
-            {
+            if (!empty(intval($params['sender_id']))) {
                 $obj = Supplier::findOne(intval($params['sender_id']));
-                if(isset($obj->name)) $supplier_name = $obj->name;
+                if (isset($obj->name)) $supplier_name = $obj->name;
             }
             $filters = [
                 'Bill Group' => $billgroup_name,
@@ -2794,7 +2721,6 @@ class AdminController extends \yii\web\Controller
             $searchModel_2 = new TdrSearchDetailed();
             $query_2 = $searchModel_2->search(\Yii::$app->request->queryParams, $mysubusr, '', true, true)->query;
             $rows_2 = $query_2->all();
-
         }
 
         $csv_cols = ["", "", "", "", "", "", ""];
@@ -2807,194 +2733,191 @@ class AdminController extends \yii\web\Controller
         $row = 1;
         $col = 1;
 
-        $sheet->setCellValueByColumnAndRow($col, $row , "TDR DETAILED REPORT");
+        $sheet->setCellValueByColumnAndRow($col, $row, "TDR DETAILED REPORT");
         $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
         $temp = $csv_cols;
-        $temp[$col-1] = "TDR DETAILED REPORT";
+        $temp[$col - 1] = "TDR DETAILED REPORT";
         $csv_arr[] = $temp;
-        $row++; $csv_arr[] = $csv_cols;
-        
-        $sheet->setCellValueByColumnAndRow($col, $row , "Created " . date('Y-m-d H:i:s'));
-        $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
-        $temp = $csv_cols;
-        $temp[$col-1] = "Created " . date('Y-m-d H:i:s');
-        $csv_arr[] = $temp;
-        $row++; $csv_arr[] = $csv_cols;
-        $row++; $csv_arr[] = $csv_cols;
+        $row++;
+        $csv_arr[] = $csv_cols;
 
-        $sheet->setCellValueByColumnAndRow($col, $row , "Filters");
+        $sheet->setCellValueByColumnAndRow($col, $row, "Created " . date('Y-m-d H:i:s'));
         $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
         $temp = $csv_cols;
-        $temp[$col-1] = "Filters";
+        $temp[$col - 1] = "Created " . date('Y-m-d H:i:s');
         $csv_arr[] = $temp;
-        $row++; $csv_arr[] = $csv_cols;
+        $row++;
+        $csv_arr[] = $csv_cols;
+        $row++;
+        $csv_arr[] = $csv_cols;
 
-        if(is_array($filters) && count($filters) > 0)
-        {
+        $sheet->setCellValueByColumnAndRow($col, $row, "Filters");
+        $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
+        $temp = $csv_cols;
+        $temp[$col - 1] = "Filters";
+        $csv_arr[] = $temp;
+        $row++;
+        $csv_arr[] = $csv_cols;
+
+        if (is_array($filters) && count($filters) > 0) {
             $col = 1;
             $temp1 = $csv_cols;
             $temp2 = $csv_cols;
-            foreach($filters as $k=>$v)
-            {
-                $sheet->setCellValueByColumnAndRow($col, $row , $k);
+            foreach ($filters as $k => $v) {
+                $sheet->setCellValueByColumnAndRow($col, $row, $k);
                 $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
-                $temp1[$col-1] = $k;
-                $sheet->setCellValueByColumnAndRow($col, $row + 1 , $v);
-                $temp2[$col-1] = $v;
+                $temp1[$col - 1] = $k;
+                $sheet->setCellValueByColumnAndRow($col, $row + 1, $v);
+                $temp2[$col - 1] = $v;
                 $col++;
             }
             $csv_arr[] = $temp1;
             $csv_arr[] = $temp2;
-            $row++; $csv_arr[] = $csv_cols;
-            $row++; $csv_arr[] = $csv_cols;
-            $row++; $csv_arr[] = $csv_cols;
+            $row++;
+            $csv_arr[] = $csv_cols;
+            $row++;
+            $csv_arr[] = $csv_cols;
+            $row++;
+            $csv_arr[] = $csv_cols;
         }
 
         $col = 1;
-        $sheet->setCellValueByColumnAndRow($col, $row , "SUMMARY");
+        $sheet->setCellValueByColumnAndRow($col, $row, "SUMMARY");
         $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
         $temp = $csv_cols;
-        $temp[$col-1] = "SUMMARY";
+        $temp[$col - 1] = "SUMMARY";
         $csv_arr[] = $temp;
-        $row++; $csv_arr[] = $csv_cols;
-        $row++; $csv_arr[] = $csv_cols;
+        $row++;
+        $csv_arr[] = $csv_cols;
+        $row++;
+        $csv_arr[] = $csv_cols;
 
-        if(is_array($headers_summary) && count($headers_summary) > 0)
-        {
+        if (is_array($headers_summary) && count($headers_summary) > 0) {
             $col = 1;
             $temp = $csv_cols;
-            foreach($headers_summary as $v)
-            {
-                $sheet->setCellValueByColumnAndRow($col, $row , $v);
+            foreach ($headers_summary as $v) {
+                $sheet->setCellValueByColumnAndRow($col, $row, $v);
                 $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
-                $temp[$col-1] = $v;
+                $temp[$col - 1] = $v;
                 $col++;
             }
             $csv_arr[] = $temp;
-            $row++; 
+            $row++;
         }
 
         $rows = $query->all();
-        if(is_array($rows) && count($rows) > 0)
-        {
-            foreach($rows as $v)
-            {
+        if (is_array($rows) && count($rows) > 0) {
+            foreach ($rows as $v) {
                 $temp = $csv_cols;
-                foreach($headers_summary as $hk => $hv)
-                {
-                    switch($hv)
-                    {
+                foreach ($headers_summary as $hk => $hv) {
+                    switch ($hv) {
                         case "Bill Group":
-                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->billgroup) ? $v->billgroup->name : "");
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row, isset($v->billgroup) ? $v->billgroup->name : "");
                             $temp[$hk] = isset($v->billgroup) ? $v->billgroup->name : "";
-                            break; 
+                            break;
                         case "Currency":
-                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->currency) ? $v->currency : "");
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row, isset($v->currency) ? $v->currency : "");
                             $temp[$hk] = isset($v->currency) ? $v->currency : "";
-                            break; 
+                            break;
                         case "Msgs":
-                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->msgs) ? number_format($v->msgs, 0) : 0);
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row, isset($v->msgs) ? number_format($v->msgs, 0) : 0);
                             $temp[$hk] = isset($v->msgs) ? number_format($v->msgs, 0) : 0;
-                            break; 
+                            break;
                         case "In":
-                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->rev_in) ? number_format($v->rev_in, 2) : number_format(0, 2));
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row, isset($v->rev_in) ? number_format($v->rev_in, 2) : number_format(0, 2));
                             $temp[$hk] = isset($v->rev_in) ? number_format($v->rev_in, 2) : number_format(0, 2);
-                            break; 
+                            break;
                         case "Out":
-                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->rev_out) ? number_format($v->rev_out, 2) : number_format(0, 2));
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row, isset($v->rev_out) ? number_format($v->rev_out, 2) : number_format(0, 2));
                             $temp[$hk] = isset($v->rev_out) ? number_format($v->rev_out, 2) : number_format(0, 2);
-                            break; 
+                            break;
                         case "Profit":
-                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->profit) ? number_format($v->profit, 2) : number_format(0, 2));
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row, isset($v->profit) ? number_format($v->profit, 2) : number_format(0, 2));
                             $temp[$hk] = isset($v->profit) ? number_format($v->profit, 2) : number_format(0, 2);
-                            break; 
+                            break;
                         case "% Profit":
-                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->profit_percentage) ? number_format($v->profit_percentage, 2) : number_format(0, 2));
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row, isset($v->profit_percentage) ? number_format($v->profit_percentage, 2) : number_format(0, 2));
                             $temp[$hk] = isset($v->profit_percentage) ? number_format($v->profit_percentage, 2) : number_format(0, 2);
-                            break; 
+                            break;
                     }
                 }
                 $csv_arr[] = $temp;
-                $row++; 
-            }                
+                $row++;
+            }
         }
 
-        $row++; $csv_arr[] = $csv_cols;
-        $row++; $csv_arr[] = $csv_cols;
+        $row++;
+        $csv_arr[] = $csv_cols;
+        $row++;
+        $csv_arr[] = $csv_cols;
         $col = 1;
-        $sheet->setCellValueByColumnAndRow($col, $row , "RESULTS");
+        $sheet->setCellValueByColumnAndRow($col, $row, "RESULTS");
         $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
         $temp = $csv_cols;
-        $temp[$col-1] = "Results";
+        $temp[$col - 1] = "Results";
         $csv_arr[] = $temp;
-        $row++; $csv_arr[] = $csv_cols;
-        $row++; $csv_arr[] = $csv_cols;
-        if(is_array($headers_result) && count($headers_result) > 0)
-        {
+        $row++;
+        $csv_arr[] = $csv_cols;
+        $row++;
+        $csv_arr[] = $csv_cols;
+        if (is_array($headers_result) && count($headers_result) > 0) {
             $col = 1;
             $temp = $csv_cols;
-            foreach($headers_result as $v)
-            {
-                $sheet->setCellValueByColumnAndRow($col, $row , $v);
+            foreach ($headers_result as $v) {
+                $sheet->setCellValueByColumnAndRow($col, $row, $v);
                 $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
-                $temp[$col-1] = $v;
+                $temp[$col - 1] = $v;
                 $col++;
             }
             $csv_arr[] = $temp;
-            $row++; 
+            $row++;
         }
 
-        if(is_array($rows_2) && count($rows_2) > 0)
-        {
-            foreach($rows_2 as $v)
-            {
+        if (is_array($rows_2) && count($rows_2) > 0) {
+            foreach ($rows_2 as $v) {
                 $temp = $csv_cols;
-                foreach($headers_result as $hk => $hv)
-                {
-                    switch($hv)
-                    {
+                foreach ($headers_result as $hk => $hv) {
+                    switch ($hv) {
                         case "Country Network":
-                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->country) ? $v->country->Country_Network : "");
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row, isset($v->country) ? $v->country->Country_Network : "");
                             $temp[$hk] = isset($v->country) ? $v->country->Country_Network : "";
-                            break; 
+                            break;
                         case "Bill Group":
-                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->billgroup) ? $v->billgroup->name : "");
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row, isset($v->billgroup) ? $v->billgroup->name : "");
                             $temp[$hk] = isset($v->billgroup) ? $v->billgroup->name : "";
-                            break; 
+                            break;
                         case "Supplier":
-                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->supplier) ? $v->supplier->name : "");
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row, isset($v->supplier) ? $v->supplier->name : "");
                             $temp[$hk] = isset($v->supplier) ? $v->supplier->name : "";
-                            break; 
+                            break;
                         case "Client":
-                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->resellerAdmin) ? $v->resellerAdmin->username : "");
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row, isset($v->resellerAdmin) ? $v->resellerAdmin->username : "");
                             $temp[$hk] = isset($v->resellerAdmin) ? $v->resellerAdmin->username : "";
-                            break; 
+                            break;
                         case "CLI":
-                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->from_number) ? $v->from_number : "");
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row, isset($v->from_number) ? $v->from_number : "");
                             $temp[$hk] = isset($v->from_number) ? $v->from_number : "";
-                            break; 
+                            break;
                         case "BNUM":
-                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->to_number) ? $v->to_number : "");
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row, isset($v->to_number) ? $v->to_number : "");
                             $temp[$hk] = isset($v->to_number) ? $v->to_number : "";
-                            break; 
+                            break;
                         case "Msgs":
-                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->msgs) ? number_format($v->msgs,0) : 0);
-                            $temp[$hk] = isset($v->msgs) ? number_format($v->msgs,0) : 0;
-                            break; 
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row, isset($v->msgs) ? number_format($v->msgs, 0) : 0);
+                            $temp[$hk] = isset($v->msgs) ? number_format($v->msgs, 0) : 0;
+                            break;
                     }
                 }
                 $csv_arr[] = $temp;
-                $row++; 
-            }                
+                $row++;
+            }
         }
 
 
-        if(\Yii::$app->request->queryParams['mode'] == 'csv')
-        {
+        if (\Yii::$app->request->queryParams['mode'] == 'csv') {
             header('Content-Type: text/csv; charset=utf-8');
             header('Content-Disposition: attachment; filename="tdr_detailed.csv"');
-            if(is_array($csv_arr) && count($csv_arr) > 0)
-            {
+            if (is_array($csv_arr) && count($csv_arr) > 0) {
                 ob_end_clean();
                 $output = fopen('php://output', 'w');
                 foreach ($csv_arr as $row) {
@@ -3023,18 +2946,21 @@ class AdminController extends \yii\web\Controller
         $numbers = explode(",", Yii::$app->request->post('hdnAllocateNumbers'));
         foreach ($numbers as $key => $value) {
             Yii::$app->db->createCommand()
-            ->update('fsmastertb', [
-                    'admin_id' => $user, 
-                    'reseller_id' => 0, 
-                    'agent_id' => 0, 
-                    'service_id' => $service,
-                    'cld1rate' => $rev_out_rate,
-                    'cld2rate' => 0,
-                    'cld3rate' => 0,
-                    'allocated_date' => date('Y-m-d')
-                ], 
-                "cld1 = '" . $value . "'")
-            ->execute();
+                ->update(
+                    'fsmastertb',
+                    [
+                        'admin_id' => $user,
+                        'reseller_id' => 0,
+                        'agent_id' => 0,
+                        'service_id' => $service,
+                        'cld1rate' => $rev_out_rate,
+                        'cld2rate' => 0,
+                        'cld3rate' => 0,
+                        'allocated_date' => date('Y-m-d')
+                    ],
+                    "cld1 = '" . $value . "'"
+                )
+                ->execute();
         }
         //Yii::$app->session->setFlash('cld_added', Yii::$app->request->post('hdnAllocateNumbers') . (count($numbers) > 1 ? ' are' : ' is') . " assigned successfully");
         return $this->redirect('sms-numbers');
@@ -3044,21 +2970,80 @@ class AdminController extends \yii\web\Controller
         $numbers = explode(",", Yii::$app->request->post('hdnUnallocateNumbers'));
         foreach ($numbers as $key => $value) {
             Yii::$app->db->createCommand()
-            ->update('fsmastertb', [
-                    'admin_id' => 0, 
-                    'reseller_id' => 0, 
-                    'agent_id' => 0, 
-                    'service_id' => 0,
-                    'cld1rate' => 0,
-                    'cld2rate' => 0,
-                    'cld3rate' => 0,
-                    'allocated_date' => date('Y-m-d')
-                ], 
-                "cld1 = '" . $value . "'")
-            ->execute();
+                ->update(
+                    'fsmastertb',
+                    [
+                        'admin_id' => 0,
+                        'reseller_id' => 0,
+                        'agent_id' => 0,
+                        'service_id' => 0,
+                        'cld1rate' => 0,
+                        'cld2rate' => 0,
+                        'cld3rate' => 0,
+                        'allocated_date' => date('Y-m-d')
+                    ],
+                    "cld1 = '" . $value . "'"
+                )
+                ->execute();
         }
         //Yii::$app->session->setFlash('cld_added', Yii::$app->request->post('hdnUnallocateNumbers') . (count($numbers) > 1 ? ' are' : ' is') . " assigned remove successfully");
         return $this->redirect('sms-numbers');
     }
 
+    public function actionTestNumbers()
+    {
+        $model = new Fsusertb();
+        $search = isset($_GET['search']) ? $_GET['search'] : '';
+        $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
+
+        if ($filter == 'all') {
+            $filter = '';
+        }
+
+        $searchModel = new FsmastertbSearch();
+        $mysubusr = User::find()->select('id')->where(['admin_id' => Yii::$app->user->identity->id, 'role' => 3]);
+        //$summary = $model->getSummary($mysubusr, false, true);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $mysubusr, $search, true, true);
+        $dataProvider->pagination->pageSize = $filter;
+        $billgroups = Billgroup::getBillgroupItems();
+        return $this->render('test_numbers', [
+            'dataProvider' => $dataProvider,
+            'searchModel' => $searchModel,
+            //'summary' => $summary,
+            'countries' => $this->getCountryItems(),
+            'billgroups' => $billgroups,
+            'suppliers' => $this->getSupplierItems(),
+            'clients' => $this->getResellerAdminItems(),
+            'clients_only' => $this->getResellerAdminItems(false),
+            'services' => $this->getServicesItems(),
+        ]);
+    }
+
+    public function actionTestTdr()
+    {
+        $model = new Fsusertb();
+        $search = isset($_GET['search']) ? $_GET['search'] : '';
+        $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
+        $mysubusr = User::find()->select('id')->where(['role' => 4]);
+
+        if ($filter == 'all') {
+            $filter = '';
+        }
+
+        $searchModel = new TdrSearch();
+
+        $mysubusr = User::find()->select('id')->where(['admin_id' => Yii::$app->user->identity->id, 'role' => 3]);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $mysubusr, $search, true, true);
+        $dataProvider->setPagination(['pageSize' => $filter]);
+        $billgroups = Billgroup::getBillgroupItems();
+        return $this->render('test_tdr', [
+            'dataProvider' => $dataProvider,
+            'searchModel' => $searchModel,
+            'search' => $search,
+            'filter' => $filter,
+            'billgroups' => $billgroups,
+            'clients' => $this->getResellerAdminItems(),
+            'suppliers' => $this->getSupplierItems(),
+        ]);
+    }
 }

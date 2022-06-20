@@ -165,16 +165,6 @@ $this->registerJs('
                     <div class="card-body">
                         <div class="row">
                             <div class="col-sm-12">
-                                <!-- <ul class="gv_top">
-                                    <li>
-                                        <?php //= Html::button('Allocate Numbers', ['id' => 'btnAllocate','class' => 'btn btn-success pull-left']) ?>
-                                        <?php //= Html::button('Unallocate Numbers', ['id' => 'btnUnallocate','class' => 'btn btn-danger pull-left']) ?>
-                                    </li>
-                                    <li>
-                                        <button type="button" class="btn btn-danger pull-left" id="edit_selected_number"
-                                            onclick="javascript:void(0);">Edit Selected Numbers</button>
-                                    </li>
-                                </ul> -->
                                 <div id="dropdown_top">
                                     <ul class="gv_top">
                                         <li>
@@ -190,10 +180,10 @@ $this->registerJs('
                                         <ul class="gv_top">
                                             <?php $form = ActiveForm::begin(['id' => 'searchForm', 'method' => 'get']); ?>
                                             <li>
-                                                <?= Html::textInput('search', $search, ['id' => 'search_box', 'class' => 'search_box custom_search pull-left', 'placeholder' => 'Search....']); ?>
+                                                <?= Html::textInput('search', $search, ['id' => 'search_box', 'class' => 'search_box custom_search', 'placeholder' => 'Search....']); ?>
                                             </li>
                                             <li>
-                                                <?= Html::dropdownlist('filter', $filter, ['10' => '10', '20' => '20', '50' => '50', '100' => '100', '1000' => '1000'], ['id' => 'filter_box', 'class' => 'filter_box custom_filter pull-left']); ?>
+                                                <?= Html::dropdownlist('filter', $filter, ['10' => '10', '20' => '20', '50' => '50', '100' => '100', '1000' => '1000'], ['id' => 'filter_box', 'class' => 'filter_box custom_filter']); ?>
                                             </li>
                                             <?php ActiveForm::end(); ?>
                                         </ul>

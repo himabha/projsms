@@ -206,10 +206,10 @@ $this->registerJs('
                                     <ul class="gv_top">
                                         <?php $form = ActiveForm::begin(['id' => 'searchForm', 'method' => 'get']); ?>
                                         <li>
-                                            <?= Html::textInput('search', $search, ['id' => 'search_box', 'class' => 'search_box custom_search pull-left', 'placeholder' => 'Search....']); ?>
+                                            <?= Html::textInput('search', $search, ['id' => 'search_box', 'class' => 'search_box custom_search', 'placeholder' => 'Search....']); ?>
                                         </li>
                                         <li>
-                                            <?= Html::dropdownlist('filter', $filter, ['10' => '10', '20' => '20', '50' => '50', '100' => '100', '1000' => '1000'], ['id' => 'filter_box', 'class' => 'filter_box custom_filter pull-left']); ?>
+                                            <?= Html::dropdownlist('filter', $filter, ['10' => '10', '20' => '20', '50' => '50', '100' => '100', '1000' => '1000'], ['id' => 'filter_box', 'class' => 'filter_box custom_filter']); ?>
                                         </li>
                                         <?php ActiveForm::end(); ?>
                                     </ul>
@@ -285,9 +285,6 @@ $this->registerJs('
 										[
 											'label' => 'Caller Number',
 											'attribute' => 'cld1',
-											//'filterInputOptions' => [
-											//	'placeholder' => 'Search Caller Number',
-											//]
 										],
 										[
 											'label' => 'Reseller Name',
@@ -335,40 +332,6 @@ $this->registerJs('
 											'label' => 'Allocated Date',
 											'attribute' => 'allocated_date',
 										],
-										/* [
-											'class' => 'yii\grid\ActionColumn',
-											'header' => 'Action',
-											'footer' => 'Total records: ' . $totalCount,
-											'footerOptions' => ['style' => ['font-size' => 'larger', 'font-weight' => 'bold', 'min-width' => '10em']],
-											'template' => '{update-cld}', // {show-number-routes} {delete-cld}',
-											'buttons' => [
-												'show-number-routes' => function ($url, $model, $key) {
-													return Html::a('<span class="glyphicon glyphicon-eye-open"></span>', $url, [
-														'class' => 'btn btn-info btn-xs',
-														'data-toggle' => 'tooltip',
-														'title' => 'Show list of all users who hold this number',
-													]);
-												},
-												'update-cld' => function ($url, $model, $key) {
-													return Html::a('<span class="glyphicon glyphicon-pencil"></span>', $url, [
-														'class' => 'btn btn-success btn-xs',
-														'data-toggle' => 'tooltip',
-														'title' => 'Edit'
-													]);
-												},
-												'delete-cld' => function ($url, $model, $key) {
-													return Html::a('<span class="glyphicon glyphicon-trash"></span>', $url, [
-														'class' => 'btn btn-danger btn-xs',
-														'data-pjax' => "0",
-														'data-method' => 'post',
-														'data-confirm' => 'Are you sure you want to delete CLD1?',
-														'data-toggle' => 'tooltip',
-														'title' => 'Delete'
-													]);
-												}
-											],
-										] */
-
 									],
 								]); ?>
                             </div>

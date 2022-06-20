@@ -196,12 +196,8 @@ $this->registerJs('
 											[
 												'class' => 'yii\grid\CheckboxColumn',
 												'checkboxOptions' => function ($model, $key, $index, $column) {
-													return ['value' => $model->fsmid, 'data-cld1' => $model->cld1, 'data-reseller_id' => $model->reseller_id];
+													return ['value' => $model->fsmid, 'data-cld1' => $model->cld1, 'data-admin_id' => $model->admin_id];
 												}
-											],
-											[
-												'label' => 'Caller Number',
-												'attribute' => 'cld1',
 											],
 											[
 												'label' => 'Bill Group',
@@ -214,6 +210,71 @@ $this->registerJs('
 												],
 												'value' => function ($model) {
 													return isset($model->billgroup) ? $model->billgroup->name : null;
+												}
+											],
+											[
+												'label' => 'Suppliers',
+												'attribute' => 'sender_id',
+												'filter' => $suppliers,
+												'filterInputOptions' => [
+													'id' => 'sender_id_search',
+													'prompt' => 'Select Supplier',
+													'class' => 'custom_select'
+												],
+												'value' => function ($model) {
+													return isset($model->supplier) ? $model->supplier->name : null;
+												}
+											],
+											[
+												'label' => 'Clients',
+												'filter' => $clients,
+												'filterInputOptions' => [
+													'id' => 'admin_id_search',
+													'prompt' => 'Select Client',
+													'class' => 'custom_select'
+												],
+												'attribute' => 'admin_id',
+												'value' => function ($model) {
+													return $model->resellerAdmin ? $model->resellerAdmin->username : null;
+												}
+											],
+											[
+												'label' => 'Services',
+												'attribute' => 'service_id',
+												'filter' => $services,
+												'filterInputOptions' => [
+													'id' => 'service_id_search',
+													'prompt' => 'Select Service',
+													'class' => 'custom_select'
+												],
+												'value' => function ($model) {
+													return isset(\Yii::$app->params['services'][$model->service_id]) ? \Yii::$app->params['services'][$model->service_id] : null;
+												}
+											],
+											[
+												'label' => 'Caller Number',
+												'attribute' => 'cld1',
+											],
+											[
+												'label' => 'Reseller Name',
+												'attribute' => 'reseller_id',
+												'value' => function ($model) {
+													if ($model->reseller_id !== 0) {
+														return $model->resellers->username;
+													} else {
+														return '';
+													}
+												}
+											],
+											[
+												'label' => 'Agent Name',
+												'attribute' => 'agent_id',
+												'value' => function ($model) {
+													if ($model->agent_id !== 0) {
+														return $model->users->username;
+													} else {
+														return '';
+													}
 												}
 											],
 											[
@@ -231,6 +292,14 @@ $this->registerJs('
 											[
 												'label' => 'Rev. In Rate',
 												'attribute' => 'cld1rate',
+											],
+											[
+												'label' => 'Rev. Out Rate',
+												'attribute' => 'cld2rate',
+											],
+											[
+												'label' => 'Allocated Date',
+												'attribute' => 'allocated_date',
 											],
 										],
 									]); ?>

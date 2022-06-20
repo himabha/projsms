@@ -9,7 +9,7 @@ use kartik\daterange\DateRangePicker;
 $search = isset($_GET['search']) ? $_GET['search'] : '';
 $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
 $totalCount = $dataProvider->getTotalCount();
-$today = !isset($_GET['TdrSearch']) && !isset($_GET['search']) ? date('d-m-Y') . ' 00:00 AM'  . ' to ' . date('d-m-Y')  . ' 12:59 PM' : '';
+$today = !isset($_GET['TdrSearch']) && !isset($_GET['search']) ? date('d-m-Y') . ' 00:00 AM'  . ' to ' . date('d-m-Y')  . ' 11:59 PM' : '';
 $qstr = isset($_GET) ? http_build_query(\Yii::$app->request->queryParams) : '';
 $csv_url = 'tdr-export/?mode=csv&' . $qstr;
 $xls_url = 'tdr-export/?mode=xls&' . $qstr;
@@ -84,12 +84,13 @@ $this->registerJs('
 		$("#dd_billgroup_id").change(function(){
 			$("#billgroup_id_search").val(jQuery(this).val()).trigger("change");
 		});
-		$("#dd_reseller_id").change(function(){
-			$("#reseller_id_search").val(jQuery(this).val()).trigger("change");
+		$("#dd_agent_id").change(function(){
+			$("#agent_id_search").val(jQuery(this).val()).trigger("change");
 		});
 		$("#btnRefresh").click(function(){
 			$("#delivered_time_search").trigger("change");
 		});
+
 	});
 ');
 ?>
@@ -166,10 +167,10 @@ $this->registerJs('
 						<div id="dropdown_top" style="margin-top:1em;">
 							<ul class="gv_top">
 								<li>
-									<?= Html::dropdownlist('dd_billgroup_id',  isset($_GET['TdrSearch']['billgroup_id']) ?  $_GET['TdrSearch']['billgroup_id'] : "", $billgroups, ['id' => 'dd_billgroup_id', 'class' => 'btn btn-dark btn-sm', 'prompt' => 'Select Billgroup']); ?>
+									<?= Html::dropdownlist('dd_billgroup_id',  isset($_GET['TdrSearch']['billgroup_id']) ?  $_GET['TdrSearch']['billgroup_id'] : "", $billgroups, ['id' => 'dd_billgroup_id', 'class' => 'btn-dark btn-sm', 'prompt' => 'Select Billgroup']); ?>
 								</li>
 								<li>
-									<?= Html::dropdownlist('dd_reseller_id',  isset($_GET['TdrSearch']['reseller_id']) ?  $_GET['TdrSearch']['reseller_id'] : "", $resellers, ['id' => 'dd_reseller_id', 'class' => 'btn btn-dark btn-sm', 'prompt' => 'Select Client']); ?>
+									<?= Html::dropdownlist('dd_agent_id',  isset($_GET['TdrSearch']['agent_id']) ?  $_GET['TdrSearch']['agent_id'] : "", $agents, ['id' => 'dd_agent_id', 'class' => 'btn-dark btn-sm', 'prompt' => 'Select Agent']); ?>
 								</li>
 								<li>
 									<?= Html::button('Refresh', ['id' => 'btnRefresh', 'class' => 'btn btn-success btn-sm']); ?>
@@ -179,27 +180,29 @@ $this->registerJs('
 										<a class="btn btn-info dropdown-toggle btn-sm" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 											Export
 										</a>
+
 										<div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
 											<a class="dropdown-item" href="<?= $csv_url; ?>">CSV</a>
 											<a class="dropdown-item" href="<?= $xls_url; ?>">XLS</a>
 										</div>
 									</div>
+
 								</li>
 							</ul>
 						</div>
 						<div>
 							<div class="table-responsive">
 								<div class="pull-right">
+									<?php $form = ActiveForm::begin(['id' => 'searchForm', 'method' => 'get']); ?>
 									<ul class="gv_top">
-										<?php $form = ActiveForm::begin(['id' => 'searchForm', 'method' => 'get']); ?>
 										<li>
-											<?= Html::textInput('search', $search, ['id' => 'search_box', 'class' => 'search_box custom_search pull-left', 'placeholder' => 'Search....']); ?>
+											<?= Html::textInput('search', $search, ['id' => 'search_box', 'class' => 'search_box custom_search', 'placeholder' => 'Search....']); ?>
 										</li>
 										<li>
-											<?= Html::dropdownlist('filter', $filter, ['10' => '10', '20' => '20', '50' => '50', '100' => '100', '1000' => '1000'], ['id' => 'filter_box', 'class' => 'filter_box custom_filter pull-left']); ?>
+											<?= Html::dropdownlist('filter', $filter, ['10' => '10', '20' => '20', '50' => '50', '100' => '100', '1000' => '1000'], ['id' => 'filter_box', 'class' => 'filter_box custom_filter']); ?>
 										</li>
-										<?php ActiveForm::end(); ?>
 									</ul>
+									<?php ActiveForm::end(); ?>
 								</div>
 								<?= GridView::widget([
 									'id' => 'manage_num_grid',
@@ -237,16 +240,16 @@ $this->registerJs('
 											}
 										],
 										[
-											'label' => 'Client',
-											'attribute' => 'reseller_id',
-											'filter' => $resellers,
+											'label' => 'Agent Name',
+											'filter' => $agents,
 											'filterInputOptions' => [
-												'id' => 'reseller_id_search',
-												'prompt' => 'Select Client',
+												'id' => 'agent_id_search',
+												'prompt' => 'Select Agent',
 												'class' => 'custom_select'
 											],
+											'attribute' => 'agent_id',
 											'value' => function ($model) {
-												return isset($model->resellers) ? $model->resellers->username : null;
+												return isset($model->users) ? $model->users->username : null;
 											}
 										],
 										[
@@ -265,47 +268,6 @@ $this->registerJs('
 											'footer' => 'Total records: ' . $totalCount,
 											'footerOptions' => ['style' => ['font-weight' => 'bold']]
 										]
-										/*
-										[
-											'class' => 'yii\grid\CheckboxColumn',
-											'checkboxOptions' => function ($model, $key, $index, $column) {
-												return ['value' => $model->fsmid];
-											}
-										],
-										[
-											'class' => 'yii\grid\ActionColumn',
-											'header' => 'Action',
-											'footer' => 'Total records: ' . $totalCount,
-											'footerOptions' => ['style' => ['font-size' => 'larger', 'font-weight' => 'bold', 'min-width'=> '10em']],
-											'template' => '{update-cld}', // {show-number-routes} {delete-cld}',
-											'buttons' => [
-												'show-number-routes' => function ($url, $model, $key) {
-													return Html::a('<span class="glyphicon glyphicon-eye-open"></span>', $url, [
-														'class' => 'btn btn-info btn-xs',
-														'data-toggle' => 'tooltip',
-														'title' => 'Show list of all users who hold this number',
-													]);
-												},
-												'update-cld' => function ($url, $model, $key) {
-													return Html::a('<span class="glyphicon glyphicon-pencil"></span>', $url, [
-														'class' => 'btn btn-success btn-xs',
-														'data-toggle' => 'tooltip',
-														'title' => 'Edit'
-													]);
-												},
-												'delete-cld' => function ($url, $model, $key) {
-													return Html::a('<span class="glyphicon glyphicon-trash"></span>', $url, [
-														'class' => 'btn btn-danger btn-xs',
-														'data-pjax' => "0",
-														'data-method' => 'post',
-														'data-confirm' => 'Are you sure you want to delete CLD1?',
-														'data-toggle' => 'tooltip',
-														'title' => 'Delete'
-													]);
-												}
-											],
-										]
-                                        */
 									],
 								]); ?>
 							</div>

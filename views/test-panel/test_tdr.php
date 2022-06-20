@@ -84,6 +84,9 @@ $this->registerJs('
 		$("#dd_billgroup_id").change(function(){
 			$("#billgroup_id_search").val(jQuery(this).val()).trigger("change");
 		});
+		$("#dd_reseller_id").change(function(){
+			$("#reseller_id_search").val(jQuery(this).val()).trigger("change");
+		});
 		$("#btnRefresh").click(function(){
 			$("#delivered_time_search").trigger("change");
 		});
@@ -97,7 +100,7 @@ $this->registerJs('
                 <div class="card">
                     <div class="card-header card-header-primary card-header-icon">
                         <div class="card-icon">
-                            <i class="material-icons">report</i>
+                            <i class="material-icons">account_box</i>
                         </div>
                         <h4 class="card-title ">Test TDR</h4>
                     </div>
@@ -175,8 +178,27 @@ $this->registerJs('
                         <div id="dropdown_top" style="margin-top:1em;">
                             <ul class="gv_top">
                                 <li>
-                                    <?= Html::dropdownlist('dd_billgroup_id',  isset($_GET['TdrSearch']['billgroup_id']) ?  $_GET['TdrSearch']['billgroup_id'] : ""  , $billgroups, ['id' => 'dd_billgroup_id', 'class' => 'btn-dark btn-sm', 'prompt' => 'Select Billgroup']); ?>
+                                    <?= Html::dropdownlist('dd_billgroup_id',  isset($_GET['TdrSearch']['billgroup_id']) ?  $_GET['TdrSearch']['billgroup_id'] : ""  , $billgroups, ['id' => 'dd_billgroup_id', 'class' => 'btn btn-dark btn-sm', 'prompt' => 'Select Billgroup']); ?>
                                 </li>
+                                <li>
+                                    <?= Html::dropdownlist('dd_reseller_id',  isset($_GET['TdrSearch']['reseller_id']) ?  $_GET['TdrSearch']['reseller_id'] : ""  , $resellers, ['id' => 'dd_reseller_id', 'class' => 'btn btn-dark btn-sm', 'prompt' => 'Select Client']); ?>
+                                </li>
+                                <li>
+                                    <?= Html::button('Refresh', ['id' => 'btnRefresh', 'class' => 'btn btn-success btn-sm']); ?>
+                                </li>
+                                <!-- <li>
+                                    <div class="dropdown show">
+                                        <a class="btn btn-info dropdown-toggle btn-sm" href="#" role="button"
+                                            id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true"
+                                            aria-expanded="false">
+                                            Export
+                                        </a>
+                                        <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                                            <a class="dropdown-item" href="<?php //= $csv_url; ?>">CSV</a>
+                                            <a class="dropdown-item" href="<?php //= $xls_url; ?>">XLS</a>
+                                        </div>
+                                    </div>
+                                </li> -->
                             </ul>
                         </div>
                         <div>
@@ -191,6 +213,9 @@ $this->registerJs('
 										'class' => 'table'
 									],
 									'columns' => [
+										/* [
+											'attribute' => 'id'
+										], */
 										[
 											'attribute' => 'from_number'
 										],
@@ -214,6 +239,19 @@ $this->registerJs('
 											}
 										],
 										[
+											'label' => 'Client',
+											'attribute' => 'reseller_id',
+											'filter' => $resellers,
+											'filterInputOptions' => [
+												'id' => 'reseller_id_search',
+												'prompt' => 'Select Client',
+												'class' => 'custom_select'
+											],
+											'value' => function ($model) {
+												return isset($model->resellers) ? $model->resellers->username : null;
+											}
+										],
+										[
 											'attribute' => 'delivered_time',
 											'value' => function ($model) {
 												if (isset($model->delivered_time)) {
@@ -229,6 +267,47 @@ $this->registerJs('
 											'footer' => 'Total records: ' . $totalCount,
 											'footerOptions' => ['style' => ['font-weight' => 'bold']]
 										]
+										/*
+										[
+											'class' => 'yii\grid\CheckboxColumn',
+											'checkboxOptions' => function ($model, $key, $index, $column) {
+												return ['value' => $model->fsmid];
+											}
+										],
+										[
+											'class' => 'yii\grid\ActionColumn',
+											'header' => 'Action',
+											'footer' => 'Total records: ' . $totalCount,
+											'footerOptions' => ['style' => ['font-size' => 'larger', 'font-weight' => 'bold', 'min-width'=> '10em']],
+											'template' => '{update-cld}', // {show-number-routes} {delete-cld}',
+											'buttons' => [
+												'show-number-routes' => function ($url, $model, $key) {
+													return Html::a('<span class="glyphicon glyphicon-eye-open"></span>', $url, [
+														'class' => 'btn btn-info btn-xs',
+														'data-toggle' => 'tooltip',
+														'title' => 'Show list of all users who hold this number',
+													]);
+												},
+												'update-cld' => function ($url, $model, $key) {
+													return Html::a('<span class="glyphicon glyphicon-pencil"></span>', $url, [
+														'class' => 'btn btn-success btn-xs',
+														'data-toggle' => 'tooltip',
+														'title' => 'Edit'
+													]);
+												},
+												'delete-cld' => function ($url, $model, $key) {
+													return Html::a('<span class="glyphicon glyphicon-trash"></span>', $url, [
+														'class' => 'btn btn-danger btn-xs',
+														'data-pjax' => "0",
+														'data-method' => 'post',
+														'data-confirm' => 'Are you sure you want to delete CLD1?',
+														'data-toggle' => 'tooltip',
+														'title' => 'Delete'
+													]);
+												}
+											],
+										]
+                                        */
 									],
 								]); ?>
 							</div>

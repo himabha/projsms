@@ -10,7 +10,7 @@ use kartik\daterange\DateRangePicker;
 $search = isset($_GET['search']) ? $_GET['search'] : '';
 $filter = isset($_GET['filter']) ? $_GET['filter'] : 20;
 $totalCount = $dataProvider->getTotalCount();
-$today = !isset($_GET['TdrSearchSummary']) && !isset($_GET['TdrSearchDetailed']) && !isset($_GET['search']) ? date('d-m-Y') . ' 00:00 AM'  . ' to ' . date('d-m-Y')  . ' 12:59 PM' : '';
+$today = !isset($_GET['TdrSearchSummary']) && !isset($_GET['TdrSearchDetailed']) && !isset($_GET['search']) ? date('d-m-Y') . ' 00:00 AM'  . ' to ' . date('d-m-Y')  . ' 11:59 PM' : '';
 $qstr = isset($_GET) ? http_build_query(\Yii::$app->request->queryParams) : '';
 $csv_url = 'tdr-detailed-export/?mode=csv&' . $qstr;
 $xls_url = 'tdr-detailed-export/?mode=xls&' . $qstr;
@@ -206,10 +206,10 @@ $this->registerJs('
 							<ul class="gv_top">
 								<?php $form = ActiveForm::begin(['id' => 'searchForm', 'method' => 'get']); ?>
 								<li>
-									<?= Html::textInput('search', $search, ['id' => 'search_box', 'class' => 'search_box custom_search pull-left', 'placeholder' => 'Search....']); ?>
+									<?= Html::textInput('search', $search, ['id' => 'search_box', 'class' => 'search_box custom_search', 'placeholder' => 'Search....']); ?>
 								</li>
 								<li>
-									<?= Html::dropdownlist('filter', $filter, ['10' => '10', '20' => '20', '50' => '50', '100' => '100', '1000' => '1000'], ['id' => 'filter_box', 'class' => 'filter_box custom_filter pull-left']); ?>
+									<?= Html::dropdownlist('filter', $filter, ['10' => '10', '20' => '20', '50' => '50', '100' => '100', '1000' => '1000'], ['id' => 'filter_box', 'class' => 'filter_box custom_filter']); ?>
 								</li>
 								<?php ActiveForm::end(); ?>
 							</ul>

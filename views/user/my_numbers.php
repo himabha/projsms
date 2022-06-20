@@ -116,10 +116,10 @@ $this->registerJs('
 								<ul class="gv_top">
 									<?php $form = ActiveForm::begin(['id' => 'searchForm', 'method' => 'get']); ?>
 									<li>
-										<?= Html::textInput('search', $search, ['id' => 'search_box', 'class' => 'search_box custom_search pull-left', 'placeholder' => 'Search....']); ?>
+										<?= Html::textInput('search', $search, ['id' => 'search_box', 'class' => 'search_box custom_search', 'placeholder' => 'Search....']); ?>
 									</li>
 									<li>
-										<?= Html::dropdownlist('filter', $filter, ['10' => '10', '20' => '20', '50' => '50', '100' => '100', '1000' => '1000'], ['id' => 'filter_box', 'class' => 'filter_box custom_filter pull-left']); ?>
+										<?= Html::dropdownlist('filter', $filter, ['10' => '10', '20' => '20', '50' => '50', '100' => '100', '1000' => '1000'], ['id' => 'filter_box', 'class' => 'filter_box custom_filter']); ?>
 									</li>
 									<?php ActiveForm::end(); ?>
 								</ul>

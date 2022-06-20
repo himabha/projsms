@@ -29,7 +29,6 @@ class TdrSearch extends Smscdr
         ];
 
         return $return;
-
     }
 
     /**
@@ -48,26 +47,11 @@ class TdrSearch extends Smscdr
      *
      * @return ActiveDataProvider
      */
-    public function search($params, $users, $search=null, $isAdmin = false, $isTestPanel = false)
+    public function search($params, $users, $search = null, $isAdmin = false, $isTestPanel = false)
     {
         $query = Smscdr::find();
-        if($isTestPanel) $query->andFilterWhere(['admin_id' => \Yii::$app->params['test_panel_id']]);
-
-        // if(!$isAdmin)  => NOT SURE WHAT THIS BLOCK FOR
-        // {
-        //     if(Yii::$app->user->identity->role == 4){
-        //         //$query->joinWith(['resellers']);
-        //     } else {
-        //         $query->joinWith(['users']);
-        //     }
-        // }
 
         $this->load($params);
-
-        if(empty($search) && empty($params))
-        {
-            $query->andFilterWhere(['id' => 0]); // set empty        
-        }
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
@@ -75,81 +59,56 @@ class TdrSearch extends Smscdr
             //return $dataProvider;
         }
 
-        if(!empty($this->delivered_time))
-        {
-            try{
-                $this->dr = explode("to", $this->delivered_time);   
-                if(empty($this->dr)) $this->dr = [];
-                switch (count($this->dr))
-                {
-                    case 1: 
+        if (!empty($this->delivered_time)) {
+            try {
+                $this->dr = explode("to", $this->delivered_time);
+                if (empty($this->dr)) $this->dr = [];
+                switch (count($this->dr)) {
+                    case 1:
                         $dr_start_time = date_create_from_format('d-m-Y H:i A', trim($this->dr[0]));
                         $this->dr_from = date_format($dr_start_time, 'Y-m-d H:i');
                         break;
-                    case 2: 
+                    case 2:
                         $dr_start_time = date_create_from_format('d-m-Y H:i A', trim($this->dr[0]));
-                        $this->dr_from = date_format($dr_start_time, 'Y-m-d H:m');
+                        $this->dr_from = date_format($dr_start_time, 'Y-m-d H:i');
                         $dr_end_time = date_create_from_format('d-m-Y H:i A', trim($this->dr[1]));
                         $this->dr_to = date_format($dr_end_time, 'Y-m-d H:i');
                         break;
-                }             
+                }
+                if (!empty($this->dr_from) && !empty($this->dr_to)) {
+                    $query->andFilterWhere(
+                        ["BETWEEN", "delivered_time", $this->dr_from, $this->dr_to]
+                    );
+                } elseif (!empty($this->dr_from)) {
+                    $query->andFilterWhere(['like', 'delivered_time', $this->dr_from]);
+                }
             } catch (\Exception $e) {
-
             }
         }
 
-        if(!empty($search)){
-            $query->orFilterWhere([
-                'id' => $search
-            ]);
-            // if($isAdmin){
-            //     $query->orFilterWhere([
-            //         'billgroup_id' => $search,
-            //         'admin_id' => $search,
-            //         'sender_id' => $search,
-            //     ]);
-            // } else {
-            //     if(\Yii::$app->user->identity->role == 2) { // user
-            //         // nothing
-            //     } else if(\Yii::$app->user->identity->role == 3) { // reseller
-            //         $query->orFilterWhere([
-            //             'agent_id' => $search,
-            //         ]);
-            //     } else if(\Yii::$app->user->identity->role == 4) { // reseller admin
-            //         $query->orFilterWhere([
-            //             'reseller_id' => $search,
-            //         ]);
-            //     }
-            // }
-            $query->orFilterWhere(['from_number' => $search])
-            ->orFilterWhere(['to_number' => $search])
-            ->orFilterWhere(['like', 'sms_message', $search])
-            ;
-
-            if(!empty($this->dr_from) && !empty($this->dr_to))
-            {
-                $query->orFilterWhere(
-                    ["BETWEEN", "delivered_time", $this->dr_from, $this->dr_to]
-                );
-            } elseif(!empty($this->dr_from)) {
-                $query->orFilterWhere(['like', 'delivered_time', $this->dr_from]);
-            }
-        } else {            
+        if (!empty($search)) {
+            $query->andFilterWhere(
+                [
+                    'or',
+                    ['like', 'id', $search],
+                    ['like', 'from_number', $search],
+                    ['like', 'to_number', $search],
+                    ['like', 'sms_message', $search]
+                ]
+            );
+        } else {
             // for all roles
             $query->andFilterWhere([
                 'id' => $this->id,
                 'billgroup_id' => $this->billgroup_id
             ]);
 
-            if(!$isAdmin){
-                if(\Yii::$app->user->identity->role == 2) // user 
-                {
-                    // do nothing
-                } else if(\Yii::$app->user->identity->role == 3) {// reseller 
+            if (!$isAdmin) {
+                if (\Yii::$app->user->identity->role == 3) { // reseller 
                     $query->andFilterWhere([
                         'agent_id' => $this->agent_id,
                     ]);
-                } else if(\Yii::$app->user->identity->role == 4) { // reseller admin
+                } else if (\Yii::$app->user->identity->role == 4) { // reseller admin
                     $query->andFilterWhere([
                         'reseller_id' => $this->reseller_id,
                     ]);
@@ -163,29 +122,20 @@ class TdrSearch extends Smscdr
 
             // for all roles
             $query->andFilterWhere(['from_number' => $this->from_number])
-            ->andFilterWhere(['to_number' => $this->to_number])
-            ->andFilterWhere(['like', 'sms_message', $this->sms_message])
-            ;
-
-            if(!empty($this->dr_from) && !empty($this->dr_to))
-            {
-                $query->andFilterWhere(
-                    ["BETWEEN", "delivered_time", $this->dr_from, $this->dr_to]
-                );
-            } elseif(!empty($this->dr_from)) {
-                $query->andFilterWhere(['like', 'delivered_time', $this->dr_from]);
-            }
-
+                ->andFilterWhere(['to_number' => $this->to_number])
+                ->andFilterWhere(['like', 'sms_message', $this->sms_message]);
         }
 
-        if(!$isAdmin){
-            if(Yii::$app->user->identity->role == 4){ // reseller admin
+        if (!$isAdmin && !$isTestPanel) {
+            if (Yii::$app->user->identity->role == 4) { // reseller admin
                 $query->andFilterWhere(['in', 'sms_cdr.admin_id', Yii::$app->user->identity->id]);
-            } else if(Yii::$app->user->identity->role == 2) { //user
+            } else if (Yii::$app->user->identity->role == 2) { //user
                 $query->andFilterWhere(['in', 'sms_cdr.agent_id', Yii::$app->user->identity->id]);
-            } else if(Yii::$app->user->identity->role == 3) { // reseller
+            } else if (Yii::$app->user->identity->role == 3) { // reseller
                 $query->andFilterWhere(['in', 'sms_cdr.reseller_id', Yii::$app->user->identity->id]);
             }
+        } else if ($isTestPanel) {
+            $query->andFilterWhere(['sms_cdr.admin_id' => \Yii::$app->params['test_panel_id']]);
         }
 
         $dataProvider = new ActiveDataProvider([

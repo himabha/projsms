@@ -233,12 +233,18 @@ use yii\helpers\Url;
                             <p>Reseller Admin</p>
                         </a>
                     </li>
-                    <!-- <li class="nav-item">
-                        <a class="nav-link" href="<?= Url::to(['/admin/fs-test']); ?>">
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?= Url::to(['/admin/test-numbers']); ?>">
                             <i class="material-icons">confirmation_number</i>
                             <p>Test Numbers</p>
                         </a>
-                    </li> -->
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?= Url::to(['/admin/test-tdr']); ?>">
+                            <i class="material-icons">report</i>
+                            <p>Test TDR</p>
+                        </a>
+                    </li>
                 <?php } elseif (Yii::$app->user->identity->id == \Yii::$app->params['test_panel_id']) { ?>
                     <li class="nav-item">
                         <a class="nav-link" href="<?= Url::to(['/test-panel/test-numbers']); ?>">

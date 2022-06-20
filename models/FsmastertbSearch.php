@@ -24,8 +24,7 @@ class FsmastertbSearch extends Fsmastertb
         ];
 
 
-        switch(\Yii::$app->user->identity->role)
-        {
+        switch (\Yii::$app->user->identity->role) {
             case 1: // admin
                 $return[] = [['admin_id', 'sender_id', 'service_id'], 'number'];
                 break;
@@ -64,18 +63,11 @@ class FsmastertbSearch extends Fsmastertb
      *
      * @return ActiveDataProvider
      */
-    public function search($params, $users, $search=null, $isAdmin = false, $isTestPanel = false)
+    public function search($params, $users, $search = null, $isAdmin = false, $isTestPanel = false)
     {
         $query = Fsmastertb::find();
-        if($isTestPanel) $query->andFilterWhere(['admin_id' => \Yii::$app->params['test_panel_id']]);
-
-        if(!$isAdmin)
-        {
-            if(Yii::$app->user->identity->role == 4){
-                //$query->joinWith(['resellers']);
-            } else {
-                $query->joinWith(['users']);
-            }
+        if (!$isAdmin) {
+            $query->joinWith(['users']);
         }
         $this->load($params);
 
@@ -84,101 +76,98 @@ class FsmastertbSearch extends Fsmastertb
             // $query->where('0=1');
             //return $dataProvider;
         }
-
-        // grid filtering conditions
-        // $query->andFilterWhere([
-        //     'fsmid' => $this->fsmid,
-        //     'cld1rate' => $search,
-        //     'cld2rate' => $search,
-        // ]);
-
-        if(!empty($search)){
-            $query->andFilterWhere(['like', 'fsmastertb.cld1', $search]);
-            if(!$isAdmin){
-                $query->orFilterWhere(['like', 'user.username', $search]);
-            }
-            //->orFilterWhere(['like', 'inboundip', $search])
-            //->orFilterWhere(['like', 'cld2', $search])
-            //->orFilterWhere(['like', 'outboundip', $search])
-            $query->orFilterWhere(['like', 'cld1rate', $search])
-            ->orFilterWhere(['like', 'cld2rate', $search])
-            //->orFilterWhere(['like', 'cld1description', $search])
-            ->orFilterWhere(['like', 'cld2description', $search]);
-        }
-
-        if(!$isAdmin){
-            if(\Yii::$app->user->identity->role == 2) // user 
-            {
-                if(empty($search))
-                {
-                    $query->andFilterWhere([
-                        'cld1rate' => $this->cld1rate,
-                        'cld2rate' => $this->cld2rate,
-                        'cld3rate' => $this->cld3rate,
-                        'billgroup_id' => $this->billgroup_id,
-                        //'agent_id' => \Yii::$app->user->identity->id
-                        'country_id' => $this->country_id
-                    ]);
-                    $query->andFilterWhere(['like', 'cld1', $this->cld1])
-                    //->andFilterWhere(['like', 'cld2description', $this->cld2description])
-                    ;
+        $searches = [];
+        if (!$isAdmin) {
+            if (\Yii::$app->user->identity->role == 2) { // user               
+                $query->andFilterWhere([
+                    'cld1rate' => $this->cld1rate,
+                    'cld2rate' => $this->cld2rate,
+                    'cld3rate' => $this->cld3rate,
+                    'billgroup_id' => $this->billgroup_id,
+                    'country_id' => $this->country_id
+                ]);
+                $query->andFilterWhere(['like', 'cld1', $this->cld1]);
+                if (!empty($search)) {
+                    $searches = [
+                        ['like', 'cld1rate', $search],
+                        ['like', 'cld2rate', $search],
+                        ['like', 'cld3rate', $search]
+                    ];
                 }
-            }
-            else if(\Yii::$app->user->identity->role == 3) // reseller 
-            {
-                if(empty($search))
-                {
-                    $query->andFilterWhere([
-                        'cld2rate' => $this->cld2rate,
-                        'cld3rate' => $this->cld3rate,
-                        'billgroup_id' => $this->billgroup_id,
-                        'agent_id' => $this->agent_id,
-                        'country_id' => $this->country_id
-                    ]);
-                    $query->andFilterWhere(['like', 'cld1', $this->cld1])
-                    //->andFilterWhere(['like', 'cld2description', $this->cld2description])
-                    ;
+            } else if (\Yii::$app->user->identity->role == 3) { // reseller
+                $query->andFilterWhere([
+                    'cld2rate' => $this->cld2rate,
+                    'cld3rate' => $this->cld3rate,
+                    'billgroup_id' => $this->billgroup_id,
+                    'agent_id' => $this->agent_id,
+                    'country_id' => $this->country_id
+                ]);
+                $query->andFilterWhere(['like', 'cld1', $this->cld1]);
+                if (!empty($search)) {
+                    $searches = [
+                        ['like', 'cld2rate', $search],
+                        ['like', 'cld3rate', $search]
+                    ];
                 }
-            } else if(\Yii::$app->user->identity->role == 4) { // reseller admin
-                if(empty($search)){
-                    $query->andFilterWhere([
-                        'cld1rate' => $this->cld1rate,
-                        'cld2rate' => $this->cld2rate,
-                        'billgroup_id' => $this->billgroup_id,
-                        'reseller_id' => $this->reseller_id,
-                        'country_id' => $this->country_id
-                    ]);
-                    $query->andFilterWhere(['like', 'cld1', $this->cld1])
-                    //->andFilterWhere(['like', 'cld2description', $this->cld2description])
-                    ;
-                }
-            }
-        } else { // admin
-            if(empty($search)){
+            } else if (\Yii::$app->user->identity->role == 4) { // reseller admin
                 $query->andFilterWhere([
                     'cld1rate' => $this->cld1rate,
                     'cld2rate' => $this->cld2rate,
                     'billgroup_id' => $this->billgroup_id,
-                    'sender_id' => $this->sender_id,
-                    'admin_id' => $this->admin_id,
-                    'service_id' => $this->service_id,
-                    'country_id' => $this->country_id,
+                    'reseller_id' => $this->reseller_id,
+                    'country_id' => $this->country_id
                 ]);
-
-                $query->andFilterWhere(['like', 'cld1', $this->cld1])
-                //->andFilterWhere(['like', 'cld2description', $this->cld2description])
-                ;
+                $query->andFilterWhere(['like', 'cld1', $this->cld1]);
+                if (!empty($search)) {
+                    $searches = [
+                        ['like', 'cld1rate', $search],
+                        ['like', 'cld2rate', $search]
+                    ];
+                }
+            }
+        } else { // admin
+            $query->andFilterWhere([
+                'cld1rate' => $this->cld1rate,
+                'cld2rate' => $this->cld2rate,
+                'billgroup_id' => $this->billgroup_id,
+                'sender_id' => $this->sender_id,
+                'admin_id' => $this->admin_id,
+                'service_id' => $this->service_id,
+                'country_id' => $this->country_id,
+            ]);
+            $query->andFilterWhere(['like', 'cld1', $this->cld1]);
+            if (!empty($search)) {
+                $searches = [
+                    ['like', 'cld1rate', $search],
+                    ['like', 'cld2rate', $search]
+                ];
             }
         }
 
-        if(!$isAdmin){
-            if(Yii::$app->user->identity->role == 4){
+        if (!empty($search)) {
+            if (!$isAdmin) {
+                $searches = ['like', 'user.username', $search];
+            }
+            $query->andFilterWhere(
+                [
+                    'or',
+                    ['like', 'cld1', $search],
+                    ['like', 'cld1description', $search],
+                    $searches
+                ]
+            );
+        }
+
+        if (!$isAdmin && !$isTestPanel) {
+            if (Yii::$app->user->identity->role == 4) {
                 $query->andFilterWhere(['in', 'fsmastertb.admin_id', Yii::$app->user->identity->id]);
-            } else if(Yii::$app->user->identity->role == 2) {
+            } else if (Yii::$app->user->identity->role == 2) {
                 $query->andFilterWhere(['in', 'fsmastertb.agent_id', Yii::$app->user->identity->id]);
-            } else {
+            } else if (Yii::$app->user->identity->role == 3) {
                 $query->andFilterWhere(['in', 'fsmastertb.reseller_id', Yii::$app->user->identity->id]);
             }
+        } else if ($isTestPanel) {
+            $query->andFilterWhere(['fsmastertb.admin_id' => \Yii::$app->params['test_panel_id']]);
         }
 
         $dataProvider = new ActiveDataProvider([

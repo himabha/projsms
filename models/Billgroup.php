@@ -166,4 +166,16 @@ class Billgroup extends \yii\db\ActiveRecord
         return $this->hasOne(Billcycle::className(),['ID' => 'billcycle_id']);
     }
 
+	public static function getBillgroupItems()
+    {
+        $items = [];
+        $res = static::find()->orderBy(['name' => SORT_ASC])->all();
+        if (is_array($res) && count($res) > 0) {
+            foreach ($res as $v) {
+                $items[$v->id] = $v->name;
+            }
+        }
+        return $items;
+    }
+
 }

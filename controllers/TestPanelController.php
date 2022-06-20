@@ -52,7 +52,7 @@ class TestPanelController extends \yii\web\Controller
                         'allow' => true,
                         'roles' => ['@'],
                         'matchCallback' => function ($rule, $action) {
-                            return User::isTestPanel(Yii::$app->user->identity->id);
+                            return true;
                         },
 
                     ],
@@ -85,15 +85,15 @@ class TestPanelController extends \yii\web\Controller
         $searchModel = new FsmastertbSearch();
         $mysubusr = User::find()->select('id')->where(['reseller_id' => Yii::$app->user->identity->id, 'role' => 3]);
         $summary = $model->getSummary($mysubusr, false, true);
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $mysubusr, $search, User::isUserAdmin(\Yii::$app->user->id), User::isTestPanel(\Yii::$app->user->id));
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $mysubusr, $search, false, true);
         $dataProvider->pagination->pageSize = $filter;
-
+        $billgroups = Billgroup::getBillgroupItems();
         return $this->render('test_numbers', [
-            'dataProvider' => $dataProvider, 
+            'dataProvider' => $dataProvider,
             'searchModel' => $searchModel,
             'summary' => $summary,
             'countries' => $this->getCountryItems(),
-            'billgroups' => $this->getBillgroupItems(),
+            'billgroups' => $billgroups,
             'resellers' => $this->getResellerItems(),
             'clients_only' => $this->getResellerItems(false),
             'services' => $this->getServicesItems()
@@ -114,42 +114,26 @@ class TestPanelController extends \yii\web\Controller
         $searchModel = new TdrSearch();
 
         $mysubusr = User::find()->select('id')->where(['reseller_id' => Yii::$app->user->identity->id, 'role' => 3]);
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $mysubusr, $search, User::isUserAdmin(\Yii::$app->user->id), User::isTestPanel(\Yii::$app->user->id));
-        $dataProvider->setPagination(['pageSize' => $filter]); 
-
-        return $this->render('tdr', [
-            'dataProvider' => $dataProvider, 
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $mysubusr, $search, false, true);
+        $dataProvider->setPagination(['pageSize' => $filter]);
+        $billgroups = Billgroup::getBillgroupItems();
+        return $this->render('test_tdr', [
+            'dataProvider' => $dataProvider,
             'searchModel' => $searchModel,
-            'search' => $search, 
+            'search' => $search,
             'filter' => $filter,
-            'billgroups' => $this->getBillgroupItems(),
+            'billgroups' => $billgroups,
             'resellers' => $this->getResellerItems(),
         ]);
-    }
-
-    protected function getBillgroupItems()
-    {
-        $items = [];
-        $res = \app\models\Billgroup::find()->all();
-        if(is_array($res) && count($res) > 0)
-        {
-            foreach($res as $v)
-            {
-                $items[$v->id] = $v->name;
-            }
-        }
-        return $items;
     }
 
     protected function getResellerItems($include_unallocated = true)
     {
         $items = [];
-        if($include_unallocated) $items = [0 => "Un-allocated"];
+        if ($include_unallocated) $items = [0 => "Un-allocated"];
         $res = User::find()->where(['role' => 3, 'reseller_id' => \Yii::$app->user->id])->all();
-        if(is_array($res) && count($res) > 0)
-        {
-            foreach($res as $v)
-            {
+        if (is_array($res) && count($res) > 0) {
+            foreach ($res as $v) {
                 $items[$v->id] = $v->username;
             }
         }
@@ -183,10 +167,8 @@ class TestPanelController extends \yii\web\Controller
     {
         $items = [];
         $res = Supplier::find()->all();
-        if(is_array($res) && count($res) > 0)
-        {
-            foreach($res as $v)
-            {
+        if (is_array($res) && count($res) > 0) {
+            foreach ($res as $v) {
                 $items[$v->id] = $v->name;
             }
         }
@@ -197,10 +179,8 @@ class TestPanelController extends \yii\web\Controller
     {
         $items = [];
         $res = \Yii::$app->params['services'];
-        if(is_array($res) && count($res) > 0)
-        {
-            foreach($res as $k=>$v)
-            {
+        if (is_array($res) && count($res) > 0) {
+            foreach ($res as $k => $v) {
                 $items[$k] = $v;
             }
         }
@@ -209,7 +189,7 @@ class TestPanelController extends \yii\web\Controller
 
     public function actionTdrExport()
     {
-        $a_z = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P','Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y'. 'Z'];
+        $a_z = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y' . 'Z'];
 
         $headers = [
             'ID',
@@ -221,29 +201,25 @@ class TestPanelController extends \yii\web\Controller
             'Delivered Time'
         ];
 
-        if(isset($_SERVER['QUERY_STRING']))
-        {
+        if (isset($_SERVER['QUERY_STRING'])) {
             $searchModel = new TdrSearch();
             $mysubusr = User::find()->select('id')->where(['reseller_id' => Yii::$app->user->identity->id, 'role' => 3]);
             $query = $searchModel->search(\Yii::$app->request->queryParams, $mysubusr, '', false)->query;
             $params = isset(\Yii::$app->request->queryParams['TdrSearch']) ? \Yii::$app->request->queryParams['TdrSearch'] : [];
 
             $billgroup_name = 'None';
-            if(!empty(intval($params['billgroup_id'])))
-            {
+            if (!empty(intval($params['billgroup_id']))) {
                 $obj = Billgroup::findOne(intval($params['billgroup_id']));
-                if(isset($obj->name)) $billgroup_name = $obj->name;
+                if (isset($obj->name)) $billgroup_name = $obj->name;
             }
 
             $client_name = 'None';
-            if(isset($params['reseller_id']) && trim($params['reseller_id']) != "")
-            {
-                if($params['reseller_id'] == 0)
-                {
+            if (isset($params['reseller_id']) && trim($params['reseller_id']) != "") {
+                if ($params['reseller_id'] == 0) {
                     $client_name = 'Un-located';
                 } else {
                     $obj = User::findOne(intval($params['reseller_id']));
-                    if(isset($obj->username)) $client_name = $obj->username;
+                    if (isset($obj->username)) $client_name = $obj->username;
                 }
             }
 
@@ -255,7 +231,6 @@ class TestPanelController extends \yii\web\Controller
                 'SMS Message' => !empty($params['sms_message']) ? $params['sms_message'] : 'None',
                 'ID' => !empty($params['id']) ? $params['id'] : 'None',
             ];
-
         }
 
         $csv_cols = ["", "", "", "", "", "", "", ""];
@@ -268,58 +243,61 @@ class TestPanelController extends \yii\web\Controller
         $row = 1;
         $col = 1;
 
-        $sheet->setCellValueByColumnAndRow($col, $row , "TDR REPORT");
+        $sheet->setCellValueByColumnAndRow($col, $row, "TDR REPORT");
         $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
         $temp = $csv_cols;
-        $temp[$col-1] = "TDR REPORT";
+        $temp[$col - 1] = "TDR REPORT";
         $csv_arr[] = $temp;
-        $row++; $csv_arr[] = $csv_cols;
+        $row++;
+        $csv_arr[] = $csv_cols;
 
-        $sheet->setCellValueByColumnAndRow($col, $row , "Created " . date('Y-m-d H:i:s'));
+        $sheet->setCellValueByColumnAndRow($col, $row, "Created " . date('Y-m-d H:i:s'));
         $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
         $temp = $csv_cols;
-        $temp[$col-1] = "Created " . date('Y-m-d H:i:s');
+        $temp[$col - 1] = "Created " . date('Y-m-d H:i:s');
         $csv_arr[] = $temp;
-        $row++; $csv_arr[] = $csv_cols;
-        $row++; $csv_arr[] = $csv_cols;
+        $row++;
+        $csv_arr[] = $csv_cols;
+        $row++;
+        $csv_arr[] = $csv_cols;
 
-        $sheet->setCellValueByColumnAndRow($col, $row , "Filters");
+        $sheet->setCellValueByColumnAndRow($col, $row, "Filters");
         $temp = $csv_cols;
-        $temp[$col-1] =  "Filters";
+        $temp[$col - 1] =  "Filters";
         $csv_arr[] = $temp;
         $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
-        $row++; $csv_arr[] = $csv_cols;
+        $row++;
+        $csv_arr[] = $csv_cols;
 
-        if(is_array($filters) && count($filters) > 0)
-        {
+        if (is_array($filters) && count($filters) > 0) {
             $col = 1;
             $temp1 = $csv_cols;
             $temp2 = $csv_cols;
-            foreach($filters as $k=>$v)
-            {
-                $sheet->setCellValueByColumnAndRow($col, $row , $k);
+            foreach ($filters as $k => $v) {
+                $sheet->setCellValueByColumnAndRow($col, $row, $k);
                 $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
-                $temp1[$col-1] = $k;
-                $sheet->setCellValueByColumnAndRow($col, $row + 1 , $v);
-                $temp2[$col-1] = $v;
+                $temp1[$col - 1] = $k;
+                $sheet->setCellValueByColumnAndRow($col, $row + 1, $v);
+                $temp2[$col - 1] = $v;
                 $col++;
             }
             $csv_arr[] = $temp1;
             $csv_arr[] = $temp2;
-            $row++; $csv_arr[] = $csv_cols;
-            $row++; $csv_arr[] = $csv_cols;
-            $row++; $csv_arr[] = $csv_cols;
+            $row++;
+            $csv_arr[] = $csv_cols;
+            $row++;
+            $csv_arr[] = $csv_cols;
+            $row++;
+            $csv_arr[] = $csv_cols;
         }
 
-        if(is_array($headers) && count($headers) > 0)
-        {
+        if (is_array($headers) && count($headers) > 0) {
             $col = 1;
             $temp = $csv_cols;
-            foreach($headers as $v)
-            {
-                $sheet->setCellValueByColumnAndRow($col, $row , $v);
+            foreach ($headers as $v) {
+                $sheet->setCellValueByColumnAndRow($col, $row, $v);
                 $sheet->getStyle($a_z[$col - 1]  . $row)->applyFromArray(['font' => ['bold' => true]]);
-                $temp[$col-1] = $v;
+                $temp[$col - 1] = $v;
                 $col++;
             }
             $csv_arr[] = $temp;
@@ -327,52 +305,47 @@ class TestPanelController extends \yii\web\Controller
         }
 
         $rows = $query->all();
-        if(is_array($rows) && count($rows) > 0)
-        {
-            foreach($rows as $v)
-            {
+        if (is_array($rows) && count($rows) > 0) {
+            foreach ($rows as $v) {
                 $temp = $csv_cols;
-                foreach($headers as $hk => $hv)
-                {
-                    switch($hv)
-                    {
+                foreach ($headers as $hk => $hv) {
+                    switch ($hv) {
                         case "ID":
-                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->id) ? $v->id : "");
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row, isset($v->id) ? $v->id : "");
                             $temp[$hk] =  isset($v->id) ? $v->id : "";
-                            break; 
+                            break;
                         case "From Number":
-                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->from_number) ? $v->from_number : "");
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row, isset($v->from_number) ? $v->from_number : "");
                             $temp[$hk] = isset($v->from_number) ? $v->from_number : "";
-                            break; 
+                            break;
                         case "To Number":
-                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->to_number) ? $v->to_number : "");
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row, isset($v->to_number) ? $v->to_number : "");
                             $temp[$hk] = isset($v->to_number) ? $v->to_number : "";
-                            break; 
+                            break;
                         case "SMS Message":
-                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->sms_message) ? $v->sms_message : "");
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row, isset($v->sms_message) ? $v->sms_message : "");
                             $temp[$hk] = isset($v->sms_message) ? $v->sms_message : "";
-                            break; 
+                            break;
                         case "Bill Group":
-                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->billgroup) ? $v->billgroup->name : "");
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row, isset($v->billgroup) ? $v->billgroup->name : "");
                             $temp[$hk] = isset($v->billgroup) ? $v->billgroup->name : "";
-                            break; 
+                            break;
                         case "Client":
-                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->resellers) ? $v->resellers->username : "");
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row, isset($v->resellers) ? $v->resellers->username : "");
                             $temp[$hk] = isset($v->resellers) ? $v->resellers->username : "";
-                            break; 
+                            break;
                         case "Delivered Time":
-                            $sheet->setCellValueByColumnAndRow($hk + 1, $row , isset($v->delivered_time) ? date('d-m-Y H:i:s', strtotime($v->delivered_time)) : "");
+                            $sheet->setCellValueByColumnAndRow($hk + 1, $row, isset($v->delivered_time) ? date('d-m-Y H:i:s', strtotime($v->delivered_time)) : "");
                             $temp[$hk] = isset($v->delivered_time) ? date('d-m-Y H:i:s', strtotime($v->delivered_time)) : "";
-                            break; 
+                            break;
                     }
                 }
                 $csv_arr[] = $temp;
                 $row++;
-            }                
+            }
         }
 
-        if(\Yii::$app->request->queryParams['mode'] == 'csv')
-        {
+        if (\Yii::$app->request->queryParams['mode'] == 'csv') {
             header('Content-Type: text/csv; charset=utf-8');
             header('Content-Disposition: attachment; filename="tdr.csv"');
             ob_end_clean();
@@ -402,16 +375,19 @@ class TestPanelController extends \yii\web\Controller
         $numbers = explode(",", Yii::$app->request->post('hdnAllocateNumbers'));
         foreach ($numbers as $key => $value) {
             Yii::$app->db->createCommand()
-            ->update('fsmastertb', [
-                    'reseller_id' => $user, 
-                    'agent_id' => $user, 
-                    'service_id' => $service,
-                    'cld2rate' => $rev_out_rate,
-                    'cld3rate' => 0,
-                    //'allocated_date' => date('Y-m-d')
-                ], 
-                "cld1 = '" . $value . "'")
-            ->execute();
+                ->update(
+                    'fsmastertb',
+                    [
+                        'reseller_id' => $user,
+                        'agent_id' => $user,
+                        'service_id' => $service,
+                        'cld2rate' => $rev_out_rate,
+                        'cld3rate' => 0,
+                        //'allocated_date' => date('Y-m-d')
+                    ],
+                    "cld1 = '" . $value . "'"
+                )
+                ->execute();
         }
         //Yii::$app->session->setFlash('cld_added', Yii::$app->request->post('hdnAllocateNumbers') . (count($numbers) > 1 ? ' are' : ' is') . " assigned successfully");
         return $this->redirect('sms-numbers');
@@ -421,21 +397,21 @@ class TestPanelController extends \yii\web\Controller
         $numbers = explode(",", Yii::$app->request->post('hdnUnallocateNumbers'));
         foreach ($numbers as $key => $value) {
             Yii::$app->db->createCommand()
-            ->update('fsmastertb', [
-                    'reseller_id' => 0, 
-                    'agent_id' => 0, 
-                    'service_id' => 0,
-                    'cld2rate' => 0,
-                    'cld3rate' => 0,
-                    //'allocated_date' => date('Y-m-d')
-                ], 
-                "cld1 = '" . $value . "'")
-            ->execute();
+                ->update(
+                    'fsmastertb',
+                    [
+                        'reseller_id' => 0,
+                        'agent_id' => 0,
+                        'service_id' => 0,
+                        'cld2rate' => 0,
+                        'cld3rate' => 0,
+                        //'allocated_date' => date('Y-m-d')
+                    ],
+                    "cld1 = '" . $value . "'"
+                )
+                ->execute();
         }
         //Yii::$app->session->setFlash('cld_added', Yii::$app->request->post('hdnUnallocateNumbers') . (count($numbers) > 1 ? ' are' : ' is') . " assigned remove successfully");
         return $this->redirect('sms-numbers');
     }
-
-
-
 }
