@@ -149,8 +149,8 @@ class TdrSearchSummary extends Smscdr
             //         ]);
             //     }
             // }
-            $query->orFilterWhere(['like', 'from_number', $search])
-            ->orFilterWhere(['like', 'to_number', $search])
+            $query->orFilterWhere(['from_number' => $search])
+            ->orFilterWhere(['to_number' => $search])
             ->orFilterWhere(['like', 'sms_message', $search])
             ;
 
