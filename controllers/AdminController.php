@@ -278,7 +278,7 @@ class AdminController extends \yii\web\Controller
             'filter' => $filter,
             'countries' => $this->getCountryItems(),
             'billgroups' => $billgroups,
-            'suppliers' => $this->getSupplierItems(),
+            'suppliers' => Supplier::getSupplierItems(),
             'clients' => $this->getResellerAdminItems(),
             'clients_only' => $this->getResellerAdminItems(false),
             'services' => $this->getServicesItems(),
@@ -287,17 +287,6 @@ class AdminController extends \yii\web\Controller
         ]);
     }
 
-    protected function getSupplierItems()
-    {
-        $items = [];
-        $res = Supplier::find()->all();
-        if (is_array($res) && count($res) > 0) {
-            foreach ($res as $v) {
-                $items[$v->id] = $v->name;
-            }
-        }
-        return $items;
-    }
     protected function getResellerAdminItems($include_unallocated = true)
     {
         $items = [];
@@ -2129,7 +2118,7 @@ class AdminController extends \yii\web\Controller
             'filter' => $filter,
             'billgroups' => $billgroups,
             'clients' => $this->getResellerAdminItems(),
-            'suppliers' => $this->getSupplierItems(),
+            'suppliers' => Supplier::getSupplierItems(),
         ]);
     }
 
@@ -2158,7 +2147,7 @@ class AdminController extends \yii\web\Controller
             'search' => $search,
             'filter' => $filter,
             'clients' => $this->getResellerAdminItems(),
-            'suppliers' => $this->getSupplierItems(),
+            'suppliers' => Supplier::getSupplierItems(),
             'billgroups' => $billgroups,
         ]);
     }
@@ -2188,7 +2177,7 @@ class AdminController extends \yii\web\Controller
             'search' => $search,
             'filter' => $filter,
             'clients' => $this->getResellerAdminItems(),
-            'suppliers' => $this->getSupplierItems(),
+            'suppliers' => Supplier::getSupplierItems(),
             'billgroups' => $billgroups,
         ]);
     }
@@ -3012,7 +3001,7 @@ class AdminController extends \yii\web\Controller
             //'summary' => $summary,
             'countries' => $this->getCountryItems(),
             'billgroups' => $billgroups,
-            'suppliers' => $this->getSupplierItems(),
+            'suppliers' => Supplier::getSupplierItems(),
             'clients' => $this->getResellerAdminItems(),
             'clients_only' => $this->getResellerAdminItems(false),
             'services' => $this->getServicesItems(),
@@ -3043,7 +3032,7 @@ class AdminController extends \yii\web\Controller
             'filter' => $filter,
             'billgroups' => $billgroups,
             'clients' => $this->getResellerAdminItems(),
-            'suppliers' => $this->getSupplierItems(),
+            'suppliers' => Supplier::getSupplierItems(),
         ]);
     }
 }

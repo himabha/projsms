@@ -513,7 +513,7 @@ class UserController extends Controller
             'country_networks' => $this->getCountryNetworkItems(),
             'currencies' => $this->getCurrencyItems(),
             'billcycles' => $this->getBillcycleItems(),
-            'suppliers' => $this->getSupplierItems(),
+            'suppliers' => Supplier::getSupplierItems(),
             'services' => $this->getServicesItems()
         ]);
     }
@@ -560,17 +560,6 @@ class UserController extends Controller
         if (is_array($res) && count($res) > 0) {
             foreach ($res as $k => $v) {
                 $items[$k] = $v;
-            }
-        }
-        return $items;
-    }
-    protected function getSupplierItems()
-    {
-        $items = [];
-        $res = Supplier::find()->all();
-        if (is_array($res) && count($res) > 0) {
-            foreach ($res as $v) {
-                $items[$v->id] = $v->name;
             }
         }
         return $items;

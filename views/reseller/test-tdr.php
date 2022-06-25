@@ -199,13 +199,20 @@ $this->registerJs('
 									],
 									'columns' => [
 										[
-											'attribute' => 'from_number'
+											'attribute' => 'from_number',
+											'value' => function ($model) {
+												$value = substr($model->from_number, 0, 3) . str_repeat('x', strlen($model->from_number) - 3);
+												return $value;
+											}
 										],
 										[
 											'attribute' => 'to_number'
 										],
 										[
-											'attribute' => 'sms_message'
+											'attribute' => 'sms_message',
+											'value' => function($model) {
+												return '';
+											}
 										],
 										[
 											'label' => 'Billgroup',

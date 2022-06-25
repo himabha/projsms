@@ -1012,18 +1012,6 @@ class ResellerAdminController extends \yii\web\Controller
         return \yii\helpers\ArrayHelper::map($res, 'ID', 'billcycle');
     }
 
-    protected function getSupplierItems()
-    {
-        $items = [];
-        $res = Supplier::find()->all();
-        if (is_array($res) && count($res) > 0) {
-            foreach ($res as $v) {
-                $items[$v->id] = $v->name;
-            }
-        }
-        return $items;
-    }
-
     protected function getServicesItems()
     {
         $items = [];

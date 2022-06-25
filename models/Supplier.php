@@ -6,6 +6,7 @@ use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\Expression;
 use yii\web\IdentityInterface;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "billgroup".
@@ -61,5 +62,11 @@ class Supplier extends \yii\db\ActiveRecord
 			[['name'], 'required', 'on' => self::SCENARIO_UPDATE],
 		];
 		return [];
+	}
+
+	public static function getSupplierItems()
+	{
+		$res = Supplier::find()->all();
+		return ArrayHelper::map($res, 'id', 'name');
 	}
 }

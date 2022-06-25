@@ -1,14 +1,17 @@
 <?php
 
 use yii\helpers\Html;
+use yii\helpers\Url;
 ?>
 
 <!-- Navbar -->
 <nav class="navbar navbar-expand-lg navbar-transparent navbar-absolute fixed-top ">
   <div class="container-fluid">
-    <div class="navbar-wrapper">
-      <a class="navbar-brand" href="javascript:;">Dashboard</a>
-    </div>
+    <?php if (in_array(Url::current(), ['/site/dashboard', '/'])) { ?>
+      <div class="navbar-wrapper">
+        <a class="navbar-brand" href="javascript:;">Dashbord</a>
+      </div>
+    <?php } ?>
     <button class="navbar-toggler" type="button" data-toggle="collapse" aria-controls="navigation-index" aria-expanded="false" aria-label="Toggle navigation">
       <span class="sr-only">Toggle navigation</span>
       <span class="navbar-toggler-icon icon-bar"></span>
@@ -16,7 +19,7 @@ use yii\helpers\Html;
       <span class="navbar-toggler-icon icon-bar"></span>
     </button>
     <div class="collapse navbar-collapse justify-content-end">
-      <form class="navbar-form">
+      <!-- <form class="navbar-form">
         <div class="input-group no-border">
           <input type="text" value="" class="form-control" placeholder="Search...">
           <button type="submit" class="btn btn-white btn-round btn-just-icon">
@@ -24,10 +27,10 @@ use yii\helpers\Html;
             <div class="ripple-container"></div>
           </button>
         </div>
-      </form>
+      </form> -->
       <ul class="navbar-nav">
         <li class="nav-item">
-          <a class="nav-link" href="javascript:;">
+          <a class="nav-link" href="/">
             <i class="material-icons">dashboard</i>
             <p class="d-lg-none d-md-block">
               Stats

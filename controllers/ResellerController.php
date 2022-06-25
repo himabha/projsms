@@ -1006,7 +1006,7 @@ class ResellerController extends \yii\web\Controller
             'currencies' => $this->getCurrencyItems(),
             'billcycles' => $this->getBillcycleItems(),
             'services' => $this->getServicesItems(),
-            'suppliers' => $this->getSupplierItems(),
+            'suppliers' => Supplier::getSupplierItems(),
         ]);
     }
 
@@ -1033,13 +1033,6 @@ class ResellerController extends \yii\web\Controller
         return \yii\helpers\ArrayHelper::map($res, 'ID', 'billcycle');
     }
 
-    protected function getSupplierItems()
-    {
-        $res = Supplier::find()->all();
-        return \yii\helpers\ArrayHelper::map($res, 'id', 'name');
-    }
-
-
     public function actionSmsTdr()
     {
         $model = new Fsusertb();
@@ -1064,7 +1057,7 @@ class ResellerController extends \yii\web\Controller
             'filter' => $filter,
             'billgroups' => $billgroups,
             'agents' => $this->getAgentItems(),
-            'suppliers' => $this->getSupplierItems(),
+            'suppliers' => Supplier::getSupplierItems(),
         ]);
     }
 
@@ -1125,7 +1118,7 @@ class ResellerController extends \yii\web\Controller
             'filter' => $filter,
             //'clients' => $this->getResellerAdminItems(),
             'agents' => $this->getAgentItems(),
-            //'suppliers' => $this->getSupplierItems(),
+            //'suppliers' => Supplier::getSupplierItems(),
             'billgroups' => $billgroups,
         ]);
     }
@@ -1929,7 +1922,7 @@ class ResellerController extends \yii\web\Controller
             'filter' => $filter,
             'billgroups' => $billgroups,
             'agents' => $this->getAgentItems(),
-            'suppliers' => $this->getSupplierItems(),
+            'suppliers' => Supplier::getSupplierItems(),
         ]);
     }
 }

@@ -74,9 +74,9 @@ $this->beginPage();
   <nav class="navbar navbar-expand-lg navbar-transparent navbar-absolute fixed-top text-white">
     <div class="container">
       <div class="navbar-wrapper">
-        <a class="navbar-brand" href="#pablo">Material Dashboard Yii2</a>
+        <a class="navbar-brand" href="#pablo">SMS+ Panel</a>
       </div>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" aria-controls="navigation-index" aria-expanded="false" aria-label="Toggle navigation">
+      <!--<button class="navbar-toggler" type="button" data-toggle="collapse" aria-controls="navigation-index" aria-expanded="false" aria-label="Toggle navigation">
         <span class="sr-only">Toggle navigation</span>
         <span class="navbar-toggler-icon icon-bar"></span>
         <span class="navbar-toggler-icon icon-bar"></span>
@@ -89,30 +89,30 @@ $this->beginPage();
               <i class="material-icons">dashboard</i> Dashboard
             </a>
           </li>
-          <!--<li class="nav-item ">
+          <li class="nav-item ">
             <a href="../pages/register.html" class="nav-link">
               <i class="material-icons">person_add</i> Register
             </a>
-          </li>-->
+          </li>
           <li class="nav-item  active ">
             <a href="../pages/login.html" class="nav-link">
               <i class="material-icons">fingerprint</i> Login
             </a>
           </li>
-          <!-- <li class="nav-item ">
+          <li class="nav-item ">
             <a href="../pages/lock.html" class="nav-link">
               <i class="material-icons">lock_open</i> Lock
             </a>
-          </li> -->
+          </li> 
         </ul>
-      </div>
+      </div>-->
     </div>
   </nav>
 <!-- End Navbar -->
 <div class="wrapper wrapper-full-page" style="background-image: url(<?= \Yii::getAlias('@web/img/login.jpg'); ?>); background-size: cover; background-position: top center;">
     <div class="page-header header-filter">
         <?= $content ?>
-        <footer class="footer">
+        <!-- <footer class="footer">
         <div class="container">
           <nav class="float-left">
             <ul>
@@ -141,7 +141,7 @@ $this->beginPage();
             <a href="https://www.coderseden.com" target="_blank">CodersEden</a> and <a href="https://www.creative-tim.com" target="_blank">Creative Tim</a> for a better web.
           </div>
         </div>
-      </footer>
+      </footer> -->
     </div>
 </div>
 <!--   Core JS Files   -->

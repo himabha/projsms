@@ -194,17 +194,21 @@ $this->registerJs('
 										'class' => 'table'
 									],
 									'columns' => [
-										/* [
-											'attribute' => 'id'
-										], */
 										[
-											'attribute' => 'from_number'
+											'attribute' => 'from_number',
+											'value' => function ($model) {
+												$value = substr($model->from_number, 0, 3) . str_repeat('x', strlen($model->from_number) - 3);
+												return $value;
+											}
 										],
 										[
 											'attribute' => 'to_number'
 										],
 										[
-											'attribute' => 'sms_message'
+											'attribute' => 'sms_message',
+											'value' => function($model) {
+												return '';
+											}
 										],
 										[
 											'label' => 'Billgroup',
@@ -219,19 +223,6 @@ $this->registerJs('
 												return isset($model->billgroup) ? $model->billgroup->name : null;
 											}
 										],
-										// [
-										// 	'label' => 'Client',
-										// 	'attribute' => 'reseller_id',
-										// 	'filter' => $resellers,
-										// 	'filterInputOptions' => [
-										// 		'id' => 'reseller_id_search',
-										// 		'prompt' => 'Select Client',
-										// 		'class' => 'custom_select'
-										// 	],
-										// 	'value' => function ($model) {
-										// 		return isset($model->resellers) ? $model->resellers->username : null;
-										// 	}
-										// ],
 										[
 											'attribute' => 'delivered_time',
 											'value' => function ($model) {
@@ -248,47 +239,6 @@ $this->registerJs('
 											'footer' => 'Total records: ' . $totalCount,
 											'footerOptions' => ['style' => ['font-weight' => 'bold']]
 										]
-										/*
-										[
-											'class' => 'yii\grid\CheckboxColumn',
-											'checkboxOptions' => function ($model, $key, $index, $column) {
-												return ['value' => $model->fsmid];
-											}
-										],
-										[
-											'class' => 'yii\grid\ActionColumn',
-											'header' => 'Action',
-											'footer' => 'Total records: ' . $totalCount,
-											'footerOptions' => ['style' => ['font-size' => 'larger', 'font-weight' => 'bold', 'min-width'=> '10em']],
-											'template' => '{update-cld}', // {show-number-routes} {delete-cld}',
-											'buttons' => [
-												'show-number-routes' => function ($url, $model, $key) {
-													return Html::a('<span class="glyphicon glyphicon-eye-open"></span>', $url, [
-														'class' => 'btn btn-info btn-xs',
-														'data-toggle' => 'tooltip',
-														'title' => 'Show list of all users who hold this number',
-													]);
-												},
-												'update-cld' => function ($url, $model, $key) {
-													return Html::a('<span class="glyphicon glyphicon-pencil"></span>', $url, [
-														'class' => 'btn btn-success btn-xs',
-														'data-toggle' => 'tooltip',
-														'title' => 'Edit'
-													]);
-												},
-												'delete-cld' => function ($url, $model, $key) {
-													return Html::a('<span class="glyphicon glyphicon-trash"></span>', $url, [
-														'class' => 'btn btn-danger btn-xs',
-														'data-pjax' => "0",
-														'data-method' => 'post',
-														'data-confirm' => 'Are you sure you want to delete CLD1?',
-														'data-toggle' => 'tooltip',
-														'title' => 'Delete'
-													]);
-												}
-											],
-										]
-                                        */
 									],
 								]); ?>
 							</div>

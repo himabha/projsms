@@ -5,6 +5,7 @@ namespace app\models;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\Expression;
+use yii\helpers\ArrayHelper;
 use yii\web\IdentityInterface;
 
 /**
@@ -168,14 +169,8 @@ class Billgroup extends \yii\db\ActiveRecord
 
 	public static function getBillgroupItems()
     {
-        $items = [];
         $res = static::find()->orderBy(['name' => SORT_ASC])->all();
-        if (is_array($res) && count($res) > 0) {
-            foreach ($res as $v) {
-                $items[$v->id] = $v->name;
-            }
-        }
-        return $items;
+        return ArrayHelper::map($res, 'id', 'name');
     }
 
 }

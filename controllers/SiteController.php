@@ -75,7 +75,21 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        return $this->render('index', []);
+        $this->layout = '@app/views/layouts/admin';
+
+        if (!Yii::$app->user->isGuest) {
+            return $this->redirect(['dashboard']);
+        }
+
+        $model = new LoginForm();
+        if ($model->load(Yii::$app->request->post()) && $model->login()) {
+            return $this->redirect(['dashboard']);
+        }
+        $model->username = '';
+        $model->password = '';
+        return $this->render('login', [
+            'model' => $model,
+        ]);
     }
 
     /**
@@ -143,7 +157,7 @@ class SiteController extends Controller
         if ($model->load(Yii::$app->request->post()) && $model->login()) {
             return $this->redirect(['dashboard']);
         }
-
+        $model->username = '';
         $model->password = '';
         return $this->render('login', [
             'model' => $model,
